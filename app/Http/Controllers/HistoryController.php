@@ -22,9 +22,12 @@ class HistoryController extends Controller
             $query->where('name', 'ilike', '%' . $request->search . '%');
         }
 
-        $lists = $query->orderBy('shopping_date', 'desc')->paginate(15)->withQueryString();
+        $totalGasto = (clone $query)->sum('total');
 
-        $totalGasto = $query->sum('total');
+        $lists = $query->with('items')
+            ->orderBy('shopping_date', 'desc')
+            ->paginate(15)
+            ->withQueryString();
 
         return view('history.index', compact('lists', 'totalGasto'));
     }

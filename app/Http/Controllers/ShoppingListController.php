@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ShoppingList;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ShoppingListController extends Controller
 {
@@ -51,10 +52,32 @@ class ShoppingListController extends Controller
         return redirect()->route('lists.index')->with('success', 'Lista concluída! Veja o histórico para acompanhar.');
     }
 
-    public function destroy(ShoppingList $list)
+    public function destroy(Request $request, ShoppingList $list)
     {
         abort_if($list->user_id !== Auth::id(), 403);
+
+        $showUrl = route('lists.show', $list);
         $list->delete();
-        return back()->with('success', 'Lista removida.');
+
+        $previous = url()->previous();
+        $appUrl = rtrim((string) config('app.url'), '/');
+
+        if ($this->sameHttpPath($previous, $showUrl)) {
+            return redirect()->route('lists.index')->with('success', 'Lista removida.');
+        }
+
+        if ($appUrl !== '' && Str::startsWith($previous, $appUrl)) {
+            return redirect()->to($previous)->with('success', 'Lista removida.');
+        }
+
+        return redirect()->route('lists.index')->with('success', 'Lista removida.');
+    }
+
+    private function sameHttpPath(string $a, string $b): bool
+    {
+        $pa = rtrim((string) parse_url($a, PHP_URL_PATH), '/') ?: '';
+        $pb = rtrim((string) parse_url($b, PHP_URL_PATH), '/') ?: '';
+
+        return $pa !== '' && $pa === $pb;
     }
 }
