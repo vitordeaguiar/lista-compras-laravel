@@ -15,13 +15,7 @@ class ShoppingListController extends Controller
             ->orderBy('shopping_date', 'asc')
             ->get();
 
-        $history = Auth::user()->shoppingLists()
-            ->where('status', 'completed')
-            ->with('items')
-            ->orderBy('completed_at', 'desc')
-            ->paginate(10);
-
-        return view('lists.index', compact('openLists', 'history'));
+        return view('lists.index', compact('openLists'));
     }
 
     public function store(Request $request)
@@ -34,7 +28,6 @@ class ShoppingListController extends Controller
         $data['user_id'] = Auth::id();
 
         $list = ShoppingList::create($data);
-
         return redirect()->route('lists.show', $list)->with('success', 'Lista criada!');
     }
 
@@ -51,14 +44,9 @@ class ShoppingListController extends Controller
         abort_if($list->isCompleted(), 422);
 
         $total = $list->items->sum(fn($i) => $i->subtotal ?? 0);
+        $list->update(['status' => 'completed', 'total' => $total, 'completed_at' => now()]);
 
-        $list->update([
-            'status'       => 'completed',
-            'total'        => $total,
-            'completed_at' => now(),
-        ]);
-
-        return redirect()->route('lists.index')->with('success', 'Lista concluída e salva no histórico!');
+        return redirect()->route('lists.index')->with('success', 'Lista concluída! Veja o histórico para acompanhar.');
     }
 
     public function destroy(ShoppingList $list)
