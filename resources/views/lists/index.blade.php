@@ -73,11 +73,11 @@
 </form>
 
 {{-- SUMMARY --}}
-@if($lists->total() > 0)
+@if($openLists->total() > 0)
 <div class="summary-bar">
     <div class="sc">
         <div class="sc-label">Listas encontradas</div>
-        <div class="sc-val">{{ $lists->total() }}</div>
+        <div class="sc-val">{{ $openLists->total() }}</div>
     </div>
     <div class="sc hl">
         <div class="sc-label">Total gasto</div>
@@ -85,16 +85,16 @@
     </div>
     <div class="sc">
         <div class="sc-label">Média por lista</div>
-        <div class="sc-val">R$ {{ number_format($lists->total() > 0 ? $totalGasto / $lists->total() : 0, 2, ',', '.') }}</div>
+        <div class="sc-val">R$ {{ number_format($openLists->total() > 0 ? $totalGasto / $openLists->total() : 0, 2, ',', '.') }}</div>
     </div>
 </div>
 @endif
 
 {{-- LIST --}}
 <div class="hlist">
-@forelse($lists as $index => $list)
+@forelse($openLists as $index => $list)
     @php
-        $prev = $lists->items()[$index + 1] ?? null;
+        $prev = $openLists->items()[$index + 1] ?? null;
         $diff = $prev && $prev->total > 0 ? $list->total - $prev->total : null;
         $pct  = $prev && $prev->total > 0 ? round((($list->total - $prev->total) / $prev->total) * 100, 1) : null;
     @endphp
@@ -131,9 +131,9 @@
 </div>
 
 {{-- PAGINATION --}}
-@if($lists->hasPages())
+@if($openLists->hasPages())
 <div class="pagination-wrap">
-    {{$lists->links('pagination::simple-bootstrap-4')}}
+    {{$openLists->links('pagination::simple-bootstrap-4')}}
 </div>
 @endif
 @endsection
