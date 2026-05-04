@@ -15,7 +15,9 @@ class ShoppingListController extends Controller
             ->orderBy('shopping_date', 'asc')
             ->get();
 
-        return view('lists.index', compact('openLists'));
+        $totalGasto = $openLists->sum(fn ($list) => $list->computed_total);
+
+        return view('lists.index', compact('openLists', 'totalGasto'));
     }
 
     public function store(Request $request)

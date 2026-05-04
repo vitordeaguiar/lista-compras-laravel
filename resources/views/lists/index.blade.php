@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Histórico')
+@section('title','Minhas listas')
 
 @push('styles')
 <style>
@@ -7,15 +7,14 @@
 .ptitle{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;letter-spacing:-.03em}
 .ptitle span{color:var(--accent)}
 
-.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:1.5rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end}
+.new-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:1.5rem}
+.new-form .form-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end}
 .fg{flex:1;min-width:130px}
 .fg label{display:block;font-size:.65rem;color:var(--muted);margin-bottom:.28rem;text-transform:uppercase;letter-spacing:.05em}
-.fg input,.fg select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.55rem .8rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;width:100%;outline:none;transition:border-color .2s}
-.fg input:focus,.fg select:focus{border-color:var(--accent)}
-.btn-filter{background:var(--accent);color:#0d0d0f;border:none;padding:.55rem 1.1rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:all .2s}
-.btn-filter:hover{background:var(--accent2)}
-.btn-clear{background:none;border:1px solid var(--border);color:var(--muted);padding:.55rem .9rem;border-radius:8px;font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center}
-.btn-clear:hover{border-color:var(--danger);color:var(--danger)}
+.fg input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.55rem .8rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;width:100%;outline:none;transition:border-color .2s}
+.fg input:focus{border-color:var(--accent)}
+.btn-new{background:var(--accent);color:#0d0d0f;border:none;padding:.55rem 1.1rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:all .2s}
+.btn-new:hover{background:var(--accent2)}
 
 .summary-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin-bottom:1.5rem}
 .sc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.8rem 1rem}
@@ -36,70 +35,76 @@
 .cbadge.up{background:rgba(248,113,113,.1);color:var(--danger)}
 .cbadge.down{background:rgba(110,231,183,.1);color:var(--accent)}
 .empty{text-align:center;padding:3rem;color:var(--muted);font-size:.88rem}
-.pagination-wrap{margin-top:1.25rem;display:flex;justify-content:center;gap:.4rem;flex-wrap:wrap}
-.pagination-wrap a,.pagination-wrap span{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:.35rem .75rem;border-radius:7px;font-size:.78rem;text-decoration:none;transition:all .2s}
-.pagination-wrap a:hover{border-color:var(--accent);color:var(--accent)}
-.pagination-wrap span.current{border-color:var(--accent);color:var(--accent);background:rgba(110,231,183,.08)}
 </style>
 @endpush
 
 @section('content')
 <div class="phdr">
     <div>
-        <h1 class="ptitle">📂 <span>Histórico</span></h1>
-        <p style="color:var(--muted);font-size:.78rem;margin-top:.2rem">Todas as suas listas concluídas</p>
+        <h1 class="ptitle">📋 <span>Minhas listas</span></h1>
+        <p style="color:var(--muted);font-size:.78rem;margin-top:.2rem">Listas em aberto — da data mais próxima à mais distante</p>
     </div>
-    <a href="{{ route('finance.index') }}" class="btn btn-ghost btn-sm">💰 Ver financeiro</a>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <a href="{{ route('history.index') }}" class="btn btn-ghost btn-sm">📂 Histórico</a>
+        <a href="{{ route('finance.index') }}" class="btn btn-ghost btn-sm">💰 Financeiro</a>
+    </div>
 </div>
 
-{{-- FILTERS --}}
-<form class="filter-bar" method="GET" action="{{ route('history.index') }}">
-    <div class="fg">
-        <label>De</label>
-        <input type="date" name="date_from" value="{{ request('date_from') }}">
+<form class="new-form" method="POST" action="{{ route('lists.store') }}">
+    @csrf
+    <div class="form-row">
+        <div class="fg">
+            <label for="nl_name">Nome da lista</label>
+            <input id="nl_name" type="text" name="name" value="{{ old('name') }}" required maxlength="255" placeholder="Ex.: Compras da semana">
+        </div>
+        <div class="fg" style="flex:0 0 160px;min-width:140px">
+            <label for="nl_date">Data</label>
+            <input id="nl_date" type="date" name="shopping_date" value="{{ old('shopping_date', now()->toDateString()) }}" required>
+        </div>
+        <div class="fg" style="flex:2;min-width:180px">
+            <label for="nl_notes">Observações (opcional)</label>
+            <input id="nl_notes" type="text" name="notes" value="{{ old('notes') }}" maxlength="500" placeholder="Lembrete…">
+        </div>
+        <button type="submit" class="btn-new">+ Criar</button>
     </div>
-    <div class="fg">
-        <label>Até</label>
-        <input type="date" name="date_to" value="{{ request('date_to') }}">
-    </div>
-    <div class="fg">
-        <label>Buscar lista</label>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Nome da lista…">
-    </div>
-    <button type="submit" class="btn-filter">🔍 Filtrar</button>
-    @if(request()->hasAny(['date_from','date_to','search']))
-        <a href="{{ route('history.index') }}" class="btn-clear">✕ Limpar</a>
-    @endif
+    @error('name')<p style="color:var(--danger);font-size:.78rem;margin-top:.5rem">{{ $message }}</p>@enderror
+    @error('shopping_date')<p style="color:var(--danger);font-size:.78rem;margin-top:.5rem">{{ $message }}</p>@enderror
+    @error('notes')<p style="color:var(--danger);font-size:.78rem;margin-top:.5rem">{{ $message }}</p>@enderror
 </form>
 
-{{-- SUMMARY --}}
-@if($openLists->total() > 0)
+@php
+    $rows = $openLists->values();
+    $listCount = $openLists->count();
+@endphp
+
+@if($listCount > 0)
 <div class="summary-bar">
     <div class="sc">
-        <div class="sc-label">Listas encontradas</div>
-        <div class="sc-val">{{ $openLists->total() }}</div>
+        <div class="sc-label">Listas em aberto</div>
+        <div class="sc-val">{{ $listCount }}</div>
     </div>
     <div class="sc hl">
-        <div class="sc-label">Total gasto</div>
+        <div class="sc-label">Soma dos itens (preços)</div>
         <div class="sc-val">R$ {{ number_format($totalGasto, 2, ',', '.') }}</div>
     </div>
     <div class="sc">
         <div class="sc-label">Média por lista</div>
-        <div class="sc-val">R$ {{ number_format($openLists->total() > 0 ? $totalGasto / $openLists->total() : 0, 2, ',', '.') }}</div>
+        <div class="sc-val">R$ {{ number_format($listCount > 0 ? $totalGasto / $listCount : 0, 2, ',', '.') }}</div>
     </div>
 </div>
 @endif
 
-{{-- LIST --}}
 <div class="hlist">
-@forelse($openLists as $index => $list)
+@forelse($rows as $index => $list)
     @php
-        $prev = $openLists->items()[$index + 1] ?? null;
-        $diff = $prev && $prev->total > 0 ? $list->total - $prev->total : null;
-        $pct  = $prev && $prev->total > 0 ? round((($list->total - $prev->total) / $prev->total) * 100, 1) : null;
+        $prev = $index > 0 ? $rows->get($index - 1) : null;
+        $curVal = $list->computed_total;
+        $prevVal = $prev ? $prev->computed_total : 0;
+        $diff = $prev && $prevVal > 0 ? $curVal - $prevVal : null;
+        $pct  = $prev && $prevVal > 0 ? round((($curVal - $prevVal) / $prevVal) * 100, 1) : null;
     @endphp
     <a class="hcard" href="{{ route('lists.show', $list) }}">
-        <div class="hicon">✅</div>
+        <div class="hicon">🛒</div>
         <div class="hinfo">
             <div class="hname">{{ $list->name }}</div>
             <div class="hmeta">
@@ -107,16 +112,16 @@
                 &nbsp;·&nbsp; {{ $list->items->count() }} itens
                 @if($pct !== null)
                     @if($diff > 0)
-                        <span class="cbadge up">▲ {{ abs($pct) }}% vs anterior</span>
+                        <span class="cbadge up">▲ {{ abs($pct) }}% vs lista anterior</span>
                     @elseif($diff < 0)
-                        <span class="cbadge down">▼ {{ abs($pct) }}% vs anterior</span>
+                        <span class="cbadge down">▼ {{ abs($pct) }}% vs lista anterior</span>
                     @endif
                 @endif
             </div>
         </div>
         <div class="htotal">
-            @if($list->total > 0)
-                R$ {{ number_format($list->total, 2, ',', '.') }}
+            @if($curVal > 0)
+                R$ {{ number_format($curVal, 2, ',', '.') }}
             @else
                 <span style="font-size:.75rem;font-weight:400;color:var(--muted)">sem preços</span>
             @endif
@@ -125,15 +130,8 @@
 @empty
     <div class="empty">
         <div style="font-size:2.5rem;margin-bottom:.5rem">📭</div>
-        Nenhuma lista encontrada com esses filtros.
+        Nenhuma lista em aberto. Crie uma acima para começar.
     </div>
 @endforelse
 </div>
-
-{{-- PAGINATION --}}
-@if($openLists->hasPages())
-<div class="pagination-wrap">
-    {{$openLists->links('pagination::simple-bootstrap-4')}}
-</div>
-@endif
 @endsection
