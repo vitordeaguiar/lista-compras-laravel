@@ -39,12 +39,24 @@ class ShoppingItemController extends Controller
         return back();
     }
 
-    public function toggle(ShoppingList $list, ShoppingItem $item)
+    // Toggle purchase status, optionally saving price at same time
+    public function toggle(Request $request, ShoppingList $list, ShoppingItem $item)
     {
         abort_if($list->user_id !== Auth::id(), 403);
         abort_if($item->shopping_list_id !== $list->id, 403);
 
-        $item->update(['purchased' => !$item->purchased]);
+        $newPurchased = !$item->purchased;
+        $updateData   = ['purchased' => $newPurchased];
+
+        // If a price was sent together with the toggle, save it
+        if ($request->filled('price')) {
+            $price = (float) str_replace(',', '.', $request->price);
+            if ($price >= 0) {
+                $updateData['price'] = $price;
+            }
+        }
+
+        $item->update($updateData);
         return back();
     }
 
