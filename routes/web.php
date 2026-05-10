@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', fn() => redirect()->route('lists.index'));
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // Lists
     Route::get('/listas',                      [ShoppingListController::class, 'index'])->name('lists.index');
     Route::post('/listas',                     [ShoppingListController::class, 'store'])->name('lists.store');
     Route::get('/listas/{list}',               [ShoppingListController::class, 'show'])->name('lists.show');
@@ -27,11 +28,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/listas/{list}/reabrir',     [ShoppingListController::class, 'reopen'])->name('lists.reopen');
     Route::delete('/listas/{list}',            [ShoppingListController::class, 'destroy'])->name('lists.destroy');
 
+    // Items
     Route::post('/listas/{list}/itens',                   [ShoppingItemController::class, 'store'])->name('items.store');
     Route::patch('/listas/{list}/itens/{item}',           [ShoppingItemController::class, 'update'])->name('items.update');
     Route::patch('/listas/{list}/itens/{item}/toggle',    [ShoppingItemController::class, 'toggle'])->name('items.toggle');
     Route::delete('/listas/{list}/itens/{item}',          [ShoppingItemController::class, 'destroy'])->name('items.destroy');
 
+    // History & Finance
     Route::get('/historico',  [HistoryController::class, 'index'])->name('history.index');
     Route::get('/financeiro', [FinanceController::class, 'index'])->name('finance.index');
 });
