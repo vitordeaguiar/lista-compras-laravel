@@ -18,8 +18,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
         // Rate limiting for login (5 attempts per minute per IP)
-        $middleware->throttleWithRedis();
-
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
@@ -29,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return Limit::perMinute(3)->by($request->ip());
         });
 
-        // General API/web rate limit (120 requests/minute per user or IP)
+        // General web rate limit
         RateLimiter::for('web', function (Request $request) {
             return $request->user()
                 ? Limit::perMinute(120)->by($request->user()->id)
