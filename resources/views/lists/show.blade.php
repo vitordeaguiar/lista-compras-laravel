@@ -99,8 +99,8 @@
 .tp-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;margin-bottom:.4rem}
 .tp-item-name{font-size:.82rem;color:var(--muted);margin-bottom:1.1rem}
 .tp-price-wrap{position:relative;margin-bottom:1rem}
-.tp-price-wrap em{position:absolute;left:.6rem;top:50%;transform:translateY(-50%);color:var(--muted);font-style:normal;font-size:.9rem;pointer-events:none}
-.tp-price-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.75rem .85rem .75rem 2.8rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:500;outline:none;transition:border-color .2s}
+.tp-price-wrap em{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--muted);font-style:normal;font-size:.85rem;pointer-events:none}
+.tp-price-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.75rem .85rem .75rem 2.25rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:500;outline:none;transition:border-color .2s}
 .tp-price-input:focus{border-color:var(--accent)}
 .tp-hint{font-size:.75rem;color:var(--muted);margin-bottom:1.1rem}
 .tp-actions{display:flex;gap:.5rem}
