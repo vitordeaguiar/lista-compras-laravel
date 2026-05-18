@@ -23,7 +23,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended(route('lists.index'));
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors(['email' => 'E-mail ou senha incorretos.'])->onlyInput('email');
@@ -138,7 +138,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('lists.index')->with('success', 'Bem-vindo! Sua conta foi criada.');
+        return redirect()->route('dashboard')->with('success', 'Bem-vindo! Sua conta foi criada.');
     }
 
     public function logout(Request $request)
