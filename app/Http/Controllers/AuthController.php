@@ -57,13 +57,20 @@ class AuthController extends Controller
         ]);
 
         // Send email
-        Mail::raw(
-            "Seu código de verificação para Lista de Compras é: {$code}\n\nEste código expira em 15 minutos.",
-            function ($msg) use ($email, $code) {
-                $msg->to($email)
-                    ->subject("Código de verificação: {$code} — Lista de Compras");
-            }
-        );
+        try {
+            Mail::raw(
+                "Seu código de verificação para Smart Listiq é: {$code}\n\nEste código expira em 15 minutos.",
+                function ($msg) use ($email, $code) {
+                    $msg->to($email)
+                        ->subject("Código de verificação: {$code} — Smart Listiq");
+                }
+            );
+        } catch (\Exception $e) {
+            \Log::error('Falha ao enviar e-mail de verificação: ' . $e->getMessage());
+            return back()
+                ->withInput()
+                ->withErrors(['email' => 'Não foi possível enviar o e-mail. Tente novamente em instantes.']);
+        }
 
         return redirect()->route('register.verify', ['email' => $email])
             ->with('info', "Código enviado para {$email}. Verifique sua caixa de entrada.");
