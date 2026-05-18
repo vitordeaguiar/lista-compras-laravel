@@ -12,7 +12,6 @@ class FinanceController extends Controller
         $dateFrom = $request->date_from ?? now()->startOfMonth()->toDateString();
         $dateTo   = $request->date_to   ?? now()->toDateString();
 
-        // All completed lists in period
         $lists = Auth::user()->shoppingLists()
             ->where('status', 'completed')
             ->whereDate('shopping_date', '>=', $dateFrom)
@@ -20,12 +19,9 @@ class FinanceController extends Controller
             ->with('items')
             ->get();
 
-        $listIds = $lists->pluck('id');
-
-        // Total spent
+        $listIds    = $lists->pluck('id');
         $totalGasto = $lists->sum('total');
 
-        // Items most purchased (by times appeared across lists)
         $topItems = DB::table('shopping_items')
             ->whereIn('shopping_list_id', $listIds)
             ->where('purchased', true)
@@ -41,24 +37,23 @@ class FinanceController extends Controller
             ->limit(20)
             ->get();
 
-        // Spending per list (for chart)
         $gastosPorLista = $lists->sortBy('shopping_date')->map(fn($l) => [
             'label' => $l->shopping_date->format('d/m'),
             'name'  => $l->name,
             'total' => $l->total ?? 0,
         ])->values();
 
-        // Spending per month summary
+        // MySQL usa DATE_FORMAT em vez de TO_CHAR do Postgres
         $gastosPorMes = Auth::user()->shoppingLists()
             ->where('status', 'completed')
             ->whereDate('shopping_date', '>=', $dateFrom)
             ->whereDate('shopping_date', '<=', $dateTo)
             ->select(
-                DB::raw("TO_CHAR(shopping_date, 'MM/YYYY') as mes"),
+                DB::raw("DATE_FORMAT(shopping_date, '%m/%Y') as mes"),
                 DB::raw('SUM(total) as total'),
                 DB::raw('COUNT(*) as num_listas')
             )
-            ->groupBy(DB::raw("TO_CHAR(shopping_date, 'MM/YYYY')"))
+            ->groupBy(DB::raw("DATE_FORMAT(shopping_date, '%m/%Y')"))
             ->orderBy(DB::raw("MIN(shopping_date)"))
             ->get();
 
