@@ -82,7 +82,8 @@ function runComposer(string $command, string $composerBin): array
 {
     $output = [];
     $code = 0;
-    exec(PHP_BIN . ' ' . escapeshellarg($composerBin) . " $command --no-interaction --working-dir=" . BASE_PATH . " 2>&1", $output, $code);
+    $env = 'HOME=/home1/vit75277 COMPOSER_HOME=/home1/vit75277/.composer';
+    exec("$env " . PHP_BIN . ' ' . escapeshellarg($composerBin) . " $command --no-interaction --working-dir=" . BASE_PATH . " 2>&1", $output, $code);
     return ['output' => implode("\n", $output), 'code' => $code];
 }
 
