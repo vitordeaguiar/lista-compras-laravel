@@ -37,13 +37,22 @@ class FinanceController extends Controller
             ->limit(20)
             ->get();
 
+        $topItemName = $topItems->isNotEmpty() ? ucfirst($topItems->first()->item_name) : '—';
+
+        $itensUnicos = $listIds->isNotEmpty()
+            ? (int) DB::table('shopping_items')
+                ->whereIn('shopping_list_id', $listIds)
+                ->where('purchased', true)
+                ->selectRaw('COUNT(DISTINCT LOWER(name)) as cnt')
+                ->value('cnt')
+            : 0;
+
         $gastosPorLista = $lists->sortBy('shopping_date')->map(fn($l) => [
             'label' => $l->shopping_date->format('d/m'),
             'name'  => $l->name,
             'total' => $l->total ?? 0,
         ])->values();
 
-        // MySQL usa DATE_FORMAT em vez de TO_CHAR do Postgres
         $gastosPorMes = Auth::user()->shoppingLists()
             ->where('status', 'completed')
             ->whereDate('shopping_date', '>=', $dateFrom)
@@ -59,7 +68,8 @@ class FinanceController extends Controller
 
         return view('finance.index', compact(
             'topItems', 'totalGasto', 'gastosPorLista',
-            'gastosPorMes', 'dateFrom', 'dateTo', 'listIds'
+            'gastosPorMes', 'dateFrom', 'dateTo', 'listIds',
+            'topItemName', 'itensUnicos'
         ));
     }
 }

@@ -1,56 +1,65 @@
 @extends('layouts.app')
 @section('title','Histórico')
+@section('page-title','Histórico')
+@section('page-sub','Todas as suas listas concluídas')
+@section('page-actions')
+    <a href="{{ route('finance.index') }}" class="btn btn-ghost btn-sm">📊 Financeiro</a>
+@endsection
 
 @push('styles')
 <style>
-.phdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
-.ptitle{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;letter-spacing:-.03em}
-.ptitle span{color:var(--accent)}
-
-.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:1.5rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end}
-.fg{flex:1;min-width:130px}
-.fg label{display:block;font-size:.65rem;color:var(--muted);margin-bottom:.28rem;text-transform:uppercase;letter-spacing:.05em}
-.fg input,.fg select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.55rem .8rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;width:100%;outline:none;transition:border-color .2s}
-.fg input:focus,.fg select:focus{border-color:var(--accent)}
-.btn-filter{background:var(--accent);color:#0d0d0f;border:none;padding:.55rem 1.1rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:all .2s}
+.filter-bar{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem .95rem;margin-bottom:1.25rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end}
+.fg{flex:1;min-width:120px}
+.fg label{display:block;font-size:.61rem;color:var(--text2);margin-bottom:.22rem;text-transform:uppercase;letter-spacing:.05em}
+.fg input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.48rem .75rem;border-radius:7px;font-family:'Inter',sans-serif;font-size:.82rem;width:100%;outline:none;transition:border-color .2s}
+.fg input:focus{border-color:var(--accent)}
+.btn-filter{background:var(--accent);color:#09090b;border:none;padding:.48rem 1rem;border-radius:7px;font-family:'Inter',sans-serif;font-weight:700;font-size:.79rem;cursor:pointer;white-space:nowrap;transition:all .18s}
 .btn-filter:hover{background:var(--accent2)}
-.btn-clear{background:none;border:1px solid var(--border);color:var(--muted);padding:.55rem .9rem;border-radius:8px;font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center}
+.btn-clear{background:none;border:1px solid var(--border);color:var(--text2);padding:.48rem .85rem;border-radius:7px;font-size:.79rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center}
 .btn-clear:hover{border-color:var(--danger);color:var(--danger)}
 
-.summary-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin-bottom:1.5rem}
-.sc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.8rem 1rem}
-.sc.hl{border-color:rgba(110,231,183,.3);background:rgba(110,231,183,.05)}
-.sc-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.25rem}
-.sc-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem}
-.sc.hl .sc-val{color:var(--accent)}
-
-.hlist{display:flex;flex-direction:column;gap:.5rem}
-.hcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.85rem 1rem;display:flex;align-items:center;gap:.85rem;text-decoration:none;color:inherit;transition:all .2s}
-.hcard:hover{border-color:#3a3a45;transform:translateX(2px)}
-.hicon{width:36px;height:36px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;opacity:.7}
+.hlist{display:flex;flex-direction:column;gap:.4rem}
+.hcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.8rem .95rem;display:flex;align-items:center;gap:.75rem;text-decoration:none;color:inherit;transition:border-color .18s,transform .15s}
+.hcard:hover{border-color:var(--border2);transform:translateX(2px)}
+.hicon{width:34px;height:34px;border-radius:8px;background:var(--adim);border:1px solid rgba(163,230,53,.15);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
 .hinfo{flex:1;min-width:0}
-.hname{font-size:.88rem;font-weight:500;margin-bottom:.1rem}
-.hmeta{font-size:.7rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
-.htotal{font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;flex-shrink:0}
-.cbadge{display:inline-flex;align-items:center;gap:.2rem;font-size:.63rem;padding:.1rem .4rem;border-radius:5px}
-.cbadge.up{background:rgba(248,113,113,.1);color:var(--danger)}
-.cbadge.down{background:rgba(110,231,183,.1);color:var(--accent)}
-.empty{text-align:center;padding:3rem;color:var(--muted);font-size:.88rem}
-.pagination-wrap{margin-top:1.25rem;display:flex;justify-content:center;gap:.4rem;flex-wrap:wrap}
-.pagination-wrap a,.pagination-wrap span{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:.35rem .75rem;border-radius:7px;font-size:.78rem;text-decoration:none;transition:all .2s}
+.hname{font-size:.84rem;font-weight:600;margin-bottom:.1rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hmeta{font-size:.67rem;color:var(--text3);display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.htotal{font-weight:700;font-size:.9rem;color:var(--accent);flex-shrink:0}
+.cbadge{display:inline-flex;align-items:center;gap:.18rem;font-size:.6rem;padding:.08rem .36rem;border-radius:4px}
+.cbadge.up{background:rgba(239,68,68,.1);color:var(--danger)}
+.cbadge.down{background:var(--adim);color:var(--accent)}
+.empty{text-align:center;padding:3rem;color:var(--text3);font-size:.85rem}
+
+.pagination-wrap{margin-top:1rem;display:flex;justify-content:center;gap:.35rem;flex-wrap:wrap}
+.pagination-wrap a,.pagination-wrap span{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:.3rem .7rem;border-radius:6px;font-size:.75rem;text-decoration:none;transition:all .18s}
 .pagination-wrap a:hover{border-color:var(--accent);color:var(--accent)}
-.pagination-wrap span.current{border-color:var(--accent);color:var(--accent);background:rgba(110,231,183,.08)}
+.pagination-wrap span.current{border-color:var(--accent);color:var(--accent);background:var(--adim)}
 </style>
 @endpush
 
 @section('content')
-<div class="phdr">
-    <div>
-        <h1 class="ptitle">📂 <span>Histórico</span></h1>
-        <p style="color:var(--muted);font-size:.78rem;margin-top:.2rem">Todas as suas listas concluídas</p>
+
+{{-- SUMMARY --}}
+@if($lists->total() > 0)
+<div class="stats-grid" style="margin-bottom:1.1rem">
+    <div class="stat-card hl">
+        <div class="stat-label">Total gasto</div>
+        <div class="stat-val">R$ {{ number_format($totalGasto, 2, ',', '.') }}</div>
+        <div class="stat-hint">no filtro atual</div>
     </div>
-    <a href="{{ route('finance.index') }}" class="btn btn-ghost btn-sm">💰 Ver financeiro</a>
+    <div class="stat-card">
+        <div class="stat-label">Listas</div>
+        <div class="stat-val">{{ $lists->total() }}</div>
+        <div class="stat-hint">encontradas</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Média por lista</div>
+        <div class="stat-val">R$ {{ number_format($lists->total() > 0 ? $totalGasto / $lists->total() : 0, 2, ',', '.') }}</div>
+        <div class="stat-hint">valor médio gasto</div>
+    </div>
 </div>
+@endif
 
 {{-- FILTERS --}}
 <form class="filter-bar" method="GET" action="{{ route('history.index') }}">
@@ -66,29 +75,11 @@
         <label>Buscar lista</label>
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Nome da lista…">
     </div>
-    <button type="submit" class="btn-filter">🔍 Filtrar</button>
+    <button type="submit" class="btn-filter">Filtrar</button>
     @if(request()->hasAny(['date_from','date_to','search']))
         <a href="{{ route('history.index') }}" class="btn-clear">✕ Limpar</a>
     @endif
 </form>
-
-{{-- SUMMARY --}}
-@if($lists->total() > 0)
-<div class="summary-bar">
-    <div class="sc">
-        <div class="sc-label">Listas encontradas</div>
-        <div class="sc-val">{{ $lists->total() }}</div>
-    </div>
-    <div class="sc hl">
-        <div class="sc-label">Total gasto</div>
-        <div class="sc-val">R$ {{ number_format($totalGasto, 2, ',', '.') }}</div>
-    </div>
-    <div class="sc">
-        <div class="sc-label">Média por lista</div>
-        <div class="sc-val">R$ {{ number_format($lists->total() > 0 ? $totalGasto / $lists->total() : 0, 2, ',', '.') }}</div>
-    </div>
-</div>
-@endif
 
 {{-- LIST --}}
 <div class="hlist">
@@ -103,8 +94,9 @@
         <div class="hinfo">
             <div class="hname">{{ $list->name }}</div>
             <div class="hmeta">
-                {{ $list->shopping_date->locale('pt_BR')->isoFormat('D [de] MMMM [de] YYYY') }}
-                &nbsp;·&nbsp; {{ $list->items->count() }} itens
+                <span>{{ $list->shopping_date->locale('pt_BR')->isoFormat('D [de] MMMM [de] YYYY') }}</span>
+                <span style="opacity:.3">·</span>
+                <span>{{ $list->items->count() }} itens</span>
                 @if($pct !== null)
                     @if($diff > 0)
                         <span class="cbadge up">▲ {{ abs($pct) }}% vs anterior</span>
@@ -118,22 +110,21 @@
             @if($list->total > 0)
                 R$ {{ number_format($list->total, 2, ',', '.') }}
             @else
-                <span style="font-size:.75rem;font-weight:400;color:var(--muted)">sem preços</span>
+                <span style="font-size:.72rem;font-weight:400;color:var(--text3)">sem preços</span>
             @endif
         </div>
     </a>
 @empty
     <div class="empty">
-        <div style="font-size:2.5rem;margin-bottom:.5rem">📭</div>
+        <div style="font-size:2rem;margin-bottom:.5rem">📭</div>
         Nenhuma lista encontrada com esses filtros.
     </div>
 @endforelse
 </div>
 
-{{-- PAGINATION --}}
 @if($lists->hasPages())
 <div class="pagination-wrap">
-    {{$lists->links('pagination::simple-bootstrap-4')}}
+    {{ $lists->links('pagination::simple-bootstrap-4') }}
 </div>
 @endif
 @endsection

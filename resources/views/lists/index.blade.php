@@ -1,47 +1,42 @@
 @extends('layouts.app')
 @section('title','Minhas Listas')
+@section('page-title','Minhas Listas')
+@section('page-sub','Organize suas compras do dia a dia')
+@section('page-actions')
+    <button class="btn btn-primary" onclick="document.getElementById('newListModal').classList.add('open')">+ Nova Lista</button>
+@endsection
 
 @push('styles')
 <style>
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem;gap:1rem;flex-wrap:wrap}
-.page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;letter-spacing:-.03em}
-.page-title span{color:var(--accent)}
-.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:1rem}
-.modal-backdrop.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.75rem;width:100%;max-width:440px}
-.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:1.25rem}
-.modal-footer{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.25rem}
-.open-lists{display:flex;flex-direction:column;gap:.75rem}
-.lcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;display:flex;align-items:center;gap:.9rem;transition:all .2s;text-decoration:none;color:inherit}
-.lcard:hover{border-color:#3a3a45;transform:translateX(3px)}
-.lcard-icon{width:40px;height:40px;border-radius:10px;background:var(--adim);border:1px solid rgba(110,231,183,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.lists-grid{display:flex;flex-direction:column;gap:.5rem}
+.lcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem 1rem;display:flex;align-items:center;gap:.85rem;transition:border-color .18s,transform .15s;text-decoration:none;color:inherit}
+.lcard:hover{border-color:var(--border2);transform:translateX(2px)}
+.lcard-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
 .lcard-info{flex:1;min-width:0}
-.lcard-name{font-size:.95rem;font-weight:500;color:var(--text);margin-bottom:.15rem}
-.lcard-meta{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.lcard-name{font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lcard-meta{font-size:.7rem;color:var(--text3);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem}
+.lcard-meta .dot{opacity:.35}
+.prog-bar{height:3px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
 .lcard-right{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;flex-shrink:0}
-.progress-bar{width:80px;height:4px;background:var(--surface2);border-radius:99px;overflow:hidden}
-.progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
-.progress-label{font-size:.65rem;color:var(--muted)}
-.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted);font-size:.88rem}
-.empty-state .emoji{font-size:2.5rem;display:block;margin-bottom:.6rem}
-.shortcuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin-top:2rem}
-.shortcut{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;text-decoration:none;color:inherit;transition:all .2s;display:flex;align-items:center;gap:.6rem}
-.shortcut:hover{border-color:#3a3a45}
-.shortcut-icon{font-size:1.2rem}
-.shortcut-info .sh-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.shortcut-info .sh-title{font-size:.85rem;font-weight:500}
+.badge-open{font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:5px;background:var(--adim);color:var(--accent);border:1px solid rgba(163,230,53,.2)}
+.badge-done{font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:5px;background:var(--bluedim);color:#818cf8;border:1px solid rgba(99,102,241,.2)}
+.lcard-val{font-size:.82rem;font-weight:700;color:var(--accent)}
+.lcard-prog-label{font-size:.63rem;color:var(--text3)}
+
+.empty-state{text-align:center;padding:3.5rem 1rem;color:var(--text3);font-size:.83rem}
+.empty-state .emoji{font-size:2.2rem;display:block;margin-bottom:.6rem}
+
+.icon-box-green{background:var(--adim);border:1px solid rgba(163,230,53,.2)}
+.icon-box-blue{background:var(--bluedim);border:1px solid rgba(99,102,241,.2)}
+.icon-box-yellow{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)}
+.icon-box-red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)}
 </style>
 @endpush
 
 @section('content')
-<div class="page-header">
-    <div>
-        <h1 class="page-title">Minhas <span>Listas</span></h1>
-        <p style="color:var(--muted);font-size:.8rem;margin-top:.2rem">Organize suas compras do dia a dia</p>
-    </div>
-    <button class="btn btn-primary" onclick="document.getElementById('newListModal').classList.add('open')">+ Nova Lista</button>
-</div>
 
+{{-- NEW LIST MODAL --}}
 <div class="modal-backdrop" id="newListModal" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="modal">
         <div class="modal-title">📋 Nova Lista de Compras</div>
@@ -59,7 +54,7 @@
             </div>
             <div class="form-group">
                 <label>Observações (opcional)</label>
-                <textarea name="notes" placeholder="Alguma anotação importante…">{{ old('notes') }}</textarea>
+                <textarea name="notes" rows="2" placeholder="Alguma anotação importante…">{{ old('notes') }}</textarea>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" onclick="document.getElementById('newListModal').classList.remove('open')">Cancelar</button>
@@ -69,32 +64,38 @@
     </div>
 </div>
 
+@php
+    $iconBoxes = ['icon-box-green','icon-box-blue','icon-box-yellow','icon-box-red'];
+@endphp
+
 @if($openLists->count() > 0)
-<div class="open-lists">
-    @foreach($openLists as $list)
+<div class="lists-grid">
+    @foreach($openLists as $i => $list)
         @php
             $total  = $list->items->count();
             $bought = $list->items->where('purchased', true)->count();
             $pct    = $total > 0 ? round(($bought / $total) * 100) : 0;
             $est    = $list->computedTotal;
+            $box    = $iconBoxes[$i % 4];
         @endphp
         <a class="lcard" href="{{ route('lists.show', $list) }}">
-            <div class="lcard-icon">🛒</div>
+            <div class="lcard-icon {{ $box }}">🛒</div>
             <div class="lcard-info">
                 <div class="lcard-name">{{ $list->name }}</div>
                 <div class="lcard-meta">
                     <span>{{ $list->shopping_date->locale('pt_BR')->isoFormat('D [de] MMMM') }}</span>
-                    <span style="opacity:.4">•</span>
+                    <span class="dot">•</span>
                     <span>{{ $total }} {{ Str::plural('item', $total) }}</span>
                     @if($est > 0)
-                        <span style="opacity:.4">•</span>
+                        <span class="dot">•</span>
                         <span style="color:var(--accent)">R$ {{ number_format($est, 2, ',', '.') }}</span>
                     @endif
                 </div>
+                <div class="prog-bar"><div class="prog-fill" style="width:{{ $pct }}%"></div></div>
             </div>
             <div class="lcard-right">
-                <div class="progress-bar"><div class="progress-fill" style="width:{{ $pct }}%"></div></div>
-                <div class="progress-label">{{ $bought }}/{{ $total }} comprados</div>
+                <span class="badge-open">Em andamento</span>
+                <span class="lcard-prog-label">{{ $bought }}/{{ $total }} comprados</span>
             </div>
         </a>
     @endforeach
@@ -103,25 +104,9 @@
 <div class="empty-state">
     <span class="emoji">🛒</span>
     <p>Nenhuma lista aberta.<br>Crie uma nova lista para começar!</p>
+    <button class="btn btn-primary" style="margin-top:1rem" onclick="document.getElementById('newListModal').classList.add('open')">+ Nova Lista</button>
 </div>
 @endif
-
-<div class="shortcuts">
-    <a class="shortcut" href="{{ route('history.index') }}">
-        <span class="shortcut-icon">📂</span>
-        <div class="shortcut-info">
-            <div class="sh-label">Ver</div>
-            <div class="sh-title">Histórico</div>
-        </div>
-    </a>
-    <a class="shortcut" href="{{ route('finance.index') }}">
-        <span class="shortcut-icon">💰</span>
-        <div class="shortcut-info">
-            <div class="sh-label">Analisar</div>
-            <div class="sh-title">Financeiro</div>
-        </div>
-    </a>
-</div>
 
 @if($errors->any())
 <script>document.getElementById('newListModal').classList.add('open')</script>

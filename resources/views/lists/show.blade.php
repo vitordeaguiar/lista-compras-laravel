@@ -1,125 +1,137 @@
 @extends('layouts.app')
 @section('title', $list->name)
 
+@section('page-title')
+    <span style="font-size:.7rem;color:var(--text3);font-weight:400">
+        <a href="{{ route('lists.index') }}" style="color:var(--text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">Minhas Listas</a>
+        <span style="margin:0 .35rem;opacity:.4">›</span>
+    </span>{{ $list->name }}
+@endsection
+
+@section('page-sub')
+    {{ $list->shopping_date->locale('pt_BR')->isoFormat('dddd, D [de] MMMM [de] YYYY') }}
+    @if($list->isCompleted())
+        · <span style="color:var(--accent)">✅ Concluída</span>
+    @else
+        · <span style="color:var(--accent)">🟢 Aberta</span>
+    @endif
+@endsection
+
+@section('page-actions')
+    <a href="https://www.confianca.com.br/bauru" target="_blank" class="btn btn-ghost btn-sm">🔗 Confiança</a>
+    @if($list->isCompleted())
+        <form method="POST" action="{{ route('lists.reopen', $list) }}">
+            @csrf @method('PATCH')
+            <button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reabrir esta lista para edição?')">🔓 Reabrir</button>
+        </form>
+    @else
+        <form method="POST" action="{{ route('lists.destroy', $list) }}" onsubmit="return confirm('Excluir esta lista?')">
+            @csrf @method('DELETE')
+            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+        </form>
+    @endif
+@endsection
+
 @push('styles')
 <style>
-/* breadcrumb */
-.breadcrumb{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--muted);margin-bottom:1.5rem}
-.breadcrumb a{color:var(--muted);text-decoration:none;transition:color .2s}
-.breadcrumb a:hover{color:var(--accent)}
-.breadcrumb .sep{opacity:.35}
-
-/* header */
-.list-header{margin-bottom:1.5rem}
-.list-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:.6rem}
-.list-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;letter-spacing:-.03em}
-.list-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.list-meta{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
-.meta-pill{display:inline-flex;align-items:center;gap:.3rem;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.2rem .65rem}
-.meta-pill.green{border-color:rgba(110,231,183,.3);color:var(--accent);background:var(--adim)}
-
 /* totals */
-.totals-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-bottom:1.5rem}
-.tc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.85rem 1rem}
-.tc.hl{border-color:rgba(110,231,183,.3);background:rgba(110,231,183,.05)}
-.tc-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.25rem}
-.tc-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--text)}
+.totals-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-bottom:1.25rem}
+.tc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.8rem .9rem}
+.tc.hl{border-color:rgba(163,230,53,.22);background:rgba(163,230,53,.04)}
+.tc-label{font-size:.61rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:.22rem}
+.tc-val{font-size:1.15rem;font-weight:700;color:var(--text)}
 .tc.hl .tc-val{color:var(--accent)}
-.tc-hint{font-size:.63rem;color:var(--muted);margin-top:.15rem}
+.tc-hint{font-size:.6rem;color:var(--text3);margin-top:.12rem}
 
 /* progress */
-.progress-section{margin-bottom:1.5rem}
-.progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;font-size:.78rem;color:var(--muted)}
-.big-progress{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.progress-section{margin-bottom:1.25rem}
+.progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;font-size:.75rem;color:var(--text3)}
+.big-progress{height:5px;background:var(--bg3);border-radius:99px;overflow:hidden}
 .big-progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
 
 /* add form */
-.add-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;margin-bottom:1.75rem}
-.form-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end}
+.add-form{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem .95rem;margin-bottom:1.5rem}
+.form-row{display:flex;gap:.4rem;flex-wrap:wrap;align-items:flex-end}
 .fg{flex:1;min-width:110px}
-.fg.sm{flex:0 0 70px;min-width:70px}
-.fg.md{flex:0 0 120px;min-width:120px}
-.fg label{display:block;font-size:.65rem;color:var(--muted);margin-bottom:.28rem;text-transform:uppercase;letter-spacing:.05em}
-.fg input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;width:100%;outline:none;transition:border-color .2s}
+.fg.sm{flex:0 0 65px;min-width:65px}
+.fg.md{flex:0 0 115px;min-width:115px}
+.fg label{display:block;font-size:.61rem;color:var(--text2);margin-bottom:.22rem;text-transform:uppercase;letter-spacing:.05em}
+.fg input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.48rem .7rem;border-radius:7px;font-family:'Inter',sans-serif;font-size:.82rem;width:100%;outline:none;transition:border-color .2s}
 .fg input:focus{border-color:var(--accent)}
-.fg input::placeholder{color:var(--muted);opacity:.6}
+.fg input::placeholder{color:var(--text3)}
 .pr-wrap{position:relative}
-.pr-wrap em{position:absolute;left:.6rem;top:50%;transform:translateY(-50%);color:var(--muted);font-style:normal;font-size:.75rem;pointer-events:none}
-.pr-wrap input{padding-left:1.6rem}
-.btn-add{background:var(--accent);color:#0d0d0f;border:none;padding:.55rem 1rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap;transition:all .2s}
+.pr-wrap em{position:absolute;left:.55rem;top:50%;transform:translateY(-50%);color:var(--text3);font-style:normal;font-size:.72rem;pointer-events:none}
+.pr-wrap input{padding-left:1.5rem}
+.btn-add{background:var(--accent);color:#09090b;border:none;padding:.48rem .9rem;border-radius:7px;font-family:'Inter',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .18s}
 .btn-add:hover{background:var(--accent2);transform:translateY(-1px)}
 
-/* section label */
-.slabel{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.6rem;display:flex;align-items:center;justify-content:space-between}
-.sbadge{background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:.6rem;padding:.1rem .45rem;border-radius:99px}
-
 /* items */
-.items-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.5rem}
-.item-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;align-items:flex-start;gap:.6rem;padding:.75rem .9rem;transition:border-color .2s;animation:si .15s ease}
-@keyframes si{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.item-card:hover{border-color:#3a3a45}
-.item-card.done{opacity:.5;background:#111115}
-.item-card.done .iname{text-decoration:line-through;color:var(--muted)}
+.items-list{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1.25rem}
+.item-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:flex-start;gap:.55rem;padding:.68rem .85rem;transition:border-color .18s;animation:si .15s ease}
+@keyframes si{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.item-card:hover{border-color:var(--border2)}
+.item-card.done{opacity:.45}
+.item-card.done .iname{text-decoration:line-through;color:var(--text3)}
 
-.chk{flex-shrink:0;margin-top:2px;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.68rem;color:transparent;transition:all .2s}
+.chk{flex-shrink:0;margin-top:1px;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:transparent;transition:all .18s}
 .chk:hover{border-color:var(--accent);color:var(--accent)}
-.item-card.done .chk{background:var(--accent);border-color:var(--accent);color:#0d0d0f}
+.item-card.done .chk{background:var(--accent);border-color:var(--accent);color:#09090b}
 
 .iinfo{flex:1;min-width:0}
-.iname-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.2rem}
-.iname{font-size:.9rem;color:var(--text)}
-.unit-tag{font-size:.65rem;background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:.03rem .4rem;border-radius:5px}
-.imeta{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
-.qty-tag{font-size:.7rem;color:var(--muted)}
+.iname-row{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;margin-bottom:.18rem}
+.iname{font-size:.85rem;color:var(--text)}
+.unit-tag{font-size:.62rem;background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:.02rem .36rem;border-radius:4px}
+.imeta{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.qty-tag{font-size:.67rem;color:var(--text3)}
 
 /* price pill */
-.ppill{display:inline-flex;align-items:center;gap:.2rem;padding:.1rem .45rem;border-radius:6px;font-size:.7rem;cursor:pointer;transition:all .2s;border:1px solid rgba(110,231,183,.25);background:rgba(110,231,183,.07);color:var(--accent)}
-.ppill.empty{border-color:var(--border);background:var(--surface2);color:var(--muted)}
-.ppill:hover{background:rgba(110,231,183,.15)}
+.ppill{display:inline-flex;align-items:center;gap:.18rem;padding:.08rem .4rem;border-radius:5px;font-size:.68rem;cursor:pointer;transition:all .18s;border:1px solid rgba(163,230,53,.22);background:rgba(163,230,53,.06);color:var(--accent)}
+.ppill.empty{border-color:var(--border);background:var(--bg3);color:var(--text3)}
+.ppill:hover{background:rgba(163,230,53,.12)}
 .ppill.empty:hover{border-color:var(--accent);color:var(--accent)}
-.sub{font-size:.7rem;color:var(--muted);font-style:italic}
+.sub{font-size:.67rem;color:var(--text3);font-style:italic}
 
 /* inline edit */
-.iedit{display:none;align-items:center;gap:.35rem;margin-top:.4rem;flex-wrap:wrap}
+.iedit{display:none;align-items:center;gap:.3rem;margin-top:.35rem;flex-wrap:wrap}
 .iedit.open{display:flex}
-.iedit input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.3rem .55rem;border-radius:6px;font-size:.8rem;font-family:inherit;outline:none;transition:border-color .2s}
+.iedit input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.28rem .5rem;border-radius:5px;font-size:.77rem;font-family:inherit;outline:none;transition:border-color .2s}
 .iedit input:focus{border-color:var(--accent)}
 .iedit .pwrap{position:relative}
-.iedit .pwrap em{position:absolute;left:.45rem;top:50%;transform:translateY(-50%);color:var(--muted);font-style:normal;font-size:.7rem;pointer-events:none}
-.iedit .pwrap input{padding-left:1.3rem;width:100px}
-.iedit .qinput{width:60px}
-.bsave{background:var(--accent);color:#0d0d0f;border:none;padding:.3rem .65rem;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.iedit .pwrap em{position:absolute;left:.4rem;top:50%;transform:translateY(-50%);color:var(--text3);font-style:normal;font-size:.67rem;pointer-events:none}
+.iedit .pwrap input{padding-left:1.2rem;width:95px}
+.iedit .qinput{width:58px}
+.bsave{background:var(--accent);color:#09090b;border:none;padding:.28rem .6rem;border-radius:5px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s}
 .bsave:hover{background:var(--accent2)}
-.bcancel{background:none;border:1px solid var(--border);color:var(--muted);padding:.3rem .55rem;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:inherit}
+.bcancel{background:none;border:1px solid var(--border);color:var(--text2);padding:.28rem .5rem;border-radius:5px;font-size:.72rem;cursor:pointer;font-family:inherit}
 
 /* toggle+price modal */
-.tp-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center;padding:1rem}
+.tp-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:center;justify-content:center;padding:1rem}
 .tp-overlay.open{display:flex}
-.tp-modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.5rem;width:100%;max-width:360px}
-.tp-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;margin-bottom:.4rem}
-.tp-item-name{font-size:.82rem;color:var(--muted);margin-bottom:1.1rem}
-.tp-price-wrap{margin-bottom:1rem}
-.tp-price-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.75rem .85rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1.1rem;font-weight:500;outline:none;transition:border-color .2s}
+.tp-modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.4rem;width:100%;max-width:340px}
+.tp-title{font-size:.9rem;font-weight:700;margin-bottom:.35rem;color:var(--text)}
+.tp-item-name{font-size:.79rem;color:var(--text2);margin-bottom:1rem}
+.tp-price-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.7rem .8rem;border-radius:9px;font-family:'Inter',sans-serif;font-size:1rem;font-weight:600;outline:none;transition:border-color .2s}
 .tp-price-input:focus{border-color:var(--accent)}
-.tp-hint{font-size:.75rem;color:var(--muted);margin-bottom:1.1rem}
-.tp-actions{display:flex;gap:.5rem}
-.tp-btn-check{flex:1;background:var(--accent);color:#0d0d0f;border:none;padding:.75rem;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;cursor:pointer;transition:all .2s}
+.tp-hint{font-size:.72rem;color:var(--text3);margin:-.25rem 0 .9rem}
+.tp-actions{display:flex;gap:.45rem}
+.tp-btn-check{flex:1;background:var(--accent);color:#09090b;border:none;padding:.7rem;border-radius:9px;font-family:'Inter',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .18s}
 .tp-btn-check:hover{background:var(--accent2)}
-.tp-btn-skip{background:none;border:1px solid var(--border);color:var(--muted);padding:.75rem 1rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.85rem;cursor:pointer;transition:all .2s}
+.tp-btn-skip{background:none;border:1px solid var(--border);color:var(--text2);padding:.7rem .9rem;border-radius:9px;font-family:'Inter',sans-serif;font-size:.82rem;cursor:pointer;transition:all .18s}
 .tp-btn-skip:hover{border-color:var(--accent);color:var(--accent)}
-.tp-btn-cancel{background:none;border:none;color:var(--muted);padding:.4rem;font-size:.8rem;cursor:pointer;font-family:inherit;width:100%;text-align:center;margin-top:.5rem}
+.tp-btn-cancel{background:none;border:none;color:var(--text3);padding:.35rem;font-size:.75rem;cursor:pointer;font-family:inherit;width:100%;text-align:center;margin-top:.45rem}
 
-.del{flex-shrink:0;background:none;border:none;color:var(--muted);cursor:pointer;padding:.25rem;border-radius:5px;font-size:.75rem;opacity:0;transition:all .15s;margin-top:2px}
+.del{flex-shrink:0;background:none;border:none;color:var(--text3);cursor:pointer;padding:.22rem;border-radius:4px;font-size:.72rem;opacity:0;transition:all .15s;margin-top:1px}
 .item-card:hover .del{opacity:1}
-.del:hover{color:var(--danger);background:rgba(248,113,113,.1)}
+.del:hover{color:var(--danger);background:rgba(239,68,68,.1)}
 
-.completed-banner{background:var(--adim);border:1px solid rgba(110,231,183,.25);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem;font-size:.85rem;color:var(--accent)}
-.notes-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;margin-bottom:1.5rem;font-size:.82rem;color:var(--muted);font-style:italic}
-.conclude-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;margin-top:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.conclude-text strong{color:var(--text);display:block;font-size:.9rem;margin-bottom:.2rem}
-.conclude-text{font-size:.82rem;color:var(--muted)}
-.divider{border:none;border-top:1px solid var(--border);margin:1.5rem 0 1.25rem}
-.empty-state{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem}
+.completed-banner{background:var(--adim);border:1px solid rgba(163,230,53,.22);border-radius:var(--radius);padding:.85rem 1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:.65rem;font-size:.82rem;color:var(--accent)}
+.notes-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem .9rem;margin-bottom:1.25rem;font-size:.79rem;color:var(--text3);font-style:italic}
+
+.conclude-box{background:var(--bg2);border:1px solid rgba(163,230,53,.22);border-radius:var(--radius);padding:1rem 1.1rem;margin-top:1.75rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.conclude-text strong{color:var(--text);display:block;font-size:.85rem;margin-bottom:.18rem}
+.conclude-text{font-size:.78rem;color:var(--text3)}
+.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0 1rem}
+.empty-state{text-align:center;padding:1.75rem;color:var(--text3);font-size:.82rem}
 </style>
 @endpush
 
@@ -129,7 +141,7 @@
     <div class="tp-modal">
         <div class="tp-title">✓ Marcar como comprado</div>
         <div class="tp-item-name" id="tpItemName"></div>
-        <div class="tp-price-wrap">
+        <div style="margin-bottom:.65rem">
             <input type="text" class="tp-price-input" id="tpPriceInput" placeholder="0,00" inputmode="numeric" aria-label="Preço em reais (opcional)">
         </div>
         <div class="tp-hint">Informe o preço pago (opcional). Você pode pular.</div>
@@ -145,47 +157,9 @@
     </div>
 </div>
 
-{{-- Breadcrumb --}}
-<div class="breadcrumb">
-    <a href="{{ route('lists.index') }}">Minhas Listas</a>
-    <span class="sep">›</span>
-    <span>{{ $list->name }}</span>
-</div>
-
-{{-- Header --}}
-<div class="list-header">
-    <div class="list-title-row">
-        <h1 class="list-title">{{ $list->name }}</h1>
-        <div class="list-actions">
-            <a href="https://www.confianca.com.br/bauru" target="_blank" class="btn btn-ghost btn-sm">🔗 Confiança</a>
-            @if($list->isCompleted())
-                <form method="POST" action="{{ route('lists.reopen', $list) }}">
-                    @csrf @method('PATCH')
-                    <button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reabrir esta lista para edição?')">
-                        🔓 Reabrir lista
-                    </button>
-                </form>
-            @else
-                <form method="POST" action="{{ route('lists.destroy', $list) }}" onsubmit="return confirm('Excluir esta lista?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
-                </form>
-            @endif
-        </div>
-    </div>
-    <div class="list-meta">
-        <span class="meta-pill">📅 {{ $list->shopping_date->locale('pt_BR')->isoFormat('dddd, D [de] MMMM [de] YYYY') }}</span>
-        @if($list->isCompleted())
-            <span class="meta-pill green">✅ Concluída em {{ $list->completed_at->locale('pt_BR')->isoFormat('D/MM/YYYY [às] HH:mm') }}</span>
-        @else
-            <span class="meta-pill" style="color:var(--accent);border-color:rgba(110,231,183,.2)">🟢 Aberta</span>
-        @endif
-    </div>
-</div>
-
 @if($list->isCompleted())
 <div class="completed-banner">
-    ✅ <span>Lista concluída. Clique em <strong>🔓 Reabrir lista</strong> para editar novamente.</span>
+    ✅ <span>Lista concluída. Clique em <strong>🔓 Reabrir</strong> para editar novamente.</span>
 </div>
 @endif
 
@@ -232,7 +206,7 @@
 <div class="progress-section">
     <div class="progress-header">
         <span>Progresso da lista</span>
-        <span>{{ $boughtCnt }}/{{ $total }} • {{ $pct }}%</span>
+        <span>{{ $boughtCnt }}/{{ $total }} · {{ $pct }}%</span>
     </div>
     <div class="big-progress">
         <div class="big-progress-fill" style="width:{{ $pct }}%"></div>
@@ -251,10 +225,7 @@
             <div class="fg sm"><label>Unid.</label><input type="text" name="unit" placeholder="un,kg…"></div>
             <div class="fg md">
                 <label>Preço (R$)</label>
-                <div class="pr-wrap">
-                    <em>R$</em>
-                    <input type="text" name="price" class="price-mask" placeholder="0,00" inputmode="numeric">
-                </div>
+                <div class="pr-wrap"><em>R$</em><input type="text" name="price" class="price-mask" placeholder="0,00" inputmode="numeric"></div>
             </div>
             <button type="submit" class="btn-add">＋ Adicionar</button>
         </div>
@@ -263,17 +234,16 @@
 @endif
 
 {{-- Pending items --}}
-<div class="slabel">
-    A comprar <span class="sbadge">{{ $pending->count() }}</span>
+<div class="sec-label">
+    A comprar <span class="sec-badge">{{ $pending->count() }}</span>
 </div>
 <div class="items-list">
 @forelse($pending as $item)
     <div class="item-card" id="icard-{{ $item->id }}">
-        {{-- Check button: opens modal if open list, disabled if completed --}}
         @if($list->isOpen())
             <button type="button" class="chk" onclick="openToggleModal({{ $item->id }}, '{{ addslashes($item->name) }}', '{{ route('items.toggle', [$list, $item]) }}')" title="Marcar comprado">✓</button>
         @else
-            <div class="chk" style="cursor:default;opacity:.4">✓</div>
+            <div class="chk" style="cursor:default;opacity:.35">✓</div>
         @endif
 
         <div class="iinfo">
@@ -320,8 +290,8 @@
 {{-- Purchased items --}}
 @if($purchased->count() > 0)
 <hr class="divider">
-<div class="slabel">
-    Comprados <span class="sbadge">{{ $purchased->count() }}</span>
+<div class="sec-label">
+    Comprados <span class="sec-badge">{{ $purchased->count() }}</span>
 </div>
 <div class="items-list">
     @foreach($purchased as $item)
@@ -329,7 +299,7 @@
         @if($list->isOpen())
             <button type="button" class="chk" onclick="openToggleModal({{ $item->id }}, '{{ addslashes($item->name) }}', '{{ route('items.toggle', [$list, $item]) }}')" title="Desmarcar">✓</button>
         @else
-            <div class="chk" style="background:var(--accent);border-color:var(--accent);color:#0d0d0f;cursor:default">✓</div>
+            <div class="chk" style="background:var(--accent);border-color:var(--accent);color:#09090b;cursor:default">✓</div>
         @endif
         <div class="iinfo">
             <div class="iname-row">
@@ -338,13 +308,11 @@
             </div>
             <div class="imeta">
                 <span class="qty-tag">Qtd: {{ rtrim(rtrim(number_format($item->qty,3,',','.'), '0'), ',') }}</span>
-                {{-- Always allow price edit on purchased items (open or completed) --}}
                 <span class="ppill {{ $item->price ? '' : 'empty' }}" onclick="toggleEdit({{ $item->id }})">
                     {{ $item->price ? 'R$ '.number_format($item->price,2,',','.') : '+ preço' }}
                 </span>
                 @if($item->subtotal)<span class="sub">= R$ {{ number_format($item->subtotal,2,',','.') }}</span>@endif
             </div>
-            {{-- Price edit available even on completed lists for purchased items --}}
             <div class="iedit" id="edit-{{ $item->id }}">
                 <form method="POST" action="{{ route('items.update', [$list, $item]) }}" style="display:contents">
                     @csrf @method('PATCH')
@@ -380,7 +348,6 @@
 @endif
 
 <script>
-// ── Price mask ─────────────────────────────────────────────────────────────
 function applyMask(input) {
     let v = input.value.replace(/\D/g, '');
     if (!v) { input.value = ''; return; }
@@ -389,10 +356,7 @@ function applyMask(input) {
 }
 document.querySelectorAll('.price-mask').forEach(el => {
     el.addEventListener('input', () => applyMask(el));
-    el.addEventListener('focus', () => { if (!el.value) el.value = ''; });
 });
-
-// Convert comma price to dot before form submit
 document.querySelectorAll('form').forEach(form => {
     form.addEventListener('submit', () => {
         form.querySelectorAll('.price-mask').forEach(el => {
@@ -400,25 +364,15 @@ document.querySelectorAll('form').forEach(form => {
         });
     });
 });
-
-// ── Inline edit ────────────────────────────────────────────────────────────
 function toggleEdit(id) {
     const el = document.getElementById('edit-' + id);
     const isOpen = el.classList.contains('open');
     document.querySelectorAll('.iedit.open').forEach(e => e.classList.remove('open'));
-    if (!isOpen) {
-        el.classList.add('open');
-        const inp = el.querySelector('input');
-        if (inp) inp.focus();
-    }
+    if (!isOpen) { el.classList.add('open'); el.querySelector('input')?.focus(); }
 }
-function closeEdit(id) {
-    document.getElementById('edit-' + id)?.classList.remove('open');
-}
+function closeEdit(id) { document.getElementById('edit-' + id)?.classList.remove('open'); }
 
-// ── Toggle + price modal ───────────────────────────────────────────────────
 let currentToggleUrl = null;
-
 function openToggleModal(itemId, itemName, url) {
     currentToggleUrl = url;
     document.getElementById('tpItemName').textContent = itemName;
@@ -426,17 +380,14 @@ function openToggleModal(itemId, itemName, url) {
     document.getElementById('tpOverlay').classList.add('open');
     setTimeout(() => document.getElementById('tpPriceInput').focus(), 100);
 }
-
 function closeToggleModal() {
     document.getElementById('tpOverlay').classList.remove('open');
     currentToggleUrl = null;
 }
-
 function submitToggle(withPrice) {
     if (!currentToggleUrl) return;
     const form = document.getElementById('tpForm');
     form.action = currentToggleUrl;
-
     if (withPrice) {
         const raw = document.getElementById('tpPriceInput').value.replace(',', '.');
         const val = parseFloat(raw);
@@ -444,22 +395,14 @@ function submitToggle(withPrice) {
     } else {
         document.getElementById('tpFormPrice').value = '';
     }
-
     closeToggleModal();
     form.submit();
 }
-
-// Price mask on modal input
-document.getElementById('tpPriceInput').addEventListener('input', function() {
-    applyMask(this);
-});
-// Allow Enter to confirm
+document.getElementById('tpPriceInput').addEventListener('input', function() { applyMask(this); });
 document.getElementById('tpPriceInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); submitToggle(true); }
     if (e.key === 'Escape') closeToggleModal();
 });
-
-// Close modal on backdrop click
 document.getElementById('tpOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeToggleModal();
 });

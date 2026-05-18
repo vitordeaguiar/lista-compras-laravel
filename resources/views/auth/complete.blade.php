@@ -3,39 +3,46 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Completar Cadastro — Smart Listiq</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#0d0d0f;--surface:#16161a;--surface2:#1e1e24;--border:#2a2a33;--accent:#6ee7b7;--accent2:#34d399;--text:#f0f0f3;--muted:#7b7b8e;--danger:#f87171}
-    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
-    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 20%,rgba(110,231,183,.07) 0%,transparent 60%);pointer-events:none}
-    .card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.25rem 2rem}
-    .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--text);margin-bottom:.25rem;display:flex;align-items:center;gap:.5rem}
-    .sub{color:var(--muted);font-size:.85rem;margin-bottom:1.75rem}
-    h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:1.25rem}
-    .verified-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(110,231,183,.1);border:1px solid rgba(110,231,183,.25);border-radius:8px;padding:.35rem .75rem;font-size:.78rem;color:var(--accent);margin-bottom:1.25rem}
-    .fg{margin-bottom:.9rem}
-    label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.05em}
-    input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.65rem .9rem;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
+    :root{--bg:#09090b;--bg2:#18181b;--bg3:#27272a;--border:#3f3f46;--accent:#a3e635;--accent2:#84cc16;--text:#fafafa;--text2:#a1a1aa;--text3:#71717a;--danger:#ef4444}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 20%,rgba(163,230,53,.06) 0%,transparent 60%);pointer-events:none}
+    .card{width:100%;max-width:420px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2.1rem 2rem}
+    .logo{display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem;text-decoration:none}
+    .logo-icon{width:30px;height:30px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .logo-text{font-size:.9rem;font-weight:700;color:var(--text)}
+    .logo-text em{color:var(--accent);font-style:normal}
+    .sub{color:var(--text3);font-size:.8rem;margin-bottom:1.5rem}
+    h2{font-size:1rem;font-weight:700;margin-bottom:1.1rem;color:var(--text)}
+    .verified-badge{display:inline-flex;align-items:center;gap:.35rem;background:rgba(163,230,53,.08);border:1px solid rgba(163,230,53,.22);border-radius:7px;padding:.3rem .7rem;font-size:.74rem;color:var(--accent);margin-bottom:1.1rem}
+    .fg{margin-bottom:.85rem}
+    label{display:block;font-size:.66rem;color:var(--text2);margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.05em}
+    input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.62rem .88rem;border-radius:8px;font-family:'Inter',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s}
     input:focus{border-color:var(--accent)}
-    .field-error{color:var(--danger);font-size:.75rem;margin-top:.28rem}
-    .btn{width:100%;background:var(--accent);color:#0d0d0f;border:none;padding:.8rem;border-radius:9px;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;margin-top:.5rem;transition:all .2s}
+    input::placeholder{color:var(--text3)}
+    .field-error{color:var(--danger);font-size:.72rem;margin-top:.25rem}
+    .btn{width:100%;background:var(--accent);color:#09090b;border:none;padding:.78rem;border-radius:8px;font-family:'Inter',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;margin-top:.4rem;transition:all .18s}
     .btn:hover{background:var(--accent2)}
-    .steps{display:flex;gap:.4rem;margin-bottom:1.5rem}
-    .step{flex:1;height:3px;border-radius:99px;background:var(--border)}
+    .steps{display:flex;gap:.35rem;margin-bottom:1.35rem}
+    .step{flex:1;height:2.5px;border-radius:99px;background:var(--border)}
     .step.active{background:var(--accent)}
     </style>
 </head>
 <body>
 <div class="card">
-    <div class="logo"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect width="28" height="28" rx="8" fill="#C8F060"/><path d="M7 9h14M7 14h9M7 19h11" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round"/><circle cx="21" cy="19" r="3" fill="#0a0a0a"/><path d="M19.5 19l1 1 2-2" stroke="#C8F060" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span><span style="font-weight:900;letter-spacing:-.02em">Smart</span> <span style="color:var(--accent);font-weight:900">Listiq</span></span></div>
+    <a class="logo" href="{{ route('login') }}">
+        <div class="logo-icon"><svg width="16" height="16" viewBox="0 0 28 28" fill="none"><path d="M7 9h14M7 14h9M7 19h11" stroke="#09090b" stroke-width="2.5" stroke-linecap="round"/><circle cx="21" cy="19" r="3.5" fill="#09090b"/><path d="M19.5 19l1 1 2-2" stroke="#a3e635" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="logo-text">Smart <em>Listiq</em></div>
+    </a>
     <p class="sub">Crie sua conta — Passo 3 de 3</p>
     <div class="steps"><div class="step active"></div><div class="step active"></div><div class="step active"></div></div>
     <h2>Complete seu cadastro</h2>
     <div class="verified-badge">✅ E-mail {{ $email }} verificado</div>
 
     @if($errors->any())
-        <div style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:9px;padding:.7rem .9rem;font-size:.82rem;color:var(--danger);margin-bottom:1rem">{{ $errors->first() }}</div>
+        <div style="background:rgba(239,68,68,.09);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:.62rem .88rem;font-size:.8rem;color:var(--danger);margin-bottom:.9rem">{{ $errors->first() }}</div>
     @endif
 
     <form method="POST" action="{{ route('register.complete') }}">
