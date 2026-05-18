@@ -8,11 +8,66 @@ define('BASE_PATH', '/home1/vit75277/repositories/lista-compras-laravel');
 define('ENV_FILE', BASE_PATH . '/.env');
 define('ENV_EXAMPLE', BASE_PATH . '/.env.example');
 define('PHP_BIN', '/usr/local/bin/php');
-define('COMPOSER_BIN', '/usr/local/bin/composer');
 
 $message = '';
 $messageType = '';
 $step = $_GET['step'] ?? 'configure';
+
+// ── Detecção automática do Composer ───────────────────────────────────────
+
+function detectComposer(): array
+{
+    $searches = [];
+
+    $out = []; $code = 1;
+    exec('which composer 2>&1', $out, $code);
+    $searches[] = [
+        'cmd'    => 'which composer',
+        'output' => trim(implode("\n", $out)),
+        'found'  => $code === 0 && !empty($out[0]) && trim($out[0]) !== '',
+    ];
+
+    $out = []; $code = 1;
+    exec('whereis composer 2>&1', $out, $code);
+    $searches[] = [
+        'cmd'    => 'whereis composer',
+        'output' => trim(implode("\n", $out)),
+        'found'  => $code === 0 && strlen(trim(implode('', $out))) > strlen('composer:'),
+    ];
+
+    $out = []; $code = 1;
+    exec('find /usr /opt /home -name composer 2>/dev/null', $out, $code);
+    $searches[] = [
+        'cmd'    => 'find /usr /opt /home -name composer',
+        'output' => trim(implode("\n", $out)),
+        'found'  => !empty($out),
+    ];
+
+    return $searches;
+}
+
+function resolveComposerBin(): string
+{
+    $out = [];
+    exec('which composer 2>/dev/null', $out);
+    if (!empty($out[0]) && is_executable(trim($out[0]))) {
+        return trim($out[0]);
+    }
+
+    $out = [];
+    exec('find /usr /opt /home -name composer -type f 2>/dev/null', $out);
+    foreach ($out as $path) {
+        $path = trim($path);
+        if ($path !== '' && is_executable($path)) {
+            return $path;
+        }
+    }
+
+    return '/usr/local/bin/composer';
+}
+
+$composerBin      = resolveComposerBin();
+$composerDetected = detectComposer();
 
 function runArtisan(string $command): array
 {
@@ -23,11 +78,11 @@ function runArtisan(string $command): array
     return ['output' => implode("\n", $output), 'code' => $code];
 }
 
-function runComposer(string $command): array
+function runComposer(string $command, string $composerBin): array
 {
     $output = [];
     $code = 0;
-    exec(PHP_BIN . ' ' . COMPOSER_BIN . " $command --no-interaction --working-dir=" . BASE_PATH . " 2>&1", $output, $code);
+    exec(PHP_BIN . ' ' . escapeshellarg($composerBin) . " $command --no-interaction --working-dir=" . BASE_PATH . " 2>&1", $output, $code);
     return ['output' => implode("\n", $output), 'code' => $code];
 }
 
@@ -57,9 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'APP_URL'          => $_POST['app_url'] ?? '',
             'LOG_CHANNEL'      => 'stack',
             'LOG_LEVEL'        => 'error',
-            'DB_CONNECTION'    => 'pgsql',
+            'DB_CONNECTION'    => 'mysql',
             'DB_HOST'          => $_POST['db_host'] ?? '127.0.0.1',
-            'DB_PORT'          => $_POST['db_port'] ?? '5432',
+            'DB_PORT'          => $_POST['db_port'] ?? '3306',
             'DB_DATABASE'      => $_POST['db_database'] ?? '',
             'DB_USERNAME'      => $_POST['db_username'] ?? '',
             'DB_PASSWORD'      => $_POST['db_password'] ?? '',
@@ -112,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'run_composer_install') {
-        $result = runComposer('install --no-dev --optimize-autoloader');
+        $result = runComposer('install --no-dev --optimize-autoloader', $composerBin);
         $message = $result['code'] === 0
             ? "Dependências instaladas:\n" . $result['output']
             : 'Erro no composer install: ' . $result['output'];
@@ -142,14 +197,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ── Verificações de ambiente ───────────────────────────────────────────────
 
 $checks = [
-    'PHP >= 8.2 (' . PHP_VERSION . ')'    => version_compare(PHP_VERSION, '8.2.0', '>='),
-    'php bin: ' . PHP_BIN                 => is_executable(PHP_BIN),
-    'composer bin: ' . COMPOSER_BIN       => is_executable(COMPOSER_BIN),
-    '.env existe'                          => file_exists(ENV_FILE),
-    'vendor/ existe'                       => is_dir(BASE_PATH . '/vendor'),
-    'storage gravável'                     => is_writable(BASE_PATH . '/storage'),
-    'bootstrap/cache gravável'             => is_writable(BASE_PATH . '/bootstrap/cache'),
-    'APP_KEY definida'                     => !empty(envValue('APP_KEY')),
+    'PHP >= 8.2 (' . PHP_VERSION . ')'          => version_compare(PHP_VERSION, '8.2.0', '>='),
+    'php bin: ' . PHP_BIN                        => is_executable(PHP_BIN),
+    'composer bin: ' . $composerBin              => is_executable($composerBin),
+    '.env existe'                                 => file_exists(ENV_FILE),
+    'vendor/ existe'                              => is_dir(BASE_PATH . '/vendor'),
+    'storage gravável'                            => is_writable(BASE_PATH . '/storage'),
+    'bootstrap/cache gravável'                    => is_writable(BASE_PATH . '/bootstrap/cache'),
+    'APP_KEY definida'                            => !empty(envValue('APP_KEY')),
+    'PDO MySQL disponível'                        => in_array('mysql', PDO::getAvailableDrivers()),
 ];
 
 $appKey   = envValue('APP_KEY');
@@ -234,7 +290,7 @@ $dbUser   = envValue('DB_USERNAME');
       <input type="text" name="app_key" value="<?= htmlspecialchars($appKey) ?>" placeholder="base64:...">
 
       <hr style="margin:1.25rem 0; border-color:#e2e8f0;">
-      <h2 style="margin-bottom:0">Banco de Dados (PostgreSQL)</h2>
+      <h2 style="margin-bottom:0">Banco de Dados (MySQL)</h2>
 
       <div class="grid-2">
         <div>
@@ -243,7 +299,7 @@ $dbUser   = envValue('DB_USERNAME');
         </div>
         <div>
           <label>Porta</label>
-          <input type="text" name="db_port" value="<?= htmlspecialchars($dbPort ?: '5432') ?>">
+          <input type="text" name="db_port" value="<?= htmlspecialchars($dbPort ?: '3306') ?>">
         </div>
       </div>
 
@@ -301,6 +357,25 @@ $dbUser   = envValue('DB_USERNAME');
       <div class="check">
         <span class="icon"><?= $ok ? '✅' : '❌' ?></span>
         <span><?= htmlspecialchars($label) ?></span>
+      </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Localização do Composer</h2>
+    <p style="font-size:.8rem;color:#64748b;margin-bottom:1rem;">
+      Caminho resolvido: <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;"><?= htmlspecialchars($composerBin) ?></code>
+      <?= is_executable($composerBin) ? '<span style="color:#16a34a;font-weight:600;"> ✓ executável</span>' : '<span style="color:#dc2626;font-weight:600;"> ✗ não encontrado</span>' ?>
+    </p>
+    <div style="display:grid;gap:.75rem;">
+      <?php foreach ($composerDetected as $search): ?>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.75rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;">
+          <span><?= $search['found'] ? '✅' : '❌' ?></span>
+          <code style="font-size:.8rem;font-weight:600;"><?= htmlspecialchars($search['cmd']) ?></code>
+        </div>
+        <pre style="font-size:.75rem;color:#475569;white-space:pre-wrap;margin:0;padding-left:1.6rem;"><?= htmlspecialchars($search['output'] ?: '(sem resultado)') ?></pre>
       </div>
       <?php endforeach; ?>
     </div>
