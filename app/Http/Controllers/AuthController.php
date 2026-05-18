@@ -3,6 +3,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Models\EmailVerification;
@@ -16,17 +18,49 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        $ip = $request->ip();
+        $blockKey    = 'login_blocked_'  . $ip;
+        $attemptsKey = 'login_attempts_' . $ip;
+
+        if (Cache::has($blockKey)) {
+            Log::warning('Tentativa de login em IP bloqueado', ['ip' => $ip, 'at' => now()->toIso8601String()]);
+            return back()->withErrors(['email' => 'Credenciais inválidas.'])->onlyInput('email');
+        }
+
         $credentials = $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
+            'email'    => 'required|email|max:255',
+            'password' => 'required|max:255',
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            Cache::forget($attemptsKey);
             $request->session()->regenerate();
             return redirect()->intended(route('dashboard'));
         }
 
-        return back()->withErrors(['email' => 'E-mail ou senha incorretos.'])->onlyInput('email');
+        // Contar tentativas com TTL de 15 minutos na primeira falha
+        if (!Cache::has($attemptsKey)) {
+            Cache::put($attemptsKey, 0, now()->addMinutes(15));
+        }
+        $attempts = Cache::increment($attemptsKey);
+
+        Log::warning('Tentativa de login falha', [
+            'ip'       => $ip,
+            'email'    => $request->email,
+            'attempts' => $attempts,
+            'at'       => now()->toIso8601String(),
+        ]);
+
+        if ($attempts >= 5) {
+            Cache::put($blockKey, true, now()->addMinutes(15));
+            Cache::forget($attemptsKey);
+            Log::warning('IP bloqueado por múltiplas tentativas de login', [
+                'ip' => $ip,
+                'at' => now()->toIso8601String(),
+            ]);
+        }
+
+        return back()->withErrors(['email' => 'Credenciais inválidas.'])->onlyInput('email');
     }
 
     // Step 1: show form to enter email
@@ -39,15 +73,14 @@ class AuthController extends Controller
     public function sendCode(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|max:255|unique:users,email',
         ], [
             'email.unique' => 'Este e-mail já está cadastrado.',
         ]);
 
-        $email = $request->email;
+        $email = strip_tags(trim($request->email));
         $code  = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Delete any previous codes for this email
         EmailVerification::where('email', $email)->delete();
 
         EmailVerification::create([
@@ -56,7 +89,6 @@ class AuthController extends Controller
             'expires_at' => now()->addMinutes(15),
         ]);
 
-        // Send email
         try {
             Mail::raw(
                 "Seu código de verificação para Smart Listiq é: {$code}\n\nEste código expira em 15 minutos.",
@@ -66,7 +98,7 @@ class AuthController extends Controller
                 }
             );
         } catch (\Exception $e) {
-            \Log::error('Falha ao enviar e-mail de verificação: ' . $e->getMessage());
+            Log::error('Falha ao enviar e-mail de verificação: ' . $e->getMessage());
             return back()
                 ->withInput()
                 ->withErrors(['email' => 'Não foi possível enviar o e-mail. Tente novamente em instantes.']);
@@ -87,7 +119,7 @@ class AuthController extends Controller
     public function verifyCode(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|email|max:255',
             'code'  => 'required|digits:6',
         ]);
 
@@ -100,7 +132,6 @@ class AuthController extends Controller
             return back()->withErrors(['code' => 'Código inválido ou expirado.'])->withInput();
         }
 
-        // Code is valid — show complete registration
         return view('auth.complete', [
             'email' => $request->email,
             'code'  => $request->code,
@@ -111,13 +142,12 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email|unique:users,email',
+            'email'    => 'required|email|max:255|unique:users,email',
             'code'     => 'required|digits:6',
             'name'     => 'required|string|max:255',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|string|min:6|max:255|confirmed',
         ]);
 
-        // Re-verify code
         $verification = EmailVerification::where('email', $request->email)
             ->where('code', $request->code)
             ->latest()
@@ -129,8 +159,8 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name'     => strip_tags(trim($request->name)),
+            'email'    => strip_tags(trim($request->email)),
             'password' => $request->password,
         ]);
 

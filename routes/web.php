@@ -9,9 +9,9 @@ use App\Http\Controllers\DashboardController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login',               [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login',              [AuthController::class, 'login']);
+    Route::post('/login',              [AuthController::class, 'login'])->middleware('throttle:login');
     Route::get('/register',            [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register/send-code', [AuthController::class, 'sendCode'])->name('register.send-code');
+    Route::post('/register/send-code', [AuthController::class, 'sendCode'])->name('register.send-code')->middleware('throttle:send-code');
     Route::get('/register/verify',     [AuthController::class, 'showVerify'])->name('register.verify');
     Route::post('/register/verify',    [AuthController::class, 'verifyCode'])->name('register.verify.post');
     Route::post('/register/complete',  [AuthController::class, 'register'])->name('register.complete');

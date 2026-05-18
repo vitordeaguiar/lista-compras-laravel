@@ -2,15 +2,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\ShoppingList;
 use App\Models\ShoppingItem;
-use Illuminate\Support\Facades\Auth;
 
 class ShoppingItemController extends Controller
 {
     public function store(Request $request, ShoppingList $list)
     {
-        abort_if($list->user_id !== Auth::id(), 403);
+        if ($list->user_id !== Auth::id()) {
+            Log::warning('Tentativa não autorizada de adicionar item à lista', [
+                'user_id' => Auth::id(),
+                'list_id' => $list->id,
+                'ip'      => request()->ip(),
+                'at'      => now()->toIso8601String(),
+            ]);
+            abort(403);
+        }
         abort_if($list->isCompleted(), 422, 'Lista já concluída.');
 
         $data = $request->validate([
@@ -19,8 +28,11 @@ class ShoppingItemController extends Controller
             'qty'   => 'nullable|numeric|min:0.001|max:9999',
             'price' => 'nullable|numeric|min:0|max:99999',
         ]);
+
+        $data['name']             = strip_tags(trim($data['name']));
+        $data['unit']             = isset($data['unit']) ? strip_tags(trim($data['unit'])) : null;
+        $data['qty']              = $data['qty'] ?? 1;
         $data['shopping_list_id'] = $list->id;
-        $data['qty'] = $data['qty'] ?? 1;
 
         ShoppingItem::create($data);
         return back()->with('success', 'Item adicionado!');
@@ -28,8 +40,16 @@ class ShoppingItemController extends Controller
 
     public function update(Request $request, ShoppingList $list, ShoppingItem $item)
     {
-        abort_if($list->user_id !== Auth::id(), 403);
-        abort_if($item->shopping_list_id !== $list->id, 403);
+        if ($list->user_id !== Auth::id() || $item->shopping_list_id !== $list->id) {
+            Log::warning('Tentativa não autorizada de editar item', [
+                'user_id' => Auth::id(),
+                'list_id' => $list->id,
+                'item_id' => $item->id,
+                'ip'      => request()->ip(),
+                'at'      => now()->toIso8601String(),
+            ]);
+            abort(403);
+        }
 
         $data = $request->validate([
             'price' => 'nullable|numeric|min:0|max:99999',
@@ -39,16 +59,22 @@ class ShoppingItemController extends Controller
         return back();
     }
 
-    // Toggle purchase status, optionally saving price at same time
     public function toggle(Request $request, ShoppingList $list, ShoppingItem $item)
     {
-        abort_if($list->user_id !== Auth::id(), 403);
-        abort_if($item->shopping_list_id !== $list->id, 403);
+        if ($list->user_id !== Auth::id() || $item->shopping_list_id !== $list->id) {
+            Log::warning('Tentativa não autorizada de alternar item', [
+                'user_id' => Auth::id(),
+                'list_id' => $list->id,
+                'item_id' => $item->id,
+                'ip'      => request()->ip(),
+                'at'      => now()->toIso8601String(),
+            ]);
+            abort(403);
+        }
 
         $newPurchased = !$item->purchased;
         $updateData   = ['purchased' => $newPurchased];
 
-        // If a price was sent together with the toggle, save it
         if ($request->filled('price')) {
             $price = (float) str_replace(',', '.', $request->price);
             if ($price >= 0) {
@@ -62,8 +88,16 @@ class ShoppingItemController extends Controller
 
     public function destroy(ShoppingList $list, ShoppingItem $item)
     {
-        abort_if($list->user_id !== Auth::id(), 403);
-        abort_if($item->shopping_list_id !== $list->id, 403);
+        if ($list->user_id !== Auth::id() || $item->shopping_list_id !== $list->id) {
+            Log::warning('Tentativa não autorizada de excluir item', [
+                'user_id' => Auth::id(),
+                'list_id' => $list->id,
+                'item_id' => $item->id,
+                'ip'      => request()->ip(),
+                'at'      => now()->toIso8601String(),
+            ]);
+            abort(403);
+        }
 
         $item->delete();
         return back()->with('success', 'Item removido.');
