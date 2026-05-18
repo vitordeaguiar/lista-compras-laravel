@@ -6,12 +6,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Smart Listiq')</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="shortcut icon" href="/favicon.svg">
+    <meta name="theme-color" content="#38bdf8">
     <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
         --bg:#09090b;--bg1:#111113;--bg2:#18181b;--bg3:#27272a;
         --border:#3f3f46;--border2:#52525b;
-        --accent:#10b981;--accent2:#059669;--adim:rgba(16,185,129,.1);
+        --accent:#38bdf8;--accent2:#0ea5e9;--adim:rgba(56,189,248,.1);
         --text:#fafafa;--text2:#a1a1aa;--text3:#71717a;
         --danger:#ef4444;--warning:#f59e0b;--blue:#6366f1;--bluedim:rgba(99,102,241,.12);
         --radius:10px;
@@ -75,7 +78,7 @@
     /* ── STAT CARDS ── */
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:.7rem;margin-bottom:1.4rem}
     .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem .95rem}
-    .stat-card.hl{border-color:rgba(16,185,129,.22);background:rgba(16,185,129,.04)}
+    .stat-card.hl{border-color:rgba(56,189,248,.22);background:rgba(56,189,248,.04)}
     .stat-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.28rem}
     .stat-val{font-size:1.3rem;font-weight:700;color:var(--text);line-height:1}
     .stat-card.hl .stat-val{color:var(--accent)}
@@ -95,7 +98,7 @@
     /* ── BOTTOM NAV (mobile) ── */
     .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#111113;border-top:1px solid #27272a;height:56px;z-index:100;align-items:center;justify-content:space-around;padding:0 .5rem}
     .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;padding:.4rem .6rem;border-radius:8px;text-decoration:none;color:#71717a;font-size:.55rem;font-weight:500;flex:1;transition:color .15s;min-width:0}
-    .bn-item.active{color:#10b981}
+    .bn-item.active{color:#38bdf8}
     .bn-item:hover{color:#a1a1aa}
     .bn-icon{font-size:1.1rem;line-height:1}
 
@@ -121,7 +124,7 @@
                 <svg width="16" height="16" viewBox="0 0 28 28" fill="none">
                     <path d="M7 9h14M7 14h9M7 19h11" stroke="#09090b" stroke-width="2.5" stroke-linecap="round"/>
                     <circle cx="21" cy="19" r="3.5" fill="#09090b"/>
-                    <path d="M19.5 19l1 1 2-2" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.5 19l1 1 2-2" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
             <div class="sb-logo-text">Smart <em>Listiq</em></div>
