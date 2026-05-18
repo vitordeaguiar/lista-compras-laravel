@@ -4,9 +4,11 @@
  * ATENÇÃO: Delete este arquivo após concluir a configuração.
  */
 
-define('BASE_PATH', __DIR__);
+define('BASE_PATH', '/home1/vit75277/repositories/lista-compras-laravel');
 define('ENV_FILE', BASE_PATH . '/.env');
 define('ENV_EXAMPLE', BASE_PATH . '/.env.example');
+define('PHP_BIN', '/usr/local/bin/php');
+define('COMPOSER_BIN', '/usr/local/bin/composer');
 
 $message = '';
 $messageType = '';
@@ -15,10 +17,17 @@ $step = $_GET['step'] ?? 'configure';
 function runArtisan(string $command): array
 {
     $artisan = BASE_PATH . '/artisan';
-    $phpBin = PHP_BINARY ?: 'php';
     $output = [];
     $code = 0;
-    exec("$phpBin $artisan $command 2>&1", $output, $code);
+    exec(PHP_BIN . " $artisan $command 2>&1", $output, $code);
+    return ['output' => implode("\n", $output), 'code' => $code];
+}
+
+function runComposer(string $command): array
+{
+    $output = [];
+    $code = 0;
+    exec(PHP_BIN . ' ' . COMPOSER_BIN . " $command --no-interaction --working-dir=" . BASE_PATH . " 2>&1", $output, $code);
     return ['output' => implode("\n", $output), 'code' => $code];
 }
 
@@ -102,6 +111,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $step = 'commands';
     }
 
+    if ($action === 'run_composer_install') {
+        $result = runComposer('install --no-dev --optimize-autoloader');
+        $message = $result['code'] === 0
+            ? "Dependências instaladas:\n" . $result['output']
+            : 'Erro no composer install: ' . $result['output'];
+        $messageType = $result['code'] === 0 ? 'success' : 'error';
+        $step = 'commands';
+    }
+
     if ($action === 'fix_permissions') {
         $dirs = [
             BASE_PATH . '/storage',
@@ -124,11 +142,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ── Verificações de ambiente ───────────────────────────────────────────────
 
 $checks = [
-    'PHP >= 8.2'         => version_compare(PHP_VERSION, '8.2.0', '>='),
-    '.env existe'        => file_exists(ENV_FILE),
-    'storage gravável'   => is_writable(BASE_PATH . '/storage'),
-    'bootstrap gravável' => is_writable(BASE_PATH . '/bootstrap/cache'),
-    'APP_KEY definida'   => !empty(envValue('APP_KEY')),
+    'PHP >= 8.2 (' . PHP_VERSION . ')'    => version_compare(PHP_VERSION, '8.2.0', '>='),
+    'php bin: ' . PHP_BIN                 => is_executable(PHP_BIN),
+    'composer bin: ' . COMPOSER_BIN       => is_executable(COMPOSER_BIN),
+    '.env existe'                          => file_exists(ENV_FILE),
+    'vendor/ existe'                       => is_dir(BASE_PATH . '/vendor'),
+    'storage gravável'                     => is_writable(BASE_PATH . '/storage'),
+    'bootstrap/cache gravável'             => is_writable(BASE_PATH . '/bootstrap/cache'),
+    'APP_KEY definida'                     => !empty(envValue('APP_KEY')),
 ];
 
 $appKey   = envValue('APP_KEY');
@@ -249,6 +270,11 @@ $dbUser   = envValue('DB_USERNAME');
     <form method="POST" style="margin-bottom:.75rem;">
       <input type="hidden" name="action" value="fix_permissions">
       <button class="btn btn-secondary">🔒 Ajustar permissões (storage / bootstrap/cache)</button>
+    </form>
+
+    <form method="POST" style="margin-bottom:.75rem;">
+      <input type="hidden" name="action" value="run_composer_install">
+      <button class="btn btn-secondary">📦 composer install --no-dev --optimize-autoloader</button>
     </form>
 
     <form method="POST" style="margin-bottom:.75rem;">
