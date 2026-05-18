@@ -9,13 +9,12 @@
 @push('styles')
 <style>
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-top:1rem}
-@media(max-width:760px){.dash-grid{grid-template-columns:1fr}}
 
 /* In-progress list cards */
 .lcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem .95rem;display:flex;align-items:center;gap:.8rem;transition:border-color .18s;text-decoration:none;color:inherit;margin-bottom:.5rem}
 .lcard:last-child{margin-bottom:0}
 .lcard:hover{border-color:var(--border2)}
-.lcard-icon{width:36px;height:36px;border-radius:9px;background:var(--adim);border:1px solid rgba(163,230,53,.2);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.lcard-icon{width:36px;height:36px;border-radius:9px;background:var(--adim);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
 .lcard-info{flex:1;min-width:0}
 .lcard-name{font-size:.83rem;font-weight:600;color:var(--text);margin-bottom:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lcard-meta{font-size:.68rem;color:var(--text3);margin-bottom:.35rem}
@@ -34,8 +33,8 @@
 .act-time{font-size:.63rem;color:var(--text3);flex-shrink:0;margin-top:.05rem}
 
 /* CSS Bar Chart */
-.chart-wrap{margin-top:.6rem}
-.chart-bars{display:flex;align-items:flex-end;gap:.5rem;height:90px}
+.chart-wrap{margin-top:.6rem;overflow-x:auto}
+.chart-bars{display:flex;align-items:flex-end;gap:.5rem;height:90px;min-width:280px}
 .chart-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%}
 .chart-col-inner{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
 .chart-bar{width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:3px;opacity:.75;transition:opacity .2s}
@@ -52,7 +51,11 @@
 .empty-hint{text-align:center;padding:1.25rem;color:var(--text3);font-size:.78rem}
 
 /* Status badge */
-.badge-open{display:inline-flex;align-items:center;gap:.25rem;font-size:.62rem;font-weight:600;padding:.08rem .38rem;border-radius:5px;background:var(--adim);color:var(--accent);border:1px solid rgba(163,230,53,.2)}
+.badge-open{display:inline-flex;align-items:center;gap:.25rem;font-size:.62rem;font-weight:600;padding:.08rem .38rem;border-radius:5px;background:var(--adim);color:var(--accent);border:1px solid rgba(16,185,129,.2)}
+
+@media(max-width:768px){
+    .dash-grid{grid-template-columns:1fr}
+}
 </style>
 @endpush
 

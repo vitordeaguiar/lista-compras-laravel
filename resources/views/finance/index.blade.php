@@ -29,7 +29,8 @@
 .bar-val{flex:0 0 auto;font-weight:700;font-size:.75rem;color:var(--accent)}
 
 /* Table */
-.data-table{width:100%;border-collapse:collapse;font-size:.79rem}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.data-table{width:100%;border-collapse:collapse;font-size:.79rem;min-width:480px}
 .data-table th,.data-table td{padding:.5rem .6rem;text-align:left;border-bottom:1px solid var(--border)}
 .data-table th{color:var(--text3);font-weight:500;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em}
 .data-table td{color:var(--text)}
@@ -38,6 +39,14 @@
 .medal{font-size:.85rem}
 
 .empty{text-align:center;padding:2.5rem;color:var(--text3);font-size:.85rem}
+
+@media(max-width:768px){
+    .filter-bar{flex-direction:column}
+    .fg{min-width:unset;width:100%}
+    .btn-filter,.btn-clear{width:100%;justify-content:center;text-align:center}
+    .bar-track{flex:0 0 30%}
+    .stats-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 @endpush
 
@@ -107,36 +116,38 @@
     @if($topItems->isEmpty())
         <p class="empty">Sem itens marcados como comprados nesse período.</p>
     @else
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Item</th>
-                    <th class="num">Vezes</th>
-                    <th class="num">Qtd total</th>
-                    <th class="num">Gasto</th>
-                    <th class="num">Preço médio</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($topItems as $idx => $it)
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <td class="medal">
-                            @if($idx === 0) 🥇
-                            @elseif($idx === 1) 🥈
-                            @elseif($idx === 2) 🥉
-                            @else <span style="color:var(--text3);font-size:.75rem">{{ $idx+1 }}</span>
-                            @endif
-                        </td>
-                        <td>{{ ucfirst($it->item_name) }}</td>
-                        <td class="num">{{ (int) $it->vezes }}×</td>
-                        <td class="num">{{ number_format((float) $it->total_qty, 2, ',', '.') }}</td>
-                        <td class="num" style="color:var(--accent);font-weight:600">R$ {{ number_format((float) $it->total_gasto, 2, ',', '.') }}</td>
-                        <td class="num">{{ $it->preco_medio !== null ? 'R$ '.number_format((float) $it->preco_medio, 2, ',', '.') : '—' }}</td>
+                        <th>#</th>
+                        <th>Item</th>
+                        <th class="num">Vezes</th>
+                        <th class="num">Qtd total</th>
+                        <th class="num">Gasto</th>
+                        <th class="num">Preço médio</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach($topItems as $idx => $it)
+                        <tr>
+                            <td class="medal">
+                                @if($idx === 0) 🥇
+                                @elseif($idx === 1) 🥈
+                                @elseif($idx === 2) 🥉
+                                @else <span style="color:var(--text3);font-size:.75rem">{{ $idx+1 }}</span>
+                                @endif
+                            </td>
+                            <td>{{ ucfirst($it->item_name) }}</td>
+                            <td class="num">{{ (int) $it->vezes }}×</td>
+                            <td class="num">{{ number_format((float) $it->total_qty, 2, ',', '.') }}</td>
+                            <td class="num" style="color:var(--accent);font-weight:600">R$ {{ number_format((float) $it->total_gasto, 2, ',', '.') }}</td>
+                            <td class="num">{{ $it->preco_medio !== null ? 'R$ '.number_format((float) $it->preco_medio, 2, ',', '.') : '—' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     @endif
 </div>
 
@@ -146,24 +157,26 @@
     @if($gastosPorMes->isEmpty())
         <p class="empty">Sem dados por mês nesse período.</p>
     @else
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Mês</th>
-                    <th class="num">Listas</th>
-                    <th class="num">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($gastosPorMes as $m)
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <td>{{ $m->mes }}</td>
-                        <td class="num">{{ (int) $m->num_listas }}</td>
-                        <td class="num" style="color:var(--accent);font-weight:600">R$ {{ number_format((float) $m->total, 2, ',', '.') }}</td>
+                        <th>Mês</th>
+                        <th class="num">Listas</th>
+                        <th class="num">Total</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach($gastosPorMes as $m)
+                        <tr>
+                            <td>{{ $m->mes }}</td>
+                            <td class="num">{{ (int) $m->num_listas }}</td>
+                            <td class="num" style="color:var(--accent);font-weight:600">R$ {{ number_format((float) $m->total, 2, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     @endif
 </div>
 
