@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — Lista de Compras</title>
+    <title>Login — Smart Listiq</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
@@ -54,7 +54,7 @@
             font-family: 'Syne', sans-serif;
             font-weight: 800;
             font-size: 1.5rem;
-            color: var(--accent);
+            color: var(--text);
             margin-bottom: 0.3rem;
             display: flex;
             align-items: center;
@@ -133,7 +133,7 @@
 </head>
 <body>
     <div class="auth-card">
-        <div class="logo">🛒 Lista de Compras</div>
+        <div class="logo"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect width="28" height="28" rx="8" fill="#C8F060"/><path d="M7 9h14M7 14h9M7 19h11" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round"/><circle cx="21" cy="19" r="3" fill="#0a0a0a"/><path d="M19.5 19l1 1 2-2" stroke="#C8F060" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span><span style="font-weight:900;letter-spacing:-.02em">Smart</span> <span style="color:var(--accent);font-weight:900">Listiq</span></span></div>
         <p class="subtitle">Organize suas compras com facilidade</p>
         <h2>Entrar na conta</h2>
 

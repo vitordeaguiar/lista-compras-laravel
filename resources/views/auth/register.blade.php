@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro — Lista de Compras</title>
+    <title>Cadastro — Smart Listiq</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -10,7 +10,7 @@
     body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
     body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 30% 30%,rgba(110,231,183,.06) 0%,transparent 60%);pointer-events:none}
     .card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.25rem 2rem}
-    .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--accent);margin-bottom:.25rem}
+    .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--text);margin-bottom:.25rem;display:flex;align-items:center;gap:.5rem}
     .sub{color:var(--muted);font-size:.85rem;margin-bottom:1.75rem}
     h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:1.25rem}
     .fg{margin-bottom:.9rem}
@@ -30,7 +30,7 @@
 </head>
 <body>
 <div class="card">
-    <div class="logo">🛒 Lista de Compras</div>
+    <div class="logo"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect width="28" height="28" rx="8" fill="#C8F060"/><path d="M7 9h14M7 14h9M7 19h11" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round"/><circle cx="21" cy="19" r="3" fill="#0a0a0a"/><path d="M19.5 19l1 1 2-2" stroke="#C8F060" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> <span><span style="font-weight:900;letter-spacing:-.02em">Smart</span> <span style="color:var(--accent);font-weight:900">Listiq</span></span></div>
     <p class="sub">Crie sua conta — Passo 1 de 3</p>
     <div class="steps"><div class="step active"></div><div class="step"></div><div class="step"></div></div>
     <h2>Informe seu e-mail</h2>
