@@ -19,7 +19,7 @@
 .prog-bar{height:3px;background:var(--bg3);border-radius:99px;overflow:hidden}
 .prog-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
 .lcard-right{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;flex-shrink:0}
-.badge-open{font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:5px;background:var(--adim);color:var(--accent);border:1px solid rgba(163,230,53,.2)}
+.badge-open{font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:5px;background:var(--adim);color:var(--accent);border:1px solid rgba(16,185,129,.2)}
 .badge-done{font-size:.62rem;font-weight:600;padding:.1rem .4rem;border-radius:5px;background:var(--bluedim);color:#818cf8;border:1px solid rgba(99,102,241,.2)}
 .lcard-val{font-size:.82rem;font-weight:700;color:var(--accent)}
 .lcard-prog-label{font-size:.63rem;color:var(--text3)}
@@ -27,10 +27,15 @@
 .empty-state{text-align:center;padding:3.5rem 1rem;color:var(--text3);font-size:.83rem}
 .empty-state .emoji{font-size:2.2rem;display:block;margin-bottom:.6rem}
 
-.icon-box-green{background:var(--adim);border:1px solid rgba(163,230,53,.2)}
+.icon-box-green{background:var(--adim);border:1px solid rgba(16,185,129,.2)}
 .icon-box-blue{background:var(--bluedim);border:1px solid rgba(99,102,241,.2)}
 .icon-box-yellow{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)}
 .icon-box-red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)}
+
+@media(max-width:768px){
+    .lcard{width:100%}
+    .modal{width:95vw;max-width:95vw}
+}
 </style>
 @endpush
 
