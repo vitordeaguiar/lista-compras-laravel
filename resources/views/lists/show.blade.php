@@ -87,7 +87,7 @@
 /* price pill */
 .ppill{display:inline-flex;align-items:center;gap:.18rem;padding:.08rem .4rem;border-radius:5px;font-size:.68rem;cursor:pointer;transition:all .18s;border:1px solid rgba(56,189,248,.22);background:rgba(56,189,248,.06);color:var(--accent)}
 .ppill.empty{border-color:var(--border);background:var(--bg3);color:var(--text3)}
-.ppill:hover{background:rgba(147,197,253,.12)}
+.ppill:hover{background:rgba(45,212,191,.12)}
 .ppill.empty:hover{border-color:var(--accent);color:var(--accent)}
 .sub{font-size:.67rem;color:var(--text3);font-style:italic}
 

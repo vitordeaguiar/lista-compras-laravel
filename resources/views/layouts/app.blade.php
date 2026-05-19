@@ -8,13 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="shortcut icon" href="/favicon.svg">
-    <meta name="theme-color" content="#93c5fd">
+    <meta name="theme-color" content="#2dd4bf">
     <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
         --bg:#09090b;--bg1:#111113;--bg2:#18181b;--bg3:#27272a;
         --border:#3f3f46;--border2:#52525b;
-        --accent:#93c5fd;--accent2:#60a5fa;--adim:rgba(147,197,253,.1);
+        --accent:#2dd4bf;--accent2:#14b8a6;--adim:rgba(45,212,191,.1);
         --text:#fafafa;--text2:#a1a1aa;--text3:#71717a;
         --danger:#ef4444;--warning:#f59e0b;--blue:#6366f1;--bluedim:rgba(99,102,241,.12);
         --radius:10px;
@@ -98,7 +98,7 @@
     /* ── BOTTOM NAV (mobile) ── */
     .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#111113;border-top:1px solid #27272a;height:56px;z-index:100;align-items:center;justify-content:space-around;padding:0 .5rem}
     .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;padding:.4rem .6rem;border-radius:8px;text-decoration:none;color:#71717a;font-size:.55rem;font-weight:500;flex:1;transition:color .15s;min-width:0}
-    .bn-item.active{color:#93c5fd}
+    .bn-item.active{color:#2dd4bf}
     .bn-item:hover{color:#a1a1aa}
     .bn-icon{font-size:1.1rem;line-height:1}
 
@@ -124,7 +124,7 @@
                 <svg width="16" height="16" viewBox="0 0 28 28" fill="none">
                     <path d="M7 9h14M7 14h9M7 19h11" stroke="#09090b" stroke-width="2.5" stroke-linecap="round"/>
                     <circle cx="21" cy="19" r="3.5" fill="#09090b"/>
-                    <path d="M19.5 19l1 1 2-2" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.5 19l1 1 2-2" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
             <div class="sb-logo-text">Smart <em>Listiq</em></div>

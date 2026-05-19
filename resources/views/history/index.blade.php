@@ -21,7 +21,7 @@
 .hlist{display:flex;flex-direction:column;gap:.4rem}
 .hcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.8rem .95rem;display:flex;align-items:center;gap:.75rem;text-decoration:none;color:inherit;transition:border-color .18s,transform .15s}
 .hcard:hover{border-color:var(--border2);transform:translateX(2px)}
-.hicon{width:34px;height:34px;border-radius:8px;background:var(--adim);border:1px solid rgba(147,197,253,.15);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.hicon{width:34px;height:34px;border-radius:8px;background:var(--adim);border:1px solid rgba(45,212,191,.15);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
 .hinfo{flex:1;min-width:0}
 .hname{font-size:.84rem;font-weight:600;margin-bottom:.1rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hmeta{font-size:.67rem;color:var(--text3);display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
