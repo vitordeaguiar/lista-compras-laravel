@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 @section('title','Dashboard')
 @section('page-title','Dashboard')
 @section('page-sub'){{ now()->locale('pt_BR')->isoFormat('dddd, D [de] MMMM [de] YYYY') }}@endsection
@@ -14,7 +14,7 @@
 .lcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem .95rem;display:flex;align-items:center;gap:.8rem;transition:border-color .18s;text-decoration:none;color:inherit;margin-bottom:.5rem}
 .lcard:last-child{margin-bottom:0}
 .lcard:hover{border-color:var(--border2)}
-.lcard-icon{width:36px;height:36px;border-radius:9px;background:var(--adim);border:1px solid rgba(56,189,248,.2);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.lcard-icon{width:36px;height:36px;border-radius:9px;background:var(--adim);border:1px solid rgba(147,197,253,.2);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
 .lcard-info{flex:1;min-width:0}
 .lcard-name{font-size:.83rem;font-weight:600;color:var(--text);margin-bottom:.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lcard-meta{font-size:.68rem;color:var(--text3);margin-bottom:.35rem}
@@ -51,7 +51,7 @@
 .empty-hint{text-align:center;padding:1.25rem;color:var(--text3);font-size:.78rem}
 
 /* Status badge */
-.badge-open{display:inline-flex;align-items:center;gap:.25rem;font-size:.62rem;font-weight:600;padding:.08rem .38rem;border-radius:5px;background:var(--adim);color:var(--accent);border:1px solid rgba(56,189,248,.2)}
+.badge-open{display:inline-flex;align-items:center;gap:.25rem;font-size:.62rem;font-weight:600;padding:.08rem .38rem;border-radius:5px;background:var(--adim);color:var(--accent);border:1px solid rgba(147,197,253,.2)}
 
 @media(max-width:768px){
     .dash-grid{grid-template-columns:1fr}

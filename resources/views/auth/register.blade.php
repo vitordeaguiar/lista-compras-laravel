@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro — Smart Listiq</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="shortcut icon" href="/favicon.svg">
-    <meta name="theme-color" content="#38bdf8">
+    <meta name="theme-color" content="#93c5fd">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#09090b;--bg2:#18181b;--bg3:#27272a;--border:#3f3f46;--accent:#38bdf8;--accent2:#0ea5e9;--text:#fafafa;--text2:#a1a1aa;--text3:#71717a;--danger:#ef4444}
+    :root{--bg:#09090b;--bg2:#18181b;--bg3:#27272a;--border:#3f3f46;--accent:#93c5fd;--accent2:#60a5fa;--text:#fafafa;--text2:#a1a1aa;--text3:#71717a;--danger:#ef4444}
     body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
     body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 30% 30%,rgba(56,189,248,.05) 0%,transparent 60%);pointer-events:none}
     .card{width:100%;max-width:420px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2.1rem 2rem}
@@ -38,7 +38,7 @@
 <body>
 <div class="card">
     <a class="logo" href="{{ route('login') }}">
-        <div class="logo-icon"><svg width="16" height="16" viewBox="0 0 28 28" fill="none"><path d="M7 9h14M7 14h9M7 19h11" stroke="#09090b" stroke-width="2.5" stroke-linecap="round"/><circle cx="21" cy="19" r="3.5" fill="#09090b"/><path d="M19.5 19l1 1 2-2" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="logo-icon"><svg width="16" height="16" viewBox="0 0 28 28" fill="none"><path d="M7 9h14M7 14h9M7 19h11" stroke="#09090b" stroke-width="2.5" stroke-linecap="round"/><circle cx="21" cy="19" r="3.5" fill="#09090b"/><path d="M19.5 19l1 1 2-2" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="logo-text">Smart <em>Listiq</em></div>
     </a>
     <p class="sub">Crie sua conta — Passo 1 de 3</p>
