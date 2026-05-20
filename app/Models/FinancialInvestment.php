@@ -5,8 +5,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinancialInvestment extends Model
 {
-    protected $fillable = ['user_id', 'name', 'category', 'started_at'];
-    protected $casts    = ['started_at' => 'date'];
+    protected $fillable = ['user_id', 'name', 'category', 'started_at', 'initial_amount'];
+    protected $casts    = ['started_at' => 'date', 'initial_amount' => 'decimal:2'];
 
     public function user()
     {

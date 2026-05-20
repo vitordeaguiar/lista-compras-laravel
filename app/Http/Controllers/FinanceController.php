@@ -192,6 +192,13 @@ class FinanceController extends Controller
         return back();
     }
 
+    public function updateInvestmentInitial(Request $request, FinancialInvestment $investment)
+    {
+        abort_if($investment->user_id !== Auth::id(), 403);
+        $investment->update(['initial_amount' => $request->validate(['initial_amount' => 'required|numeric|min:0'])['initial_amount']]);
+        return back();
+    }
+
     public function openMonth(Request $request)
     {
         $month     = $request->validate(['month' => 'required|string'])['month'];

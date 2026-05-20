@@ -511,7 +511,9 @@
             @php
                 $entry       = $inv->entries->first();
                 $entryAmt    = $entry ? (float) $entry->amount : 0;
-                $totalAmt    = (float) ($inv->entries_sum_amount ?? 0);
+                $initialAmt  = (float) ($inv->initial_amount ?? 0);
+                $aportesTot  = (float) ($inv->entries_sum_amount ?? 0);
+                $totalAmt    = $initialAmt + $aportesTot;
                 $monthsSince = $inv->started_at->diffInMonths(now()) + 1;
             @endphp
             <div class="fin-item inv-item" style="align-items:flex-start;padding:.75rem .85rem">
@@ -521,15 +523,35 @@
                     <div style="font-size:.62rem;color:var(--text3);margin-top:.1rem">
                         {{ $invCatNames[$inv->category] ?? $inv->category }} · {{ $monthsSince }} {{ $monthsSince==1?'mês':'meses' }} desde {{ $inv->started_at->locale('pt_BR')->isoFormat('MMM/YYYY') }}
                     </div>
-                    <div style="display:flex;gap:1.2rem;margin-top:.45rem;flex-wrap:wrap">
+                    <div style="display:flex;gap:1.2rem;margin-top:.5rem;flex-wrap:wrap;align-items:flex-end">
+
+                        {{-- Total acumulado --}}
                         <div>
                             <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text3)">Total acumulado</div>
-                            <div style="font-size:.88rem;font-weight:700;color:#818cf8">R$ {{ number_format($totalAmt, 2, ',', '.') }}</div>
+                            <div style="font-size:.95rem;font-weight:800;color:#818cf8">R$ {{ number_format($totalAmt, 2, ',', '.') }}</div>
+                            <div style="font-size:.6rem;color:var(--text3);margin-top:.1rem">
+                                inicial R$ {{ number_format($initialAmt,2,',','.') }} + aportes R$ {{ number_format($aportesTot,2,',','.') }}
+                            </div>
                         </div>
+
+                        {{-- Valor inicial (editável) --}}
+                        <div>
+                            <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text3)">Valor inicial</div>
+                            <div class="edit-wrap" style="margin-top:.05rem">
+                                <span class="edit-val" style="color:var(--text);font-size:.82rem" onclick="startEdit(this)">R$ {{ number_format($initialAmt, 2, ',', '.') }}</span>
+                                <form class="edit-form" method="POST" action="{{ route('finance.investment.initial', $inv->id) }}">
+                                    @csrf @method('PATCH')
+                                    <input type="number" name="initial_amount" step="0.01" min="0" value="{{ $initialAmt }}" class="edit-inp">
+                                    <button type="submit" class="edit-ok" style="background:#818cf8">✓</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {{-- Aporte este mês (editável) --}}
                         <div>
                             <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text3)">Aporte este mês</div>
                             <div class="edit-wrap" style="margin-top:.05rem">
-                                <span class="edit-val" style="color:var(--text);font-size:.88rem" onclick="startEdit(this)">R$ {{ number_format($entryAmt, 2, ',', '.') }}</span>
+                                <span class="edit-val" style="color:var(--text);font-size:.82rem" onclick="startEdit(this)">R$ {{ number_format($entryAmt, 2, ',', '.') }}</span>
                                 @if($entry)
                                     <form class="edit-form" method="POST" action="{{ route('finance.investment.update', $entry->id) }}">
                                         @csrf @method('PATCH')
@@ -539,6 +561,7 @@
                                 @endif
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
