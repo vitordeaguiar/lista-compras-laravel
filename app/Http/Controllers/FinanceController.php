@@ -47,6 +47,7 @@ class FinanceController extends Controller
         // Investimentos
         $investments = FinancialInvestment::where('user_id', $user->id)
             ->with(['entries' => fn($q) => $q->where('month', $month)])
+            ->withSum('entries', 'amount')
             ->get();
         $totalInvestment = FinancialInvestmentEntry::where('user_id', $user->id)
             ->where('month', $month)->sum('amount');

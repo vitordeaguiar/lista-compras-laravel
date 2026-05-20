@@ -258,7 +258,7 @@
                         <div class="leg-item">
                             <span class="leg-dot" style="background:{{ $sl['color'] }}"></span>
                             <span class="leg-lbl">{{ $sl['label'] }}</span>
-                            <span class="leg-val">R$ {{ number_format((float)($sl['value']??0),0,',','.') }}</span>
+                            <span class="leg-val">R$ {{ number_format((float)($sl['value']??0),2,',','.') }}</span>
                         </div>
                     @endforeach
                 </div>
@@ -511,25 +511,35 @@
             @php
                 $entry       = $inv->entries->first();
                 $entryAmt    = $entry ? (float) $entry->amount : 0;
+                $totalAmt    = (float) ($inv->entries_sum_amount ?? 0);
                 $monthsSince = $inv->started_at->diffInMonths(now()) + 1;
             @endphp
-            <div class="fin-item inv-item">
-                <span class="fin-icon">{{ $invCatIcons[$inv->category] ?? '💼' }}</span>
+            <div class="fin-item inv-item" style="align-items:flex-start;padding:.75rem .85rem">
+                <span class="fin-icon" style="margin-top:.1rem">{{ $invCatIcons[$inv->category] ?? '💼' }}</span>
                 <div style="flex:1;min-width:0">
-                    <div style="font-size:.8rem;color:var(--text)">{{ $inv->name }}</div>
-                    <div style="font-size:.62rem;color:var(--text3)">
+                    <div style="font-size:.8rem;color:var(--text);font-weight:600">{{ $inv->name }}</div>
+                    <div style="font-size:.62rem;color:var(--text3);margin-top:.1rem">
                         {{ $invCatNames[$inv->category] ?? $inv->category }} · {{ $monthsSince }} {{ $monthsSince==1?'mês':'meses' }} desde {{ $inv->started_at->locale('pt_BR')->isoFormat('MMM/YYYY') }}
                     </div>
-                </div>
-                <div class="edit-wrap">
-                    <span class="edit-val" style="color:#818cf8" onclick="startEdit(this)">R$ {{ number_format($entryAmt, 2, ',', '.') }}</span>
-                    @if($entry)
-                        <form class="edit-form" method="POST" action="{{ route('finance.investment.update', $entry->id) }}">
-                            @csrf @method('PATCH')
-                            <input type="number" name="amount" step="0.01" min="0" value="{{ $entryAmt }}" class="edit-inp">
-                            <button type="submit" class="edit-ok" style="background:#818cf8">✓</button>
-                        </form>
-                    @endif
+                    <div style="display:flex;gap:1.2rem;margin-top:.45rem;flex-wrap:wrap">
+                        <div>
+                            <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text3)">Total acumulado</div>
+                            <div style="font-size:.88rem;font-weight:700;color:#818cf8">R$ {{ number_format($totalAmt, 2, ',', '.') }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text3)">Aporte este mês</div>
+                            <div class="edit-wrap" style="margin-top:.05rem">
+                                <span class="edit-val" style="color:var(--text);font-size:.88rem" onclick="startEdit(this)">R$ {{ number_format($entryAmt, 2, ',', '.') }}</span>
+                                @if($entry)
+                                    <form class="edit-form" method="POST" action="{{ route('finance.investment.update', $entry->id) }}">
+                                        @csrf @method('PATCH')
+                                        <input type="number" name="amount" step="0.01" min="0" value="{{ $entryAmt }}" class="edit-inp">
+                                        <button type="submit" class="edit-ok" style="background:#818cf8">✓</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         @empty
