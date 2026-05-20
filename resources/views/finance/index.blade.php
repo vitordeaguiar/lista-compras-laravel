@@ -149,7 +149,7 @@
 <div class="tabs-nav">
     <button class="tab-btn active" onclick="setTab('resumo')" id="btn-resumo">📊 Resumo</button>
     <button class="tab-btn" onclick="setTab('fixos')" id="btn-fixos">
-        📌 Fixos@if($fixedTotal > 0) <span class="sec-cnt">{{ $paidFixed }}/{{ $fixedTotal }}</span>@endif
+        📌 Fixos @if($fixedTotal > 0)<span class="sec-cnt">{{ $paidFixed }}/{{ $fixedTotal }}</span>@endif
     </button>
     <button class="tab-btn" onclick="setTab('variaveis')" id="btn-variaveis">🎲 Variáveis</button>
     <button class="tab-btn" onclick="setTab('investimentos')" id="btn-investimentos">📈 Invest.</button>
