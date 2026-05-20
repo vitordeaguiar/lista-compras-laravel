@@ -17,4 +17,39 @@ class User extends Authenticatable
     {
         return $this->hasMany(ShoppingList::class);
     }
+
+    public function financialMonths()
+    {
+        return $this->hasMany(FinancialMonth::class);
+    }
+
+    public function financialIncomes()
+    {
+        return $this->hasMany(FinancialIncome::class);
+    }
+
+    public function financialFixedCosts()
+    {
+        return $this->hasMany(FinancialFixedCost::class);
+    }
+
+    public function financialFixedPayments()
+    {
+        return $this->hasMany(FinancialFixedPayment::class);
+    }
+
+    public function financialVariableCosts()
+    {
+        return $this->hasMany(FinancialVariableCost::class);
+    }
+
+    public function financialInvestments()
+    {
+        return $this->hasMany(FinancialInvestment::class);
+    }
+
+    public function financialInvestmentEntries()
+    {
+        return $this->hasMany(FinancialInvestmentEntry::class);
+    }
 }

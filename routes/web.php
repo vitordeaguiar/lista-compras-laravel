@@ -36,7 +36,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('/listas/{list}/itens/{item}/toggle', [ShoppingItemController::class, 'toggle'])->name('items.toggle');
     Route::delete('/listas/{list}/itens/{item}',       [ShoppingItemController::class, 'destroy'])->name('items.destroy');
 
-    // History & Finance
-    Route::get('/historico',  [HistoryController::class, 'index'])->name('history.index');
-    Route::get('/financeiro', [FinanceController::class, 'index'])->name('finance.index');
+    // History
+    Route::get('/historico', [HistoryController::class, 'index'])->name('history.index');
+
+    // Finance
+    Route::get('/financeiro',                                 [FinanceController::class, 'index'])->name('finance.index');
+    Route::post('/financeiro/fixos',                          [FinanceController::class, 'storeFixed'])->name('finance.fixed.store');
+    Route::patch('/financeiro/fixos/{payment}/toggle',        [FinanceController::class, 'toggleFixed'])->name('finance.fixed.toggle');
+    Route::patch('/financeiro/fixos/{payment}/update',        [FinanceController::class, 'updateFixed'])->name('finance.fixed.update');
+    Route::post('/financeiro/variaveis',                      [FinanceController::class, 'storeVariable'])->name('finance.variable.store');
+    Route::patch('/financeiro/variaveis/{variable}/toggle',   [FinanceController::class, 'toggleVariable'])->name('finance.variable.toggle');
+    Route::patch('/financeiro/variaveis/{variable}/update',   [FinanceController::class, 'updateVariable'])->name('finance.variable.update');
+    Route::post('/financeiro/entradas',                       [FinanceController::class, 'storeIncome'])->name('finance.income.store');
+    Route::post('/financeiro/investimentos',                  [FinanceController::class, 'storeInvestment'])->name('finance.investment.store');
+    Route::patch('/financeiro/investimentos/{entry}/update',  [FinanceController::class, 'updateInvestment'])->name('finance.investment.update');
+    Route::post('/financeiro/abrir-mes',                      [FinanceController::class, 'openMonth'])->name('finance.open-month');
 });
