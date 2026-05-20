@@ -6,6 +6,7 @@ use App\Http\Controllers\ShoppingItemController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login',               [AuthController::class, 'showLogin'])->name('login');
@@ -56,4 +57,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/financeiro/investimentos/{investment}/initial', [FinanceController::class, 'updateInvestmentInitial'])->name('finance.investment.initial');
     Route::delete('/financeiro/investimentos/{investment}',       [FinanceController::class, 'destroyInvestment'])->name('finance.investment.destroy');
     Route::post('/financeiro/abrir-mes',                      [FinanceController::class, 'openMonth'])->name('finance.open-month');
+
+    // Profile & Settings
+    Route::get('/perfil',                                 [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/perfil',                                 [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/perfil/senha',                           [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::put('/perfil/configuracoes',                   [ProfileController::class, 'updateSettings'])->name('profile.settings');
+    Route::delete('/perfil/sessoes/todas',                [ProfileController::class, 'destroyAllSessions'])->name('profile.sessions.destroy-all');
+    Route::delete('/perfil/sessoes',                      [ProfileController::class, 'destroySession'])->name('profile.session.destroy');
 });

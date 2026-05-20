@@ -9,6 +9,20 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="shortcut icon" href="/favicon.svg">
     <meta name="theme-color" content="#2dd4bf">
+    <script>
+    (function(){
+        try{
+            var aMap={'#2dd4bf':'#14b8a6','#6366f1':'#4f46e5','#10b981':'#059669','#38bdf8':'#0ea5e9','#93c5fd':'#60a5fa','#818cf8':'#6366f1','#c084fc':'#a855f7','#fb7185':'#f43f5e','#fbbf24':'#f59e0b','#f97316':'#ea580c'};
+            var dMap={'#2dd4bf':'rgba(45,212,191,.1)','#6366f1':'rgba(99,102,241,.1)','#10b981':'rgba(16,185,129,.1)','#38bdf8':'rgba(56,189,248,.1)','#93c5fd':'rgba(147,197,253,.1)','#818cf8':'rgba(129,140,248,.1)','#c084fc':'rgba(192,132,252,.1)','#fb7185':'rgba(251,113,133,.1)','#fbbf24':'rgba(251,191,36,.1)','#f97316':'rgba(249,115,22,.1)'};
+            var t=localStorage.getItem('sl_theme')||'dark';
+            var a=localStorage.getItem('sl_accent')||'#2dd4bf';
+            if(t==='light')document.documentElement.classList.add('light');
+            document.documentElement.style.setProperty('--accent',a);
+            document.documentElement.style.setProperty('--accent2',aMap[a]||a);
+            document.documentElement.style.setProperty('--adim',dMap[a]||'rgba(45,212,191,.1)');
+        }catch(e){}
+    })();
+    </script>
     <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -18,6 +32,12 @@
         --text:#fafafa;--text2:#a1a1aa;--text3:#71717a;
         --danger:#ef4444;--warning:#f59e0b;--blue:#6366f1;--bluedim:rgba(99,102,241,.12);
         --radius:10px;
+    }
+    html.light{
+        --bg:#f8fafc;--bg1:#ffffff;--bg2:#f1f5f9;--bg3:#e2e8f0;
+        --border:#e2e8f0;--border2:#cbd5e1;
+        --text:#0f172a;--text2:#475569;--text3:#94a3b8;
+        --adim:rgba(45,212,191,.12);--bluedim:rgba(99,102,241,.1);
     }
     body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;line-height:1.5;font-size:14px}
 
@@ -145,14 +165,17 @@
             <a href="{{ route('finance.index') }}" class="sb-item {{ request()->routeIs('finance.*') ? 'active' : '' }}">
                 <span class="sb-icon">📊</span> Financeiro
             </a>
+            <a href="{{ route('profile.index') }}" class="sb-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                <span class="sb-icon">⚙️</span> Configurações
+            </a>
         </nav>
 
         <div class="sb-user">
             <div class="sb-avatar">{{ mb_substr(Auth::user()->name, 0, 1) }}</div>
-            <div class="sb-uinfo">
+            <a href="{{ route('profile.index') }}" class="sb-uinfo" style="text-decoration:none;display:block">
                 <div class="sb-uname">{{ Auth::user()->name }}</div>
                 <div class="sb-uplan">Free Plan</div>
-            </div>
+            </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="sb-logout" title="Sair">⇥</button>
@@ -193,6 +216,10 @@
         <a href="{{ route('finance.index') }}" class="bn-item {{ request()->routeIs('finance.*') ? 'active' : '' }}">
             <span class="bn-icon">📊</span>
             <span>Financeiro</span>
+        </a>
+        <a href="{{ route('profile.index') }}" class="bn-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+            <span class="bn-icon">⚙️</span>
+            <span>Perfil</span>
         </a>
     </nav>
 </div>

@@ -52,4 +52,26 @@ class User extends Authenticatable
     {
         return $this->hasMany(FinancialInvestmentEntry::class);
     }
+
+    public function settings()
+    {
+        return $this->hasOne(UserSetting::class)->withDefault([
+            'theme'                  => 'dark',
+            'accent_color'           => '#2dd4bf',
+            'salary_day'             => 5,
+            'monthly_budget'         => 0,
+            'monthly_savings_goal'   => 0,
+            'notify_due_days'        => 3,
+            'notify_budget_alert'    => true,
+            'notify_monthly_summary' => true,
+            'notify_list_reminder'   => true,
+            'notify_new_month'       => true,
+            'notify_email'           => true,
+            'notify_push'            => false,
+            'auto_copy_fixed'        => true,
+            'auto_copy_incomes'      => true,
+            'auto_keep_investments'  => true,
+            'layout_density'         => 'comfortable',
+        ]);
+    }
 }
