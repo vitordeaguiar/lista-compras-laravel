@@ -96,6 +96,10 @@
 .edit-inp{width:78px;padding:.18rem .38rem;font-size:.8rem;border-radius:6px;background:var(--bg3);border:1px solid var(--accent);color:var(--text);font-family:'Inter',sans-serif;outline:none}
 .edit-ok{padding:.18rem .38rem;font-size:.68rem;border:none;background:var(--accent);color:#09090b;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700}
 
+/* ── Delete button ── */
+.del-btn{width:20px;height:20px;border-radius:50%;border:none;background:none;color:var(--text3);cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;padding:0;line-height:1}
+.del-btn:hover{background:rgba(239,68,68,.12);color:var(--danger)}
+
 /* ── Section header ── */
 .sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem}
 .sec-ttl{font-size:.76rem;font-weight:600;color:var(--text)}
@@ -292,6 +296,23 @@
 
     </div>
 
+    {{-- Incomes list --}}
+    @if($incomes->isNotEmpty())
+        <div class="fin-list" style="margin-bottom:.85rem">
+            @foreach($incomes as $inc)
+                <div class="fin-item">
+                    <span class="fin-icon">💵</span>
+                    <span class="fin-name">{{ $inc->name }}</span>
+                    <span style="font-size:.82rem;font-weight:600;color:#22c55e;font-variant-numeric:tabular-nums">R$ {{ number_format($inc->amount,2,',','.') }}</span>
+                    <form method="POST" action="{{ route('finance.income.destroy', $inc->id) }}" onsubmit="return confirm('Excluir entrada \'{{ addslashes($inc->name) }}\'?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="del-btn" title="Excluir">×</button>
+                    </form>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     {{-- Add income --}}
     <div class="add-card">
         <div class="add-ttl">+ Adicionar entrada</div>
@@ -356,6 +377,10 @@
                         <button type="submit" class="edit-ok">✓</button>
                     </form>
                 </div>
+                <form method="POST" action="{{ route('finance.fixed.destroy', $p->fixed_cost_id) }}" onsubmit="return confirm('Excluir \'{{ addslashes($p->fixedCost?->name ?? '') }}\' de todos os meses?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="del-btn" title="Excluir">×</button>
+                </form>
             </div>
         @empty
             <div style="text-align:center;padding:2rem;color:var(--text3);font-size:.8rem">
@@ -437,6 +462,10 @@
                         <button type="submit" class="edit-ok">✓</button>
                     </form>
                 </div>
+                <form method="POST" action="{{ route('finance.variable.destroy', $v->id) }}" onsubmit="return confirm('Excluir \'{{ addslashes($v->name) }}\'?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="del-btn" title="Excluir">×</button>
+                </form>
             </div>
         @empty
             <div style="text-align:center;padding:2rem;color:var(--text3);font-size:.8rem">
@@ -519,7 +548,13 @@
             <div class="fin-item inv-item" style="align-items:flex-start;padding:.75rem .85rem">
                 <span class="fin-icon" style="margin-top:.1rem">{{ $invCatIcons[$inv->category] ?? '💼' }}</span>
                 <div style="flex:1;min-width:0">
-                    <div style="font-size:.8rem;color:var(--text);font-weight:600">{{ $inv->name }}</div>
+                    <div style="display:flex;align-items:center;gap:.5rem">
+                        <span style="font-size:.8rem;color:var(--text);font-weight:600;flex:1">{{ $inv->name }}</span>
+                        <form method="POST" action="{{ route('finance.investment.destroy', $inv->id) }}" onsubmit="return confirm('Excluir investimento \'{{ addslashes($inv->name) }}\' e todos os aportes?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="del-btn" title="Excluir">×</button>
+                        </form>
+                    </div>
                     <div style="font-size:.62rem;color:var(--text3);margin-top:.1rem">
                         {{ $invCatNames[$inv->category] ?? $inv->category }} · {{ $monthsSince }} {{ $monthsSince==1?'mês':'meses' }} desde {{ $inv->started_at->locale('pt_BR')->isoFormat('MMM/YYYY') }}
                     </div>

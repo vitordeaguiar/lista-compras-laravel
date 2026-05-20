@@ -48,8 +48,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/financeiro/variaveis/{variable}/toggle',   [FinanceController::class, 'toggleVariable'])->name('finance.variable.toggle');
     Route::patch('/financeiro/variaveis/{variable}/update',   [FinanceController::class, 'updateVariable'])->name('finance.variable.update');
     Route::post('/financeiro/entradas',                       [FinanceController::class, 'storeIncome'])->name('finance.income.store');
+    Route::delete('/financeiro/entradas/{income}',            [FinanceController::class, 'destroyIncome'])->name('finance.income.destroy');
+    Route::delete('/financeiro/fixos/{cost}',                 [FinanceController::class, 'destroyFixed'])->name('finance.fixed.destroy');
+    Route::delete('/financeiro/variaveis/{variable}',         [FinanceController::class, 'destroyVariable'])->name('finance.variable.destroy');
     Route::post('/financeiro/investimentos',                  [FinanceController::class, 'storeInvestment'])->name('finance.investment.store');
     Route::patch('/financeiro/investimentos/{entry}/update',      [FinanceController::class, 'updateInvestment'])->name('finance.investment.update');
     Route::patch('/financeiro/investimentos/{investment}/initial', [FinanceController::class, 'updateInvestmentInitial'])->name('finance.investment.initial');
+    Route::delete('/financeiro/investimentos/{investment}',       [FinanceController::class, 'destroyInvestment'])->name('finance.investment.destroy');
     Route::post('/financeiro/abrir-mes',                      [FinanceController::class, 'openMonth'])->name('finance.open-month');
 });

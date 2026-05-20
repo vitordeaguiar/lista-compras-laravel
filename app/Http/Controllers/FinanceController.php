@@ -199,6 +199,34 @@ class FinanceController extends Controller
         return back();
     }
 
+    public function destroyFixed(FinancialFixedCost $cost)
+    {
+        abort_if($cost->user_id !== Auth::id(), 403);
+        $cost->delete();
+        return back();
+    }
+
+    public function destroyVariable(FinancialVariableCost $variable)
+    {
+        abort_if($variable->user_id !== Auth::id(), 403);
+        $variable->delete();
+        return back();
+    }
+
+    public function destroyIncome(FinancialIncome $income)
+    {
+        abort_if($income->user_id !== Auth::id(), 403);
+        $income->delete();
+        return back();
+    }
+
+    public function destroyInvestment(FinancialInvestment $investment)
+    {
+        abort_if($investment->user_id !== Auth::id(), 403);
+        $investment->delete();
+        return back();
+    }
+
     public function openMonth(Request $request)
     {
         $month     = $request->validate(['month' => 'required|string'])['month'];
