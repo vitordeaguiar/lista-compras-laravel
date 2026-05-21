@@ -10,9 +10,10 @@ if (($_GET['token'] ?? '') !== SECRET_TOKEN) {
 
 // Tenta encontrar o artisan em múltiplos caminhos comuns de hospedagem
 $candidates = [
-    __DIR__ . '/../artisan',                          // padrão Laravel (public/ dentro do projeto)
-    __DIR__ . '/../../artisan',                       // public_html é symlink dentro de subpasta
-    '/home1/vit75277/artisan',                        // raiz do usuário cPanel
+    '/home1/vit75277/lista-compras/artisan',          // caminho real no servidor
+    __DIR__ . '/../artisan',
+    __DIR__ . '/../../artisan',
+    '/home1/vit75277/artisan',
     '/home/vit75277/artisan',
     dirname(__DIR__) . '/artisan',
 ];
