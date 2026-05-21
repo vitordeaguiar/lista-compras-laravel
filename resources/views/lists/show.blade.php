@@ -130,6 +130,13 @@
 .conclude-box{background:var(--bg2);border:1px solid rgba(56,189,248,.22);border-radius:var(--radius);padding:1rem 1.1rem;margin-top:1.75rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 .conclude-text strong{color:var(--text);display:block;font-size:.85rem;margin-bottom:.18rem}
 .conclude-text{font-size:.78rem;color:var(--text3)}
+.mfield{margin-bottom:.75rem}
+.mfield label{display:block;font-size:.65rem;color:var(--text2);margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.06em}
+.mfield input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.52rem .8rem;border-radius:8px;font-family:'Inter',sans-serif;font-size:.88rem;font-weight:600;outline:none;transition:border-color .2s}
+.mfield input:focus{border-color:var(--accent)}
+.conclude-summary{background:var(--bg3);border-radius:var(--radius);padding:.85rem;margin-bottom:.85rem}
+.csum-row{display:flex;justify-content:space-between;margin-bottom:.35rem;font-size:.75rem;color:var(--text2)}
+.csum-row:last-child{margin-bottom:0}
 .divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0 1rem}
 .empty-state{text-align:center;padding:1.75rem;color:var(--text3);font-size:.82rem}
 
@@ -349,10 +356,54 @@
         <strong>Concluir lista</strong>
         Ao concluir, a lista entra no histórico. Você pode reabrir depois se precisar.
     </div>
-    <form method="POST" action="{{ route('lists.complete', $list) }}" onsubmit="return confirm('Concluir esta lista de compras?')">
-        @csrf @method('PATCH')
-        <button type="submit" class="btn btn-primary">✅ Concluir lista</button>
-    </form>
+    <button type="button" class="btn btn-primary" onclick="document.getElementById('concludeModal').classList.add('open')">
+        ✅ Concluir lista
+    </button>
+</div>
+@endif
+
+{{-- MODAL CONCLUIR COM DESCONTO --}}
+@if($list->isOpen())
+<div class="modal-backdrop" id="concludeModal">
+    <div class="modal">
+        <div class="modal-title">✅ Concluir lista</div>
+
+        <div class="conclude-summary">
+            <div class="csum-row">
+                <span>Total comprado</span>
+                <span style="font-weight:700" id="concludeTotalBruto">R$ 0,00</span>
+            </div>
+            <div class="csum-row">
+                <span>Desconto</span>
+                <span style="font-weight:700;color:#22c55e" id="concludeDesconto">- R$ 0,00</span>
+            </div>
+            <div style="height:1px;background:var(--border);margin:.45rem 0"></div>
+            <div class="csum-row" style="font-size:.82rem">
+                <span style="font-weight:700;color:var(--text)">Total final</span>
+                <span style="font-size:.95rem;font-weight:900;color:var(--accent)" id="concludeTotalFinal">R$ 0,00</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('lists.complete', $list) }}" id="concludeForm">
+            @csrf @method('PATCH')
+            <div class="mfield">
+                <label>Desconto recebido (opcional)</label>
+                <input type="text" name="discount" id="discountInput"
+                    placeholder="R$ 0,00" autocomplete="off"
+                    oninput="updateConcludePreview()">
+                <div style="font-size:.62rem;color:var(--text3);margin-top:.3rem">
+                    💡 Se recebeu desconto no caixa ou cupom, informe aqui. Será subtraído do total.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost btn-sm"
+                    onclick="document.getElementById('concludeModal').classList.remove('open')">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary btn-sm">✅ Confirmar e concluir</button>
+            </div>
+        </form>
+    </div>
 </div>
 @endif
 
@@ -415,5 +466,43 @@ document.getElementById('tpPriceInput').addEventListener('keydown', function(e) 
 document.getElementById('tpOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeToggleModal();
 });
+
+// ── Desconto / Concluir ────────────────────────────────────────
+const totalBruto = {{ $list->items->where('purchased', true)->sum(fn($i) => ($i->price ?? 0) * ($i->qty ?? 1)) }};
+
+function fmt(v) {
+    return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function updateConcludePreview() {
+    const raw      = (document.getElementById('discountInput')?.value || '').replace(/\./g, '').replace(',', '.');
+    const discount = parseFloat(raw) || 0;
+    const final    = Math.max(0, totalBruto - discount);
+    document.getElementById('concludeTotalBruto').textContent  = fmt(totalBruto);
+    document.getElementById('concludeDesconto').textContent    = '- ' + fmt(discount);
+    document.getElementById('concludeTotalFinal').textContent  = fmt(final);
+}
+
+const discountInput = document.getElementById('discountInput');
+if (discountInput) {
+    discountInput.addEventListener('input', function() {
+        let v = this.value.replace(/\D/g, '');
+        if (!v) { this.value = ''; updateConcludePreview(); return; }
+        v = (parseInt(v, 10) / 100).toFixed(2);
+        this.value = v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        updateConcludePreview();
+    });
+    document.getElementById('concludeForm').addEventListener('submit', function() {
+        discountInput.value = discountInput.value.replace(/\./g, '').replace(',', '.');
+    });
+}
+
+const concludeModal = document.getElementById('concludeModal');
+if (concludeModal) {
+    concludeModal.addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('open');
+    });
+    updateConcludePreview();
+}
 </script>
 @endsection

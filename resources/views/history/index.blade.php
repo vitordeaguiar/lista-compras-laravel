@@ -113,8 +113,13 @@
                 @endif
             </div>
         </div>
-        <div class="htotal">
+        <div class="htotal" style="text-align:right">
             @if($list->total > 0)
+                @if(!empty($list->discount) && $list->discount > 0)
+                    <span style="font-size:.65rem;color:#22c55e;font-weight:600;display:block;margin-bottom:.1rem">
+                        🏷 -R$ {{ number_format($list->discount, 2, ',', '.') }}
+                    </span>
+                @endif
                 R$ {{ number_format($list->total, 2, ',', '.') }}
             @else
                 <span style="font-size:.72rem;font-weight:400;color:var(--text3)">sem preços</span>

@@ -51,7 +51,7 @@ class ShoppingListController extends Controller
         return view('lists.show', compact('list'));
     }
 
-    public function complete(ShoppingList $list)
+    public function complete(Request $request, ShoppingList $list)
     {
         if ($list->user_id !== Auth::id()) {
             Log::warning('Tentativa não autorizada de concluir lista', [
@@ -64,15 +64,24 @@ class ShoppingListController extends Controller
         }
         abort_if($list->isCompleted(), 422);
 
-        $total = $list->items->sum(fn($i) => $i->subtotal ?? 0);
+        $discount = (float) str_replace(['.', ','], ['', '.'], $request->input('discount', 0));
+
+        $total = $list->items()
+            ->where('purchased', true)
+            ->get()
+            ->sum(fn($item) => ($item->price ?? 0) * $item->qty);
+
+        $finalTotal = max(0, $total - $discount);
+
         $list->update([
             'status'       => 'completed',
-            'total'        => $total,
+            'total'        => $finalTotal,
+            'discount'     => $discount,
             'completed_at' => now(),
         ]);
 
         return redirect()->route('lists.index')
-            ->with('success', 'Lista concluída! Veja o histórico para acompanhar.');
+            ->with('success', 'Lista concluída! Total: R$ ' . number_format($finalTotal, 2, ',', '.'));
     }
 
     public function reopen(ShoppingList $list)
