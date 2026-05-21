@@ -9,9 +9,9 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = ['name', 'email', 'password', 'is_admin'];
     protected $hidden   = ['password', 'remember_token'];
-    protected $casts    = ['password' => 'hashed'];
+    protected $casts    = ['password' => 'hashed', 'is_admin' => 'boolean'];
 
     public function shoppingLists()
     {

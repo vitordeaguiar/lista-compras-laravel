@@ -168,6 +168,11 @@
             <a href="{{ route('profile.index') }}" class="sb-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                 <span class="sb-icon">⚙️</span> Configurações
             </a>
+            @if(Auth::user()->is_admin)
+            <a href="/admin" class="sb-item {{ request()->is('admin*') ? 'active' : '' }}">
+                <span class="sb-icon">🛡️</span> Admin
+            </a>
+            @endif
         </nav>
 
         <div class="sb-user">

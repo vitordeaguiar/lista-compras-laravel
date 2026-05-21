@@ -412,8 +412,9 @@
                     <div class="prof-card-sub">Limite máximo de gastos por mês. Deixe em 0 para desativar.</div>
                     <div class="form-group" style="margin-bottom:0;max-width:240px">
                         <label>Orçamento (R$)</label>
-                        <input type="number" name="monthly_budget"
-                               value="{{ $settings->monthly_budget }}" min="0" step="0.01" placeholder="0,00">
+                        <input type="text" inputmode="decimal" name="monthly_budget"
+                               value="{{ $settings->monthly_budget ? number_format($settings->monthly_budget, 2, ',', '.') : '' }}"
+                               placeholder="0,00" class="money-input profile-money">
                     </div>
                 </div>
 
@@ -422,8 +423,9 @@
                     <div class="prof-card-sub">Valor mensal que você deseja poupar ou investir.</div>
                     <div class="form-group" style="margin-bottom:0;max-width:240px">
                         <label>Meta (R$)</label>
-                        <input type="number" name="monthly_savings_goal"
-                               value="{{ $settings->monthly_savings_goal }}" min="0" step="0.01" placeholder="0,00">
+                        <input type="text" inputmode="decimal" name="monthly_savings_goal"
+                               value="{{ $settings->monthly_savings_goal ? number_format($settings->monthly_savings_goal, 2, ',', '.') : '' }}"
+                               placeholder="0,00" class="money-input profile-money">
                     </div>
                 </div>
 
@@ -627,5 +629,31 @@ document.querySelectorAll('input[name="layout_density"]').forEach(radio => {
         this.closest('.density-opt').classList.add('active');
     });
 });
+
+// ── MÁSCARA MONETÁRIA ────────────────────────────────────────────────────────
+function maskMoney(input) {
+    input.addEventListener('input', function() {
+        let v = this.value.replace(/\D/g, '');
+        if (!v) { this.value = ''; return; }
+        v = (parseInt(v, 10) / 100).toFixed(2);
+        this.value = v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    });
+    input.addEventListener('blur', function() {
+        if (this.value && !this.value.includes(',')) {
+            this.value = this.value + ',00';
+        }
+    });
+}
+
+document.querySelectorAll('.money-input').forEach(function(inp) { maskMoney(inp); });
+
+const settingsForm = document.getElementById('settings-form');
+if (settingsForm) {
+    settingsForm.addEventListener('submit', function() {
+        this.querySelectorAll('.money-input').forEach(function(inp) {
+            inp.value = inp.value.replace(/\./g, '').replace(',', '.');
+        });
+    });
+}
 </script>
 @endsection

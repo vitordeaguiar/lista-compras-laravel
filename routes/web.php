@@ -7,6 +7,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login',               [AuthController::class, 'showLogin'])->name('login');
@@ -65,4 +66,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/perfil/configuracoes',                   [ProfileController::class, 'updateSettings'])->name('profile.settings');
     Route::delete('/perfil/sessoes/todas',                [ProfileController::class, 'destroyAllSessions'])->name('profile.sessions.destroy-all');
     Route::delete('/perfil/sessoes',                      [ProfileController::class, 'destroySession'])->name('profile.session.destroy');
+
+    // Admin
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/',                              [AdminController::class, 'index'])->name('index');
+        Route::get('/users/{user}',                  [AdminController::class, 'show'])->name('users.show');
+        Route::delete('/users/{user}',               [AdminController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{user}/toggle-admin',    [AdminController::class, 'toggleAdmin'])->name('users.toggle-admin');
+    });
 });

@@ -316,7 +316,7 @@
     {{-- Add income --}}
     <div class="add-card">
         <div class="add-ttl">+ Adicionar entrada</div>
-        <form method="POST" action="{{ route('finance.income.store') }}">
+        <form method="POST" action="{{ route('finance.income.store') }}" class="finance-form">
             @csrf
             <input type="hidden" name="month" value="{{ $month }}">
             <div class="form-row">
@@ -326,7 +326,7 @@
                 </div>
                 <div class="form-group">
                     <label>Valor (R$)</label>
-                    <input type="number" name="amount" step="0.01" min="0" placeholder="0,00" required>
+                    <input type="text" inputmode="decimal" name="amount" placeholder="0,00" required class="money-input">
                 </div>
             </div>
             <button type="submit" class="btn btn-primary btn-sm" style="margin-top:.3rem">Adicionar</button>
@@ -398,7 +398,7 @@
 
     <div class="add-card">
         <div class="add-ttl">+ Adicionar custo fixo</div>
-        <form method="POST" action="{{ route('finance.fixed.store') }}">
+        <form method="POST" action="{{ route('finance.fixed.store') }}" class="finance-form">
             @csrf
             <input type="hidden" name="month" value="{{ $month }}">
             <div class="form-row">
@@ -408,7 +408,7 @@
                 </div>
                 <div class="form-group">
                     <label>Valor (R$)</label>
-                    <input type="number" name="amount" step="0.01" min="0" placeholder="0,00" required>
+                    <input type="text" inputmode="decimal" name="amount" placeholder="0,00" required class="money-input">
                 </div>
                 <div class="form-group sm">
                     <label>Dia venc.</label>
@@ -483,7 +483,7 @@
 
     <div class="add-card">
         <div class="add-ttl">+ Adicionar gasto variável</div>
-        <form method="POST" action="{{ route('finance.variable.store') }}">
+        <form method="POST" action="{{ route('finance.variable.store') }}" class="finance-form">
             @csrf
             <input type="hidden" name="month" value="{{ $month }}">
             <div class="form-row">
@@ -501,7 +501,7 @@
                 </div>
                 <div class="form-group">
                     <label>Valor (R$)</label>
-                    <input type="number" name="amount" step="0.01" min="0" placeholder="0,00" required>
+                    <input type="text" inputmode="decimal" name="amount" placeholder="0,00" required class="money-input">
                 </div>
             </div>
             <button type="submit" class="btn btn-primary btn-sm" style="margin-top:.3rem">Adicionar</button>
@@ -616,7 +616,7 @@
 
     <div class="add-card" style="border-color:rgba(129,140,248,.15)">
         <div class="add-ttl" style="color:#818cf8">+ Adicionar / aportar</div>
-        <form method="POST" action="{{ route('finance.investment.store') }}">
+        <form method="POST" action="{{ route('finance.investment.store') }}" class="finance-form">
             @csrf
             <input type="hidden" name="month" value="{{ $month }}">
             <div class="form-row">
@@ -634,7 +634,7 @@
                 </div>
                 <div class="form-group">
                     <label>Aporte (R$)</label>
-                    <input type="number" name="amount" step="0.01" min="0" placeholder="0,00" required>
+                    <input type="text" inputmode="decimal" name="amount" placeholder="0,00" required class="money-input">
                 </div>
             </div>
             <button type="submit" class="btn btn-sm" style="margin-top:.3rem;background:#818cf8;color:#09090b;font-weight:700">Aportar</button>
@@ -761,6 +761,35 @@ function filterCat(cat, btnEl) {
         item.style.display = (cat === 'all' || item.dataset.cat === cat) ? '' : 'none';
     });
 }
+
+// ── Máscara monetária brasileira ──────────────────────────────
+function maskMoney(input) {
+    input.addEventListener('input', function() {
+        let v = this.value.replace(/\D/g, '');
+        if (!v) { this.value = ''; return; }
+        v = (parseInt(v, 10) / 100).toFixed(2);
+        this.value = v
+            .replace('.', ',')
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    });
+    input.addEventListener('blur', function() {
+        if (this.value && !this.value.includes(',')) {
+            this.value = this.value + ',00';
+        }
+    });
+}
+
+function unmaskMoney(form) {
+    form.querySelectorAll('.money-input').forEach(function(inp) {
+        inp.value = inp.value.replace(/\./g, '').replace(',', '.');
+    });
+}
+
+document.querySelectorAll('.money-input').forEach(function(inp) { maskMoney(inp); });
+
+document.querySelectorAll('.finance-form').forEach(function(form) {
+    form.addEventListener('submit', function() { unmaskMoney(this); });
+});
 </script>
 
 @endsection
