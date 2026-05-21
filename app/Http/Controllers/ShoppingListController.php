@@ -64,7 +64,8 @@ class ShoppingListController extends Controller
         }
         abort_if($list->isCompleted(), 422);
 
-        $discount = (float) str_replace(['.', ','], ['', '.'], $request->input('discount', 0));
+        // JS já converte "1.234,56" → "1234.56" antes do submit; basta cast direto
+        $discount = (float) $request->input('discount', 0);
 
         $total = $list->items()
             ->where('purchased', true)
