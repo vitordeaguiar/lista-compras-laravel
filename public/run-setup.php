@@ -31,9 +31,20 @@ if (!$artisan) {
     echo "Artisan não encontrado. Caminhos testados:\n";
     foreach ($candidates as $p) echo "  - $p\n";
     echo "\n__DIR__ = " . __DIR__ . "\n";
-    echo "Conteúdo de " . dirname(__DIR__) . ":\n";
+
+    echo "\nConteúdo de " . dirname(__DIR__) . ":\n";
     $files = @scandir(dirname(__DIR__)) ?: [];
     foreach ($files as $f) echo "  $f\n";
+
+    echo "\nConteúdo de " . __DIR__ . ":\n";
+    $files2 = @scandir(__DIR__) ?: [];
+    foreach ($files2 as $f) echo "  $f\n";
+
+    $lcPath = '/home1/vit75277/lista-compras';
+    echo "\nConteúdo de $lcPath:\n";
+    $files3 = @scandir($lcPath) ?: ['(não acessível ou vazio)'];
+    foreach ($files3 as $f) echo "  $f\n";
+
     echo '</pre>';
     exit;
 }
