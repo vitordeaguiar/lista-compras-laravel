@@ -122,6 +122,9 @@
     .bn-item:hover{color:#a1a1aa}
     .bn-icon{font-size:1.1rem;line-height:1}
 
+    /* ── FOOTER ── */
+    .app-footer{text-align:center;padding:.65rem 1rem;border-top:1px solid var(--border);font-size:.62rem;color:var(--text3);letter-spacing:.04em}
+
     /* ── MOBILE RESPONSIVE ── */
     @media(max-width:768px){
         .sidebar{display:none}
@@ -131,6 +134,7 @@
         .bottom-nav{display:flex}
         .stats-grid{grid-template-columns:1fr 1fr}
         .modal{max-width:95vw}
+        .app-footer{margin-bottom:56px}
     }
     </style>
     @stack('styles')
@@ -202,6 +206,7 @@
             @if(session('info'))<div class="alert alert-info">{{ session('info') }}</div>@endif
             @yield('content')
         </main>
+        <footer class="app-footer">VAF Solutions &copy; 2026</footer>
     </div>
 
     {{-- Bottom Navigation (mobile only) --}}
