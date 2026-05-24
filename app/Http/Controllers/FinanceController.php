@@ -52,8 +52,12 @@ class FinanceController extends Controller
         $totalInvestment = FinancialInvestmentEntry::where('user_id', $user->id)
             ->where('month', $month)->sum('amount');
 
+        // Cartões de crédito
+        $creditCardsTotal = \App\Models\CreditCardPayment::where('user_id', $user->id)
+            ->where('month', $month)->sum('amount');
+
         // Saldo
-        $balance = $totalIncome - $totalFixed - $totalVariable - $supermarket - $totalInvestment;
+        $balance = $totalIncome - $totalFixed - $totalVariable - $supermarket - $totalInvestment - $creditCardsTotal;
 
         // Gráfico rosca — por categoria
         $chartDonut = [
@@ -85,7 +89,7 @@ class FinanceController extends Controller
             'variables', 'totalVariable',
             'supermarket', 'investments', 'totalInvestment',
             'balance', 'chartDonut', 'chartBars',
-            'prevFixedPayments'
+            'prevFixedPayments', 'creditCardsTotal'
         ));
     }
 

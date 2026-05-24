@@ -8,6 +8,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CreditCardController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login',               [AuthController::class, 'showLogin'])->name('login');
@@ -58,6 +59,21 @@ Route::middleware('auth')->group(function () {
     Route::patch('/financeiro/investimentos/{investment}/initial', [FinanceController::class, 'updateInvestmentInitial'])->name('finance.investment.initial');
     Route::delete('/financeiro/investimentos/{investment}',       [FinanceController::class, 'destroyInvestment'])->name('finance.investment.destroy');
     Route::post('/financeiro/abrir-mes',                      [FinanceController::class, 'openMonth'])->name('finance.open-month');
+
+    // Credit Cards
+    Route::prefix('cartoes')->name('creditcards.')->group(function () {
+        Route::get('/', [CreditCardController::class, 'index'])->name('index');
+        Route::post('/', [CreditCardController::class, 'store'])->name('store');
+        Route::delete('/{card}', [CreditCardController::class, 'destroy'])->name('destroy');
+
+        Route::post('/{card}/parcelamentos', [CreditCardController::class, 'storeInstallment'])->name('installments.store');
+        Route::post('/parcelamentos/{installment}/quitar', [CreditCardController::class, 'payOffInstallment'])->name('installments.payoff');
+        Route::post('/parcelamentos/{installment}/avancar', [CreditCardController::class, 'advanceInstallment'])->name('installments.advance');
+        Route::delete('/parcelamentos/{installment}', [CreditCardController::class, 'destroyInstallment'])->name('installments.destroy');
+
+        Route::post('/pagamentos/{payment}/toggle', [CreditCardController::class, 'togglePayment'])->name('payments.toggle');
+        Route::patch('/pagamentos/{payment}/valor', [CreditCardController::class, 'updatePaymentAmount'])->name('payments.amount');
+    });
 
     // Profile & Settings
     Route::get('/perfil',                                 [ProfileController::class, 'index'])->name('profile.index');

@@ -169,6 +169,9 @@
             <a href="{{ route('finance.index') }}" class="sb-item {{ request()->routeIs('finance.*') ? 'active' : '' }}">
                 <span class="sb-icon">📊</span> Financeiro
             </a>
+            <a href="{{ route('creditcards.index') }}" class="sb-item {{ request()->routeIs('creditcards.*') ? 'active' : '' }}">
+                <span class="sb-icon">💳</span> Cartões
+            </a>
             <a href="{{ route('profile.index') }}" class="sb-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                 <span class="sb-icon">⚙️</span> Configurações
             </a>

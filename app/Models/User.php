@@ -53,6 +53,11 @@ class User extends Authenticatable
         return $this->hasMany(FinancialInvestmentEntry::class);
     }
 
+    public function creditCards()
+    {
+        return $this->hasMany(CreditCard::class);
+    }
+
     public function settings()
     {
         return $this->hasOne(UserSetting::class)->withDefault([
