@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -26,115 +26,135 @@
     <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-        --bg:#09090b;--bg1:#111113;--bg2:#18181b;--bg3:#27272a;
+        --bg:#09090b;--bg1:#111113;--bg2:#18181b;--bg3:#27272a;--bg4:#2e2e32;
         --border:#3f3f46;--border2:#52525b;
         --accent:#2dd4bf;--accent2:#14b8a6;--adim:rgba(45,212,191,.1);
         --text:#fafafa;--text2:#a1a1aa;--text3:#71717a;
-        --danger:#ef4444;--warning:#f59e0b;--blue:#6366f1;--bluedim:rgba(99,102,241,.12);
-        --radius:10px;
+        --danger:#ef4444;--danger-dim:rgba(239,68,68,.1);
+        --warning:#f59e0b;--warning-dim:rgba(245,158,11,.1);
+        --blue:#6366f1;--bluedim:rgba(99,102,241,.12);
+        --green:#22c55e;--green-dim:rgba(34,197,94,.1);
+        --shadow-sm:0 1px 3px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.2);
+        --shadow-md:0 4px 12px rgba(0,0,0,.4),0 2px 4px rgba(0,0,0,.25);
+        --radius:10px;--radius-sm:7px;--radius-lg:14px;
+        --sb-width:240px;
     }
     html.light{
-        --bg:#f8fafc;--bg1:#ffffff;--bg2:#f1f5f9;--bg3:#e2e8f0;
-        --border:#e2e8f0;--border2:#cbd5e1;
+        --bg:#f4f6fa;--bg1:#ffffff;--bg2:#f1f5f9;--bg3:#e8edf5;--bg4:#dde3ee;
+        --border:#dde3ee;--border2:#c8d0df;
         --text:#0f172a;--text2:#475569;--text3:#94a3b8;
-        --adim:rgba(45,212,191,.12);--bluedim:rgba(99,102,241,.1);
+        --adim:rgba(45,212,191,.1);
+        --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+        --shadow-md:0 4px 12px rgba(0,0,0,.1),0 2px 4px rgba(0,0,0,.06);
     }
-    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;line-height:1.5;font-size:14px}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;line-height:1.6;font-size:15px;-webkit-font-smoothing:antialiased}
 
     /* ── APP SHELL ── */
     .app-shell{display:flex;min-height:100vh}
 
     /* ── SIDEBAR ── */
-    .sidebar{width:220px;min-height:100vh;background:var(--bg1);border-right:1px solid var(--border);position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column;z-index:50}
-    .sb-logo{padding:1rem .9rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.55rem;text-decoration:none;flex-shrink:0}
-    .sb-logo-icon{width:30px;height:30px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .sb-logo-text{font-size:.88rem;font-weight:700;color:var(--text);line-height:1.15}
+    .sidebar{width:var(--sb-width);min-height:100vh;background:var(--bg1);border-right:1px solid var(--border);position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column;z-index:50}
+    .sb-logo{padding:1.1rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.65rem;text-decoration:none;flex-shrink:0}
+    .sb-logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px var(--adim)}
+    .sb-logo-text{font-size:.9rem;font-weight:700;color:var(--text);line-height:1.15;letter-spacing:-.01em}
     .sb-logo-text em{color:var(--accent);font-style:normal}
-    .sb-nav{flex:1;padding:.5rem .45rem;display:flex;flex-direction:column;gap:.05rem;overflow-y:auto}
-    .sb-item{display:flex;align-items:center;gap:.5rem;padding:.48rem .65rem;border-radius:8px;text-decoration:none;color:var(--text2);font-size:.79rem;font-weight:500;transition:all .15s;white-space:nowrap}
+    .sb-nav{flex:1;padding:.6rem .55rem;display:flex;flex-direction:column;gap:.06rem;overflow-y:auto}
+    .sb-section{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);padding:.5rem .6rem .25rem;margin-top:.35rem}
+    .sb-section:first-child{margin-top:0}
+    .sb-item{display:flex;align-items:center;gap:.55rem;padding:.52rem .7rem;border-radius:8px;text-decoration:none;color:var(--text2);font-size:.82rem;font-weight:500;transition:background .14s,color .14s;white-space:nowrap;position:relative}
     .sb-item:hover{background:var(--bg3);color:var(--text)}
     .sb-item.active{background:var(--adim);color:var(--accent)}
-    .sb-icon{font-size:.82rem;flex-shrink:0;width:16px;text-align:center}
-    .sb-badge{margin-left:auto;background:var(--accent);color:#09090b;font-size:.58rem;font-weight:700;padding:.06rem .32rem;border-radius:99px;min-width:16px;text-align:center;line-height:1.5}
-    .sb-user{padding:.65rem .9rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.5rem;flex-shrink:0}
-    .sb-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent) 0%,var(--blue) 100%);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#09090b;flex-shrink:0;text-transform:uppercase}
+    .sb-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
+    .sb-icon{width:18px;height:18px;flex-shrink:0;opacity:.8;display:flex;align-items:center;justify-content:center}
+    .sb-item.active .sb-icon{opacity:1}
+    .sb-badge{margin-left:auto;background:var(--accent);color:#09090b;font-size:.58rem;font-weight:700;padding:.07rem .35rem;border-radius:99px;min-width:18px;text-align:center;line-height:1.6}
+    .sb-user{padding:.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.6rem;flex-shrink:0}
+    .sb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent) 0%,var(--blue) 100%);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#09090b;flex-shrink:0;text-transform:uppercase;box-shadow:0 0 0 2px var(--adim)}
     .sb-uinfo{flex:1;min-width:0}
-    .sb-uname{font-size:.74rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .sb-uplan{font-size:.59rem;color:var(--text3)}
-    .sb-logout{background:none;border:none;color:var(--text3);cursor:pointer;padding:.2rem .3rem;border-radius:5px;font-size:.72rem;transition:color .15s;flex-shrink:0;font-family:'Inter',sans-serif}
-    .sb-logout:hover{color:var(--danger)}
+    .sb-uname{font-size:.78rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+    .sb-uemail{font-size:.62rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1rem}
+    .sb-logout{background:none;border:none;color:var(--text3);cursor:pointer;padding:.25rem;border-radius:6px;transition:color .15s,background .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:28px;height:28px;font-family:'Inter',sans-serif}
+    .sb-logout:hover{color:var(--danger);background:var(--danger-dim)}
 
     /* ── MAIN AREA ── */
-    .main-area{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
-    .topbar{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.75rem;border-bottom:1px solid var(--border);background:var(--bg);gap:1rem;flex-wrap:wrap;min-height:60px}
-    .topbar-left .topbar-title{font-size:.95rem;font-weight:700;color:var(--text);line-height:1.2}
-    .topbar-left .topbar-sub{font-size:.71rem;color:var(--text3);margin-top:.08rem}
-    .topbar-actions{display:flex;align-items:center;gap:.45rem;flex-shrink:0;flex-wrap:wrap}
-    .page-content{padding:1.4rem 1.75rem 3rem;flex:1}
+    .main-area{margin-left:var(--sb-width);flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.85rem;border-bottom:1px solid var(--border);background:var(--bg);gap:1rem;flex-wrap:wrap;min-height:64px;position:sticky;top:0;z-index:40;backdrop-filter:blur(8px)}
+    .topbar-left .topbar-title{font-size:1rem;font-weight:700;color:var(--text);line-height:1.2;letter-spacing:-.01em}
+    .topbar-left .topbar-sub{font-size:.72rem;color:var(--text3);margin-top:.1rem}
+    .topbar-actions{display:flex;align-items:center;gap:.5rem;flex-shrink:0;flex-wrap:wrap}
+    .page-content{padding:1.5rem 1.85rem 3rem;flex:1}
 
     /* ── ALERTS ── */
-    .alert{padding:.55rem .85rem;border-radius:var(--radius);margin-bottom:.85rem;font-size:.79rem;border-left:3px solid var(--accent);background:var(--adim);color:var(--accent)}
-    .alert-error{border-color:var(--danger);background:rgba(239,68,68,.08);color:var(--danger)}
-    .alert-info{border-color:var(--warning);background:rgba(245,158,11,.08);color:var(--warning)}
+    .alert{padding:.6rem .9rem;border-radius:var(--radius);margin-bottom:.9rem;font-size:.8rem;font-weight:500;border-left:3px solid var(--accent);background:var(--adim);color:var(--accent);display:flex;align-items:center;gap:.5rem}
+    .alert-error{border-color:var(--danger);background:var(--danger-dim);color:var(--danger)}
+    .alert-info{border-color:var(--warning);background:var(--warning-dim);color:var(--warning)}
 
     /* ── INPUTS ── */
-    input[type="text"],input[type="email"],input[type="password"],input[type="date"],input[type="number"],input[type="tel"],textarea,select{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.52rem .8rem;border-radius:8px;font-family:'Inter',sans-serif;font-size:.82rem;transition:border-color .2s;outline:none}
-    input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+    input[type="text"],input[type="email"],input[type="password"],input[type="date"],input[type="number"],input[type="tel"],textarea,select{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .85rem;border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;transition:border-color .18s,box-shadow .18s;outline:none;min-height:38px}
+    input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--adim)}
     input::placeholder,textarea::placeholder{color:var(--text3)}
-    label{display:block;font-size:.63rem;color:var(--text2);margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.06em}
-    .form-group{margin-bottom:.8rem}
-    .field-error{color:var(--danger);font-size:.71rem;margin-top:.2rem}
+    label{display:block;font-size:.72rem;color:var(--text2);margin-bottom:.3rem;font-weight:500;letter-spacing:.01em}
+    .form-group{margin-bottom:.85rem}
+    .field-error{color:var(--danger);font-size:.72rem;margin-top:.22rem;display:flex;align-items:center;gap:.25rem}
 
     /* ── BUTTONS ── */
-    .btn{display:inline-flex;align-items:center;gap:.32rem;padding:.48rem .85rem;border-radius:8px;font-family:'Inter',sans-serif;font-size:.79rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;white-space:nowrap}
-    .btn-primary{background:var(--accent);color:#09090b}
-    .btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.5rem .95rem;border-radius:8px;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;border:none;transition:all .16s;text-decoration:none;white-space:nowrap;min-height:36px;letter-spacing:.01em}
+    .btn-primary{background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);color:#09090b;box-shadow:0 2px 8px var(--adim)}
+    .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 4px 14px var(--adim)}
+    .btn-primary:active{transform:translateY(0);box-shadow:var(--shadow-sm)}
     .btn-ghost{background:var(--bg2);border:1px solid var(--border);color:var(--text2)}
-    .btn-ghost:hover{border-color:var(--border2);color:var(--text)}
-    .btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--danger)}
-    .btn-danger:hover{background:rgba(239,68,68,.16)}
-    .btn-sm{padding:.3rem .6rem;font-size:.72rem;border-radius:6px}
+    .btn-ghost:hover{border-color:var(--border2);color:var(--text);background:var(--bg3)}
+    .btn-danger{background:var(--danger-dim);border:1px solid rgba(239,68,68,.25);color:var(--danger)}
+    .btn-danger:hover{background:rgba(239,68,68,.18)}
+    .btn-sm{padding:.3rem .65rem;font-size:.74rem;border-radius:6px;min-height:30px}
 
     /* ── STAT CARDS ── */
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:.7rem;margin-bottom:1.4rem}
-    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem .95rem}
-    .stat-card.hl{border-color:rgba(56,189,248,.22);background:rgba(56,189,248,.04)}
-    .stat-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.28rem}
-    .stat-val{font-size:1.3rem;font-weight:700;color:var(--text);line-height:1}
-    .stat-card.hl .stat-val{color:var(--accent)}
-    .stat-hint{font-size:.6rem;color:var(--text3);margin-top:.22rem}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:.8rem;margin-bottom:1.5rem}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.1rem;transition:border-color .2s}
+    .stat-card:hover{border-color:var(--border2)}
+    .stat-card.hl,.stat-card.accent{border-color:rgba(45,212,191,.25);background:var(--adim)}
+    .stat-card.danger{border-color:rgba(239,68,68,.2);background:var(--danger-dim)}
+    .stat-card.warning{border-color:rgba(245,158,11,.2);background:var(--warning-dim)}
+    .stat-card.blue{border-color:rgba(99,102,241,.2);background:var(--bluedim)}
+    .stat-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);margin-bottom:.3rem}
+    .stat-val{font-size:1.35rem;font-weight:800;color:var(--text);line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+    .stat-card.hl .stat-val,.stat-card.accent .stat-val{color:var(--accent)}
+    .stat-card.danger .stat-val{color:var(--danger)}
+    .stat-card.warning .stat-val{color:var(--warning)}
+    .stat-card.blue .stat-val{color:var(--blue)}
+    .stat-hint{font-size:.62rem;color:var(--text3);margin-top:.28rem}
 
     /* ── SECTION LABEL ── */
-    .sec-label{font-size:.63rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.55rem;display:flex;align-items:center;justify-content:space-between}
+    .sec-label{font-size:.63rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.6rem;display:flex;align-items:center;justify-content:space-between;font-weight:600}
     .sec-badge{background:var(--bg3);border:1px solid var(--border);color:var(--text3);font-size:.57rem;padding:.06rem .34rem;border-radius:99px}
 
     /* ── MODAL ── */
-    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:1rem}
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)}
     .modal-backdrop.open{display:flex}
-    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.35rem;width:100%;max-width:420px}
-    .modal-title{font-size:.88rem;font-weight:700;margin-bottom:.95rem;color:var(--text)}
-    .modal-footer{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.95rem}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.45rem;width:100%;max-width:420px;box-shadow:var(--shadow-md)}
+    .modal-title{font-size:.92rem;font-weight:700;margin-bottom:1rem;color:var(--text);display:flex;align-items:center;gap:.5rem}
+    .modal-footer{display:flex;gap:.45rem;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
 
     /* ── BOTTOM NAV (mobile) ── */
-    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#111113;border-top:1px solid #27272a;height:56px;z-index:100;align-items:center;justify-content:space-around;padding:0 .5rem}
-    .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;padding:.4rem .6rem;border-radius:8px;text-decoration:none;color:#71717a;font-size:.55rem;font-weight:500;flex:1;transition:color .15s;min-width:0}
-    .bn-item.active{color:#2dd4bf}
-    .bn-item:hover{color:#a1a1aa}
-    .bn-icon{font-size:1.1rem;line-height:1}
+    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border);height:60px;z-index:100;align-items:center;justify-content:space-around;padding:0 .25rem;padding-bottom:env(safe-area-inset-bottom)}
+    .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;padding:.5rem .7rem;border-radius:10px;text-decoration:none;color:var(--text3);font-size:.57rem;font-weight:600;flex:1;transition:color .15s;min-width:0;min-height:44px;touch-action:manipulation}
+    .bn-item.active{color:var(--accent)}
+    .bn-item:hover{color:var(--text2)}
+    .bn-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center}
 
     /* ── FOOTER ── */
-    .app-footer{text-align:center;padding:.65rem 1rem;border-top:1px solid var(--border);font-size:.62rem;color:var(--text3);letter-spacing:.04em}
+    .app-footer{text-align:center;padding:.7rem 1rem;border-top:1px solid var(--border);font-size:.62rem;color:var(--text3);letter-spacing:.04em}
 
     /* ── MOBILE RESPONSIVE ── */
     @media(max-width:768px){
         .sidebar{display:none}
         .main-area{margin-left:0}
-        .topbar{padding:.75rem 1rem}
-        .page-content{padding:1rem 1rem 72px}
+        .topbar{padding:.85rem 1.1rem}
+        .page-content{padding:1.1rem 1.1rem 76px}
         .bottom-nav{display:flex}
         .stats-grid{grid-template-columns:1fr 1fr}
-        .modal{max-width:95vw}
-        .app-footer{margin-bottom:56px}
+        .modal{max-width:96vw}
+        .app-footer{margin-bottom:60px}
     }
     </style>
     @stack('styles')
@@ -145,10 +165,10 @@
     <aside class="sidebar">
         <a class="sb-logo" href="{{ route('dashboard') }}">
             <div class="sb-logo-icon">
-                <svg width="16" height="16" viewBox="0 0 28 28" fill="none">
+                <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
                     <path d="M7 9h14M7 14h9M7 19h11" stroke="#09090b" stroke-width="2.5" stroke-linecap="round"/>
                     <circle cx="21" cy="19" r="3.5" fill="#09090b"/>
-                    <path d="M19.5 19l1 1 2-2" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.5 19l1 1 2-2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
             <div class="sb-logo-text">Smart <em>Listiq</em></div>
@@ -156,28 +176,80 @@
 
         <nav class="sb-nav">
             @php $openCount = Auth::user()->shoppingLists()->where('status','open')->count(); @endphp
+
+            <div class="sb-section">Principal</div>
+
             <a href="{{ route('dashboard') }}" class="sb-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <span class="sb-icon">⊞</span> Dashboard
+                <span class="sb-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                </span>
+                Dashboard
             </a>
+
             <a href="{{ route('lists.index') }}" class="sb-item {{ request()->routeIs('lists.*') ? 'active' : '' }}">
-                <span class="sb-icon">≡</span> Minhas Listas
+                <span class="sb-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                </span>
+                Minhas Listas
                 @if($openCount > 0)<span class="sb-badge">{{ $openCount }}</span>@endif
             </a>
+
             <a href="{{ route('history.index') }}" class="sb-item {{ request()->routeIs('history.*') ? 'active' : '' }}">
-                <span class="sb-icon">🕐</span> Histórico
+                <span class="sb-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </span>
+                Histórico
             </a>
+
+            <div class="sb-section">Finanças</div>
+
             <a href="{{ route('finance.index') }}" class="sb-item {{ request()->routeIs('finance.*') ? 'active' : '' }}">
-                <span class="sb-icon">📊</span> Financeiro
+                <span class="sb-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </span>
+                Financeiro
             </a>
+
             <a href="{{ route('creditcards.index') }}" class="sb-item {{ request()->routeIs('creditcards.*') ? 'active' : '' }}">
-                <span class="sb-icon">💳</span> Cartões
+                <span class="sb-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                </span>
+                Cartões
             </a>
+
+            <div class="sb-section">Conta</div>
+
             <a href="{{ route('profile.index') }}" class="sb-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
-                <span class="sb-icon">⚙️</span> Configurações
+                <span class="sb-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </span>
+                Configurações
             </a>
+
             @if(Auth::user()->is_admin)
             <a href="/admin" class="sb-item {{ request()->is('admin*') ? 'active' : '' }}">
-                <span class="sb-icon">🛡️</span> Admin
+                <span class="sb-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </span>
+                Admin
             </a>
             @endif
         </nav>
@@ -186,11 +258,17 @@
             <div class="sb-avatar">{{ mb_substr(Auth::user()->name, 0, 1) }}</div>
             <a href="{{ route('profile.index') }}" class="sb-uinfo" style="text-decoration:none;display:block">
                 <div class="sb-uname">{{ Auth::user()->name }}</div>
-                <div class="sb-uplan">Free Plan</div>
+                <div class="sb-uemail">{{ Auth::user()->email }}</div>
             </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="sb-logout" title="Sair">⇥</button>
+                <button type="submit" class="sb-logout" title="Sair">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </button>
             </form>
         </div>
     </aside>
@@ -215,23 +293,46 @@
     {{-- Bottom Navigation (mobile only) --}}
     <nav class="bottom-nav">
         <a href="{{ route('dashboard') }}" class="bn-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-            <span class="bn-icon">⊞</span>
+            <span class="bn-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+            </span>
             <span>Início</span>
         </a>
         <a href="{{ route('lists.index') }}" class="bn-item {{ request()->routeIs('lists.*') ? 'active' : '' }}">
-            <span class="bn-icon">≡</span>
+            <span class="bn-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+            </span>
             <span>Listas</span>
         </a>
         <a href="{{ route('history.index') }}" class="bn-item {{ request()->routeIs('history.*') ? 'active' : '' }}">
-            <span class="bn-icon">🕐</span>
+            <span class="bn-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </span>
             <span>Histórico</span>
         </a>
         <a href="{{ route('finance.index') }}" class="bn-item {{ request()->routeIs('finance.*') ? 'active' : '' }}">
-            <span class="bn-icon">📊</span>
+            <span class="bn-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+            </span>
             <span>Financeiro</span>
         </a>
         <a href="{{ route('profile.index') }}" class="bn-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
-            <span class="bn-icon">⚙️</span>
+            <span class="bn-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+            </span>
             <span>Perfil</span>
         </a>
     </nav>

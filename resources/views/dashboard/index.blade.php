@@ -8,29 +8,29 @@
 
 @push('styles')
 <style>
-:root{
-    --green:#22c55e;--gdim:rgba(34,197,94,.1);
-    --ddim:rgba(239,68,68,.1);
-    --wdim:rgba(245,158,11,.1);
-}
-
 /* ── Finance cards ── */
-.dash-fcard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:.68rem .82rem}
-.dash-fcard.featured{border-color:rgba(45,212,191,.25);background:rgba(45,212,191,.04)}
-.dash-fcard-ic{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.6rem;margin-bottom:.38rem}
-.dash-fcard-lbl{font-size:.56rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:.15rem}
-.dash-fcard-val{font-size:.95rem;font-weight:900;letter-spacing:-.025em}
-.dash-fcard-diff{font-size:.56rem;margin-top:.1rem}
+.dash-fcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.9rem 1rem;transition:border-color .2s}
+.dash-fcard:hover{border-color:var(--border2)}
+.dash-fcard.featured{border-color:rgba(45,212,191,.25);background:var(--adim)}
+.dash-fcard.danger{border-color:rgba(239,68,68,.2);background:var(--danger-dim)}
+.dash-fcard.warning{border-color:rgba(245,158,11,.2);background:var(--warning-dim)}
+.dash-fcard-ic{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:.5rem;background:var(--bg3)}
+.dash-fcard.featured .dash-fcard-ic{background:var(--adim)}
+.dash-fcard.danger .dash-fcard-ic{background:var(--danger-dim)}
+.dash-fcard.warning .dash-fcard-ic{background:var(--warning-dim)}
+.dash-fcard-lbl{font-size:.6rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:.2rem}
+.dash-fcard-val{font-size:1.3rem;font-weight:800;letter-spacing:-.025em;font-variant-numeric:tabular-nums;line-height:1}
+.dash-fcard-diff{font-size:.6rem;margin-top:.2rem}
 
 /* ── Budget bar ── */
-.dash-budget{background:linear-gradient(135deg,#0f1f1e,#0a1a19);border:1px solid rgba(45,212,191,.2);border-radius:11px;padding:.82rem .95rem}
+.dash-budget{background:linear-gradient(135deg,rgba(45,212,191,.06) 0%,rgba(99,102,241,.06) 100%);border:1px solid rgba(45,212,191,.15);border-radius:var(--radius-lg);padding:.9rem 1.1rem}
 .dash-bitem{display:inline-flex;align-items:center;gap:.22rem;font-size:.58rem;color:var(--text2)}
 .dash-bdot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
 
 /* ── Cards ── */
-.dash-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;overflow:hidden}
-.dash-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:.58rem .82rem;border-bottom:1px solid var(--border)}
-.dash-card-title{font-size:.7rem;font-weight:700}
+.dash-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.dash-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:.62rem .88rem;border-bottom:1px solid var(--border)}
+.dash-card-title{font-size:.72rem;font-weight:700;display:flex;align-items:center;gap:.35rem}
 .dash-card-act{font-size:.6rem;color:var(--accent);text-decoration:none;font-weight:500}
 .dash-card-act:hover{text-decoration:underline}
 
@@ -53,8 +53,8 @@
 .dash-vrow-name{font-size:.68rem;font-weight:600;margin-bottom:.06rem}
 .dash-vrow-meta{font-size:.56rem;color:var(--text3);display:flex;align-items:center;gap:.25rem}
 .dash-vbdg{font-size:.5rem;font-weight:600;padding:.05rem .28rem;border-radius:4px}
-.dash-vlate{background:var(--ddim);color:var(--danger)}
-.dash-vwarn{background:var(--wdim);color:var(--warning)}
+.dash-vlate{background:var(--danger-dim);color:var(--danger)}
+.dash-vwarn{background:var(--warning-dim);color:var(--warning)}
 
 /* ── Activity rows ── */
 .dash-arow{display:flex;align-items:flex-start;gap:.5rem;padding:.48rem .82rem;border-bottom:1px solid var(--border)}
@@ -90,21 +90,27 @@
 <div class="dash-4col" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:.75rem">
 
     <div class="dash-fcard">
-        <div class="dash-fcard-ic" style="background:var(--gdim)">💰</div>
+        <div class="dash-fcard-ic">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
         <div class="dash-fcard-lbl">Entradas {{ now()->locale('pt_BR')->isoFormat('MMM') }}</div>
         <div class="dash-fcard-val" style="color:var(--green)">R$ {{ number_format($totalIncome, 0, ',', '.') }}</div>
         <div class="dash-fcard-diff" style="color:var(--green)">↑ salário recebido</div>
     </div>
 
-    <div class="dash-fcard">
-        <div class="dash-fcard-ic" style="background:var(--ddim)">↓</div>
+    <div class="dash-fcard danger">
+        <div class="dash-fcard-ic">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+        </div>
         <div class="dash-fcard-lbl">Saídas {{ now()->locale('pt_BR')->isoFormat('MMM') }}</div>
         <div class="dash-fcard-val" style="color:var(--danger)">R$ {{ number_format($totalOut, 0, ',', '.') }}</div>
         <div class="dash-fcard-diff" style="color:var(--text3)">fixos + variáveis</div>
     </div>
 
     <div class="dash-fcard featured">
-        <div class="dash-fcard-ic" style="background:var(--adim)">💵</div>
+        <div class="dash-fcard-ic">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
         <div class="dash-fcard-lbl">Saldo livre</div>
         <div class="dash-fcard-val" style="color:{{ $balance >= 0 ? 'var(--accent)' : 'var(--danger)' }}">
             R$ {{ number_format(abs($balance), 0, ',', '.') }}
@@ -112,8 +118,10 @@
         <div class="dash-fcard-diff" style="color:var(--warning)">{{ $budgetPct }}% comprometido</div>
     </div>
 
-    <div class="dash-fcard">
-        <div class="dash-fcard-ic" style="background:var(--wdim)">⏰</div>
+    <div class="dash-fcard warning">
+        <div class="dash-fcard-ic">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
         <div class="dash-fcard-lbl">A pagar</div>
         <div class="dash-fcard-val" style="color:var(--warning)">{{ $upcomingBills->count() }} contas</div>
         <div class="dash-fcard-diff" style="color:var(--warning)">vence em breve</div>
@@ -125,7 +133,7 @@
 <div class="dash-budget" style="margin-bottom:.75rem">
     <div style="display:flex;justify-content:space-between;margin-bottom:.4rem">
         <span style="font-size:.7rem;font-weight:700;color:var(--accent)">
-            📊 Orçamento de {{ now()->locale('pt_BR')->isoFormat('MMMM') }} — {{ $budgetPct }}% comprometido
+            Orçamento de {{ now()->locale('pt_BR')->isoFormat('MMMM') }} — {{ $budgetPct }}% comprometido
         </span>
         <span style="font-size:.68rem;font-weight:700;color:var(--warning)">
             R$ {{ number_format($balance, 2, ',', '.') }} restam
@@ -148,7 +156,10 @@
     {{-- Listas abertas --}}
     <div class="dash-card">
         <div class="dash-card-hdr">
-            <span class="dash-card-title">🛒 Listas abertas</span>
+            <span class="dash-card-title">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Listas abertas
+            </span>
             <a href="{{ route('lists.index') }}" class="dash-card-act">Ver todas →</a>
         </div>
         @forelse($openLists->take(2) as $list)
@@ -183,12 +194,15 @@
     {{-- Contas a vencer --}}
     <div class="dash-card">
         <div class="dash-card-hdr">
-            <span class="dash-card-title">⏰ Contas a vencer</span>
+            <span class="dash-card-title">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Contas a vencer
+            </span>
             <a href="{{ route('finance.index') }}" class="dash-card-act">Financeiro →</a>
         </div>
         @forelse($upcomingBills as $bill)
             <div class="dash-vrow">
-                <div class="dash-vrow-ic" style="background:var(--wdim)">{{ $bill->fixedCost->icon ?? '💰' }}</div>
+                <div class="dash-vrow-ic" style="background:var(--warning-dim)">{{ $bill->fixedCost->icon ?? '💳' }}</div>
                 <div class="dash-vrow-body">
                     <div class="dash-vrow-name">{{ $bill->fixedCost->name ?? 'Conta' }}</div>
                     <div class="dash-vrow-meta">
@@ -214,7 +228,10 @@
     {{-- Atividade recente --}}
     <div class="dash-card">
         <div class="dash-card-hdr">
-            <span class="dash-card-title">⚡ Atividade recente</span>
+            <span class="dash-card-title">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Atividade recente
+            </span>
         </div>
         @forelse($recentActivity as $act)
             <div class="dash-arow">
@@ -240,7 +257,10 @@
     {{-- GRÁFICO FINANCEIRO --}}
     <div class="dash-card">
         <div class="dash-card-hdr">
-            <span class="dash-card-title" id="finTitle">💰 Financeiro — Semanal</span>
+            <span class="dash-card-title" id="finTitle">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span id="finTitleText">Financeiro — Semanal</span>
+            </span>
             <a href="{{ route('finance.index') }}" class="dash-card-act">Ver financeiro →</a>
         </div>
         <div class="dash-chart-ctrl">
@@ -268,7 +288,10 @@
     {{-- GRÁFICO MERCADO --}}
     <div class="dash-card">
         <div class="dash-card-hdr">
-            <span class="dash-card-title" id="mktTitle">🛒 Mercado — Semanal</span>
+            <span class="dash-card-title" id="mktTitle">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span id="mktTitleText">Mercado — Semanal</span>
+            </span>
             <a href="{{ route('history.index') }}" class="dash-card-act">Ver histórico →</a>
         </div>
         <div class="dash-chart-ctrl">
@@ -320,12 +343,12 @@ function renderChart(chart) {
     const wrap   = document.getElementById(chart + 'Chart');
     const legend = document.getElementById(chart + 'Legend');
     const total  = document.getElementById(chart + 'Total');
-    const title  = document.getElementById(chart + 'Title');
+    const title  = document.getElementById(chart + 'TitleText');
     wrap.innerHTML = '';
 
     const isFin  = chart === 'fin';
     const accent = isFin ? 'var(--blue)' : 'var(--accent)';
-    const label  = isFin ? '💰 Financeiro' : '🛒 Mercado';
+    const label  = isFin ? 'Financeiro' : 'Mercado';
 
     if (mode === 'semanal') {
         title.textContent = label + ' — Semanal';
