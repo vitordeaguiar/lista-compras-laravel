@@ -70,7 +70,9 @@ class AdminController extends Controller
         if ($user->id === Auth::id()) {
             return back()->with('error', 'Você não pode alterar seu próprio status.');
         }
-        $user->update(['is_admin' => !$user->is_admin]);
+        // is_admin não está no $fillable (proteção contra mass assignment) — atribuição direta
+        $user->is_admin = !$user->is_admin;
+        $user->save();
         return back()->with('success', 'Status de admin atualizado.');
     }
 }

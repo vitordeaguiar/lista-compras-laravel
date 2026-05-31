@@ -12,6 +12,7 @@ use App\Models\FinancialInvestment;
 use App\Models\FinancialInvestmentEntry;
 use App\Models\FinancialVariableCost;
 use App\Models\ShoppingList;
+use App\Models\User;
 use App\Models\UserSetting;
 use PHPUnit\Framework\TestCase;
 
@@ -84,5 +85,11 @@ class ModelFillableSecurityTest extends TestCase
     public function test_user_setting_nao_expoe_user_id(): void
     {
         $this->assertNoForbiddenFields(new UserSetting());
+    }
+
+    public function test_user_nao_expoe_is_admin(): void
+    {
+        // email e password são legítimos no User; o perigo é is_admin (escalonamento)
+        $this->assertNotContains('is_admin', (new User())->getFillable());
     }
 }

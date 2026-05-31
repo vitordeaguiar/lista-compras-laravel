@@ -37,7 +37,7 @@ config/              # app, database, auth, session, mail, cache, logging
 database/
   migrations/        # 17 migrações
   seeders/           # UserSeeder, AdminSeeder (vitordeaguiar0@gmail.com)
-public/              # Entry point + utilities (setup_mail.php, migrate.php, clearcache.php)
+public/              # Entry point + scripts de deploy protegidos por DEPLOY_TOKEN (migrate.php, clearcache.php)
 resources/views/     # Blade templates organizados por feature
 routes/web.php       # Todas as rotas
 ```
