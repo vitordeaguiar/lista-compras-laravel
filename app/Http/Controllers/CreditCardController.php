@@ -47,18 +47,19 @@ class CreditCardController extends Controller
 
             $card->current_payment = $payment;
 
-            $card->projection = [];
+            $projection = [];
             for ($i = 0; $i < 6; $i++) {
                 $m     = $monthDate->copy()->addMonths($i);
                 $total = (float) $card->installments
                     ->filter(fn($inst) => $inst->isActiveInMonth($m))
                     ->sum('installment_amount');
-                $card->projection[] = [
+                $projection[] = [
                     'label' => $m->locale('pt_BR')->isoFormat('MMM/YY'),
                     'month' => $m->format('Y-m'),
                     'value' => $total,
                 ];
             }
+            $card->projection = $projection;
         });
 
         $totalFatura       = $cards->sum('month_amount');

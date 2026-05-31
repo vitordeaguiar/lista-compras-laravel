@@ -53,6 +53,25 @@ class CreditCardTest extends TestCase
         ]);
     }
 
+    public function test_index_renderiza_projecao_sem_modificacao_indireta(): void
+    {
+        CreditCard::forceCreate([
+            'user_id'      => $this->user->id,
+            'name'         => 'Nubank',
+            'brand'        => 'mastercard',
+            'credit_limit' => 5000,
+            'due_day'      => 10,
+            'closing_day'  => 3,
+            'color'        => '#8b5cf6',
+            'is_active'    => true,
+        ]);
+
+        $this->actingAs($this->user)
+            ->get(route('creditcards.index'))
+            ->assertOk()
+            ->assertSee('Nubank');
+    }
+
     // ── store ──────────────────────────────────────────────────────────
 
     public function test_store_cria_cartao_com_user_id_correto(): void
