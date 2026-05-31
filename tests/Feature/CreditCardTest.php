@@ -352,6 +352,61 @@ class CreditCardTest extends TestCase
         }
     }
 
+    public function test_store_installment_recorrente_sem_total_installments(): void
+    {
+        $card = $this->makeCard();
+
+        // campo de parcelas vem desabilitado no front (não é enviado) ao marcar recorrente
+        $this->actingAs($this->user)
+            ->post(route('creditcards.installments.store', $card), [
+                'description'   => 'Netflix',
+                'category'      => 'assinatura',
+                'total_amount'  => '39,90',
+                'is_recurring'  => '1',
+                'purchase_date' => now()->toDateString(),
+            ])
+            ->assertRedirect();
+
+        $inst = CreditCardInstallment::where('description', 'Netflix')->first();
+        $this->assertNotNull($inst);
+        $this->assertTrue((bool) $inst->is_recurring);
+        $this->assertEquals(1, $inst->total_installments);
+        $this->assertEquals(39.90, (float) $inst->installment_amount);
+    }
+
+    public function test_update_installment_para_recorrente_sem_total_installments(): void
+    {
+        $card = $this->makeCard();
+        $inst = CreditCardInstallment::forceCreate([
+            'user_id'             => $this->user->id,
+            'credit_card_id'      => $card->id,
+            'description'         => 'Spotify',
+            'category'            => 'assinatura',
+            'total_amount'        => 200,
+            'installment_amount'  => 20,
+            'total_installments'  => 10,
+            'current_installment' => 1,
+            'is_recurring'        => false,
+            'purchase_date'       => now()->toDateString(),
+            'is_paid_off'         => false,
+        ]);
+
+        $this->actingAs($this->user)
+            ->patch(route('creditcards.installments.update', $inst), [
+                'description'   => 'Spotify',
+                'category'      => 'assinatura',
+                'total_amount'  => '21,90',
+                'is_recurring'  => '1',
+                'purchase_date' => now()->toDateString(),
+            ])
+            ->assertRedirect();
+
+        $inst->refresh();
+        $this->assertTrue((bool) $inst->is_recurring);
+        $this->assertEquals(1, $inst->total_installments);
+        $this->assertEquals(21.90, (float) $inst->installment_amount);
+    }
+
     private function makeCard(array $attrs = []): CreditCard
     {
         return CreditCard::forceCreate(array_merge([

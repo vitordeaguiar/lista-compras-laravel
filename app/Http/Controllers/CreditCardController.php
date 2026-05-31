@@ -133,7 +133,8 @@ class CreditCardController extends Controller
 
         $data = $this->validateInstallment($request);
         $totalAmount  = $this->parseMoney($data['total_amount']);
-        $installments = (int) $data['total_installments'];
+        $isRecurring  = $request->boolean('is_recurring');
+        $installments = $isRecurring ? 1 : max(1, (int) ($data['total_installments'] ?? 1));
 
         $installment = new CreditCardInstallment([
             'credit_card_id'     => $card->id,
@@ -142,7 +143,7 @@ class CreditCardController extends Controller
             'total_amount'       => $totalAmount,
             'installment_amount' => round($totalAmount / $installments, 2),
             'total_installments' => $installments,
-            'is_recurring'       => $request->boolean('is_recurring'),
+            'is_recurring'       => $isRecurring,
             'purchase_date'      => $data['purchase_date'],
             'is_paid_off'        => false,
         ]);
@@ -158,7 +159,8 @@ class CreditCardController extends Controller
 
         $data = $this->validateInstallment($request);
         $totalAmount  = $this->parseMoney($data['total_amount']);
-        $installments = (int) $data['total_installments'];
+        $isRecurring  = $request->boolean('is_recurring');
+        $installments = $isRecurring ? 1 : max(1, (int) ($data['total_installments'] ?? 1));
 
         $installment->update([
             'description'        => $data['description'],
@@ -166,7 +168,7 @@ class CreditCardController extends Controller
             'total_amount'       => $totalAmount,
             'installment_amount' => round($totalAmount / $installments, 2),
             'total_installments' => $installments,
-            'is_recurring'       => $request->boolean('is_recurring'),
+            'is_recurring'       => $isRecurring,
             'purchase_date'      => $data['purchase_date'],
             'manual_paid_count'  => null, // volta ao cálculo automático
         ]);
@@ -268,7 +270,7 @@ class CreditCardController extends Controller
             'description'        => 'required|string|max:255',
             'category'           => 'required|in:compras,assinatura,eletronico,casa,saude,carro,comida,outros',
             'total_amount'       => 'required|string',
-            'total_installments' => 'required|integer|min:1|max:72',
+            'total_installments' => 'required_unless:is_recurring,1|nullable|integer|min:1|max:72',
             'is_recurring'       => 'nullable|boolean',
             'purchase_date'      => 'required|date',
         ]);

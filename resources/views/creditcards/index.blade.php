@@ -526,7 +526,7 @@
                         <div class="form-group sm">
                             <label>Parcelas</label>
                             <input type="number" name="total_installments" required min="1" max="72" value="1"
-                                   id="parc-count-{{ $card->id }}" oninput="updateParcLabel({{ $card->id }})">
+                                   id="parc-count-{{ $card->id }}">
                         </div>
                         <div class="form-group">
                             <label>Data da compra</label>
