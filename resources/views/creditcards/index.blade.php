@@ -214,7 +214,7 @@
         <div class="cc-cards-grid">
             @foreach($cards as $card)
             @php
-                $used = $card->month_amount;
+                $used = $card->used_limit;
                 $limit = (float)$card->credit_limit;
                 $pct = $limit > 0 ? min(100, round($used / $limit * 100)) : 0;
             @endphp
@@ -272,10 +272,11 @@
 ══════════════════════════════════════ --}}
 @foreach($cards as $card)
 @php
-    $limit = (float)$card->credit_limit;
-    $used  = $card->month_amount;
-    $avail = max(0, $limit - $used);
-    $pct   = $limit > 0 ? min(100, round($used / $limit * 100)) : 0;
+    $limit  = (float)$card->credit_limit;
+    $fatura = $card->month_amount;   // o que vence neste mês
+    $used   = $card->used_limit;     // saldo devedor que ocupa o limite
+    $avail  = max(0, $limit - $used);
+    $pct    = $limit > 0 ? min(100, round($used / $limit * 100)) : 0;
     $payment = $card->current_payment;
 @endphp
 <div id="tab-card-{{ $card->id }}" class="tab-panel">
@@ -304,11 +305,15 @@
                     <span class="card-info-val">R$ {{ number_format($limit, 2, ',', '.') }}</span>
                 </div>
                 <div class="card-info-row">
-                    <span class="card-info-lbl">Fatura atual</span>
-                    <span class="card-info-val" style="color:var(--danger)">R$ {{ number_format($used, 2, ',', '.') }}</span>
+                    <span class="card-info-lbl">Fatura deste mês</span>
+                    <span class="card-info-val" style="color:var(--danger)">R$ {{ number_format($fatura, 2, ',', '.') }}</span>
                 </div>
                 <div class="card-info-row">
-                    <span class="card-info-lbl">Disponível</span>
+                    <span class="card-info-lbl">Saldo devedor</span>
+                    <span class="card-info-val" style="color:var(--warning)">R$ {{ number_format($used, 2, ',', '.') }}</span>
+                </div>
+                <div class="card-info-row">
+                    <span class="card-info-lbl">Limite disponível</span>
                     <span class="card-info-val" style="color:#22c55e">R$ {{ number_format($avail, 2, ',', '.') }}</span>
                 </div>
                 @if($limit > 0)
@@ -364,8 +369,21 @@
             </div>
             @endforeach
 
+            {{-- Edit card --}}
+            <button type="button" class="btn btn-ghost btn-sm edit-card-btn" style="width:100%;margin-top:.5rem"
+                    data-id="{{ $card->id }}"
+                    data-name="{{ $card->name }}"
+                    data-brand="{{ $card->brand }}"
+                    data-limit="{{ number_format($card->credit_limit, 2, ',', '.') }}"
+                    data-due="{{ $card->due_day }}"
+                    data-closing="{{ $card->closing_day }}"
+                    data-color="{{ $card->color }}"
+                    onclick="openEditCard(this)">
+                ✏️ Editar cartão
+            </button>
+
             {{-- Remove card --}}
-            <form method="POST" action="{{ route('creditcards.destroy', $card->id) }}" style="margin-top:.5rem"
+            <form method="POST" action="{{ route('creditcards.destroy', $card->id) }}" style="margin-top:.35rem"
                   onsubmit="return confirm('Desativar cartão {{ $card->name }}?')">
                 @csrf @method('DELETE')
                 <button type="submit" class="btn btn-danger btn-sm" style="width:100%">Desativar cartão</button>
@@ -384,19 +402,21 @@
             </div>
 
             <div class="inst-list" id="inst-list-{{ $card->id }}">
-                @forelse($card->installments->sortBy('is_paid_off') as $inst)
+                @forelse($card->installments->sortBy(fn($i) => $i->isFullyPaid($card) ? 1 : 0) as $inst)
                 @php
-                    $isRec = $inst->is_recurring;
-                    $total = $inst->total_installments;
-                    $curr  = $inst->current_installment;
+                    $isRec     = $inst->is_recurring;
+                    $total     = $inst->total_installments;
+                    $paidCount = $inst->paidInstallmentsCount($card);
+                    $curr      = $inst->currentInstallment($card);
+                    $fullyPaid = $inst->isFullyPaid($card);
                 @endphp
-                <div class="inst-item {{ $inst->is_paid_off ? 'quitado' : '' }}">
+                <div class="inst-item {{ $fullyPaid ? 'quitado' : '' }}">
                     <div class="inst-top">
                         <span class="inst-cat-icon">{{ $catIcons[$inst->category] ?? '📦' }}</span>
                         <span class="inst-desc" title="{{ $inst->description }}">{{ $inst->description }}</span>
                         @if($isRec)
                             <span class="inst-badge rec">Recorrente</span>
-                        @elseif($inst->is_paid_off)
+                        @elseif($fullyPaid)
                             <span class="inst-badge done">Quitado</span>
                         @else
                             <span class="inst-badge">{{ $curr }}/{{ $total }}</span>
@@ -408,7 +428,7 @@
                         <div class="inst-dots" id="dots-{{ $inst->id }}">
                             @for($d = 1; $d <= min($total, 36); $d++)
                                 @php
-                                    $cls = $d < $curr ? 'done' : ($d === $curr ? 'current' : 'future');
+                                    $cls = $d <= $paidCount ? 'done' : ($d === $curr ? 'current' : 'future');
                                 @endphp
                                 <span class="parc-dot {{ $cls }}"></span>
                             @endfor
@@ -424,35 +444,45 @@
                             <div class="inst-val">R$ {{ number_format($inst->installment_amount, 2, ',', '.') }}/mês</div>
                             @if(!$isRec)
                             <div class="inst-remaining">
-                                Restante: R$ {{ number_format($inst->getRemainingAmount(), 2, ',', '.') }}
-                                · até {{ $inst->getLastInstallmentMonth() }}
+                                Restante: R$ {{ number_format($inst->getRemainingAmount($card), 2, ',', '.') }}
+                                · até {{ $inst->getLastInstallmentMonth($card) }}
                             </div>
                             @endif
                         </div>
-                        @if(!$inst->is_paid_off)
                         <div class="inst-actions">
-                            @if(!$isRec)
+                            @if(!$isRec && !$fullyPaid)
+                            <form method="POST" action="{{ route('creditcards.installments.regress', $inst->id) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-ghost btn-sm" title="Voltar parcela" style="font-size:.65rem;padding:.22rem .45rem">◀</button>
+                            </form>
                             <form method="POST" action="{{ route('creditcards.installments.advance', $inst->id) }}">
                                 @csrf
-                                <button type="submit" class="btn btn-ghost btn-sm" title="Avançar parcela" style="font-size:.65rem;padding:.22rem .5rem">
-                                    ▶ Avançar
-                                </button>
+                                <button type="submit" class="btn btn-ghost btn-sm" title="Avançar parcela" style="font-size:.65rem;padding:.22rem .45rem">▶</button>
                             </form>
                             @endif
+                            <button type="button" class="btn btn-ghost btn-sm edit-inst-btn" title="Editar"
+                                    data-id="{{ $inst->id }}"
+                                    data-desc="{{ $inst->description }}"
+                                    data-cat="{{ $inst->category }}"
+                                    data-total="{{ number_format($inst->total_amount, 2, ',', '.') }}"
+                                    data-parc="{{ $inst->total_installments }}"
+                                    data-date="{{ \Carbon\Carbon::parse($inst->purchase_date)->format('Y-m-d') }}"
+                                    data-rec="{{ $inst->is_recurring ? 1 : 0 }}"
+                                    onclick="openEditInst(this)"
+                                    style="font-size:.65rem;padding:.22rem .45rem">✏️</button>
+                            @if(!$fullyPaid)
                             <form method="POST" action="{{ route('creditcards.installments.payoff', $inst->id) }}"
                                   onsubmit="return confirm('Marcar como quitado?')">
                                 @csrf
-                                <button type="submit" class="btn btn-ghost btn-sm" style="font-size:.65rem;padding:.22rem .5rem;color:#22c55e">
-                                    ✓ Quitar
-                                </button>
+                                <button type="submit" class="btn btn-ghost btn-sm" style="font-size:.65rem;padding:.22rem .45rem;color:#22c55e">✓</button>
                             </form>
+                            @endif
                             <form method="POST" action="{{ route('creditcards.installments.destroy', $inst->id) }}"
                                   onsubmit="return confirm('Remover parcelamento?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="del-btn" title="Remover">×</button>
                             </form>
                         </div>
-                        @endif
                     </div>
                 </div>
                 @empty
@@ -534,10 +564,14 @@
     </div>
 
     <div class="inst-list" id="all-inst-list">
-        @php $allInsts = $cards->flatMap(fn($c) => $c->installments->map(fn($i) => ['inst' => $i, 'card' => $c]))->sortBy(fn($x) => $x['inst']->is_paid_off); @endphp
+        @php $allInsts = $cards->flatMap(fn($c) => $c->installments->map(fn($i) => ['inst' => $i, 'card' => $c]))->sortBy(fn($x) => $x['inst']->isFullyPaid($x['card']) ? 1 : 0); @endphp
         @forelse($allInsts as $entry)
-        @php $inst = $entry['inst']; $card = $entry['card']; $isRec = $inst->is_recurring; @endphp
-        <div class="inst-item {{ $inst->is_paid_off ? 'quitado' : '' }}" data-card-id="{{ $card->id }}">
+        @php
+            $inst = $entry['inst']; $card = $entry['card'];
+            $isRec = $inst->is_recurring;
+            $fullyPaid = $inst->isFullyPaid($card);
+        @endphp
+        <div class="inst-item {{ $fullyPaid ? 'quitado' : '' }}" data-card-id="{{ $card->id }}">
             <div class="inst-top">
                 <span class="inst-cat-icon">{{ $catIcons[$inst->category] ?? '📦' }}</span>
                 <span class="inst-desc">{{ $inst->description }}</span>
@@ -546,42 +580,56 @@
                 </span>
                 @if($isRec)
                     <span class="inst-badge rec">Rec.</span>
-                @elseif($inst->is_paid_off)
+                @elseif($fullyPaid)
                     <span class="inst-badge done">Quitado</span>
                 @else
-                    <span class="inst-badge">{{ $inst->current_installment }}/{{ $inst->total_installments }}</span>
+                    <span class="inst-badge">{{ $inst->currentInstallment($card) }}/{{ $inst->total_installments }}</span>
                 @endif
             </div>
             <div class="inst-bot" style="margin-top:.45rem">
                 <div>
                     <div class="inst-val">R$ {{ number_format($inst->installment_amount, 2, ',', '.') }}/mês</div>
-                    @if(!$isRec && !$inst->is_paid_off)
+                    @if(!$isRec && !$fullyPaid)
                     <div class="inst-remaining">
-                        Restante: R$ {{ number_format($inst->getRemainingAmount(), 2, ',', '.') }}
-                        · até {{ $inst->getLastInstallmentMonth() }}
+                        Restante: R$ {{ number_format($inst->getRemainingAmount($card), 2, ',', '.') }}
+                        · até {{ $inst->getLastInstallmentMonth($card) }}
                     </div>
                     @endif
                 </div>
-                @if(!$inst->is_paid_off)
                 <div class="inst-actions">
-                    @if(!$isRec)
+                    @if(!$isRec && !$fullyPaid)
+                    <form method="POST" action="{{ route('creditcards.installments.regress', $inst->id) }}">
+                        @csrf
+                        <button type="submit" class="btn btn-ghost btn-sm" title="Voltar parcela" style="font-size:.65rem;padding:.22rem .45rem">◀</button>
+                    </form>
                     <form method="POST" action="{{ route('creditcards.installments.advance', $inst->id) }}">
                         @csrf
-                        <button type="submit" class="btn btn-ghost btn-sm" style="font-size:.65rem;padding:.22rem .5rem">▶ Avançar</button>
+                        <button type="submit" class="btn btn-ghost btn-sm" title="Avançar parcela" style="font-size:.65rem;padding:.22rem .45rem">▶</button>
                     </form>
                     @endif
+                    <button type="button" class="btn btn-ghost btn-sm edit-inst-btn" title="Editar"
+                            data-id="{{ $inst->id }}"
+                            data-desc="{{ $inst->description }}"
+                            data-cat="{{ $inst->category }}"
+                            data-total="{{ number_format($inst->total_amount, 2, ',', '.') }}"
+                            data-parc="{{ $inst->total_installments }}"
+                            data-date="{{ \Carbon\Carbon::parse($inst->purchase_date)->format('Y-m-d') }}"
+                            data-rec="{{ $inst->is_recurring ? 1 : 0 }}"
+                            onclick="openEditInst(this)"
+                            style="font-size:.65rem;padding:.22rem .45rem">✏️</button>
+                    @if(!$fullyPaid)
                     <form method="POST" action="{{ route('creditcards.installments.payoff', $inst->id) }}"
                           onsubmit="return confirm('Quitar?')">
                         @csrf
-                        <button type="submit" class="btn btn-ghost btn-sm" style="font-size:.65rem;padding:.22rem .5rem;color:#22c55e">✓ Quitar</button>
+                        <button type="submit" class="btn btn-ghost btn-sm" style="font-size:.65rem;padding:.22rem .45rem;color:#22c55e">✓</button>
                     </form>
+                    @endif
                     <form method="POST" action="{{ route('creditcards.installments.destroy', $inst->id) }}"
                           onsubmit="return confirm('Remover?')">
                         @csrf @method('DELETE')
                         <button type="submit" class="del-btn">×</button>
                     </form>
                 </div>
-                @endif
             </div>
         </div>
         @empty
@@ -678,6 +726,128 @@
     </div>
 </div>
 
+{{-- ══════════════════════════════════════
+     MODAL: EDITAR CARTÃO
+══════════════════════════════════════ --}}
+<div class="modal-backdrop" id="modal-editar-cartao" onclick="if(event.target===this)closeModal('modal-editar-cartao')">
+    <div class="modal" style="max-width:460px">
+        <div class="modal-title">✏️ Editar Cartão</div>
+        <form method="POST" id="form-edit-cartao" action="">
+            @csrf @method('PATCH')
+            <input type="hidden" name="color" id="edit-selected-color" value="#7c3aed">
+
+            <div class="form-group">
+                <label>Nome do cartão</label>
+                <input type="text" name="name" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Bandeira</label>
+                    <select name="brand" required>
+                        <option value="visa">VISA</option>
+                        <option value="mastercard">MASTERCARD</option>
+                        <option value="elo">ELO</option>
+                        <option value="amex">AMEX</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Limite (R$)</label>
+                    <input type="text" name="credit_limit" required class="money-input" oninput="maskMoney(this)">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group sm">
+                    <label>Dia venc.</label>
+                    <input type="number" name="due_day" required min="1" max="31">
+                </div>
+                <div class="form-group sm">
+                    <label>Dia fech.</label>
+                    <input type="number" name="closing_day" required min="1" max="31">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Cor do cartão</label>
+                <div class="color-swatches" id="edit-color-swatches">
+                    @foreach($swatches as $sw)
+                    <div class="color-swatch" data-color="{{ $sw }}"
+                         style="background:linear-gradient(135deg,{{ $sw }},{{ $sw }}bb)"
+                         onclick="selectEditColor('{{ $sw }}', this)"
+                         title="{{ $sw }}"></div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal('modal-editar-cartao')">Cancelar</button>
+                <button type="submit" class="btn btn-primary btn-sm">Salvar alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ══════════════════════════════════════
+     MODAL: EDITAR PARCELAMENTO
+══════════════════════════════════════ --}}
+<div class="modal-backdrop" id="modal-editar-parcelamento" onclick="if(event.target===this)closeModal('modal-editar-parcelamento')">
+    <div class="modal" style="max-width:460px">
+        <div class="modal-title">✏️ Editar Parcelamento</div>
+        <form method="POST" id="form-edit-inst" action="">
+            @csrf @method('PATCH')
+
+            <div class="form-group">
+                <label>Descrição</label>
+                <input type="text" name="description" required placeholder="Ex: iPhone 15">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select name="category" required>
+                        <option value="compras">🛍️ Compras</option>
+                        <option value="assinatura">🔄 Assinatura</option>
+                        <option value="eletronico">💻 Eletrônico</option>
+                        <option value="casa">🏠 Casa</option>
+                        <option value="saude">💊 Saúde</option>
+                        <option value="outros">📦 Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Valor total (R$)</label>
+                    <input type="text" name="total_amount" required class="money-input" oninput="maskMoney(this)">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group sm">
+                    <label>Parcelas</label>
+                    <input type="number" name="total_installments" required min="1" max="72">
+                </div>
+                <div class="form-group">
+                    <label>Data da compra</label>
+                    <input type="date" name="purchase_date" required>
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <label class="toggle-sw">
+                    <input type="checkbox" name="is_recurring" value="1" id="edit-inst-rec">
+                    <span class="toggle-sl"></span>
+                </label>
+                <span>Recorrente mensal (assinatura sem fim)</span>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal('modal-editar-parcelamento')">Cancelar</button>
+                <button type="submit" class="btn btn-primary btn-sm">Salvar alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -761,6 +931,44 @@ function filterCard(cardId, btn) {
             el.style.display = 'none';
         }
     });
+}
+
+// ── Editar cartão ─────────────────────────────────────────────────
+const ROUTE_CARD_UPDATE = "{{ route('creditcards.update', 'CARDID') }}";
+function openEditCard(btn) {
+    const d = btn.dataset;
+    const f = document.getElementById('form-edit-cartao');
+    f.action = ROUTE_CARD_UPDATE.replace('CARDID', d.id);
+    f.querySelector('[name=name]').value         = d.name;
+    f.querySelector('[name=brand]').value        = d.brand;
+    f.querySelector('[name=credit_limit]').value = d.limit;
+    f.querySelector('[name=due_day]').value      = d.due;
+    f.querySelector('[name=closing_day]').value  = d.closing;
+    document.getElementById('edit-selected-color').value = d.color;
+    document.querySelectorAll('#edit-color-swatches .color-swatch').forEach(s => {
+        s.classList.toggle('selected', s.dataset.color === d.color);
+    });
+    openModal('modal-editar-cartao');
+}
+function selectEditColor(color, el) {
+    document.getElementById('edit-selected-color').value = color;
+    document.querySelectorAll('#edit-color-swatches .color-swatch').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+// ── Editar parcelamento ───────────────────────────────────────────
+const ROUTE_INST_UPDATE = "{{ route('creditcards.installments.update', 'INSTID') }}";
+function openEditInst(btn) {
+    const d = btn.dataset;
+    const f = document.getElementById('form-edit-inst');
+    f.action = ROUTE_INST_UPDATE.replace('INSTID', d.id);
+    f.querySelector('[name=description]').value        = d.desc;
+    f.querySelector('[name=category]').value           = d.cat;
+    f.querySelector('[name=total_amount]').value       = d.total;
+    f.querySelector('[name=total_installments]').value = d.parc;
+    f.querySelector('[name=purchase_date]').value      = d.date;
+    document.getElementById('edit-inst-rec').checked   = d.rec === '1';
+    openModal('modal-editar-parcelamento');
 }
 </script>
 @endpush

@@ -9,7 +9,8 @@ class CreditCardInstallment extends Model
     protected $fillable = [
         'credit_card_id', 'description', 'category',
         'total_amount', 'installment_amount', 'total_installments',
-        'current_installment', 'is_recurring', 'purchase_date', 'is_paid_off',
+        'current_installment', 'manual_paid_count', 'is_recurring',
+        'purchase_date', 'is_paid_off',
     ];
 
     protected $casts = [
@@ -30,27 +31,127 @@ class CreditCardInstallment extends Model
         return $this->belongsTo(CreditCard::class);
     }
 
-    public function isActiveInMonth(Carbon $month): bool
+    /**
+     * Mês (1º dia) em que a 1ª parcela vence, pela regra real de cartão:
+     * - compra feita DEPOIS do dia de fechamento entra na fatura do mês seguinte;
+     * - se o vencimento é antes do fechamento, a fatura vence no mês seguinte ao fechamento.
+     */
+    public function firstDueMonth(CreditCard $card): Carbon
+    {
+        $purchase = Carbon::parse($this->purchase_date);
+
+        // mês em que a compra fecha
+        $closeMonth = $purchase->day > $card->closing_day
+            ? $purchase->copy()->addMonth()
+            : $purchase->copy();
+
+        // mês de vencimento dessa fatura
+        $dueMonth = $card->due_day >= $card->closing_day
+            ? $closeMonth
+            : $closeMonth->copy()->addMonth();
+
+        return $dueMonth->startOfMonth();
+    }
+
+    /**
+     * A parcela está presente na fatura deste mês?
+     * Recorrente: sempre. Parcelada: entre a 1ª e a última parcela.
+     */
+    public function isActiveInMonth(Carbon $month, CreditCard $card): bool
     {
         if ($this->is_recurring) {
             return true;
         }
 
-        $start = Carbon::parse($this->purchase_date)->startOfMonth();
-        $end   = Carbon::parse($this->purchase_date)->addMonths($this->total_installments - 1)->endOfMonth();
+        $first = $this->firstDueMonth($card);
+        $start = $first->copy()->startOfMonth();
+        $end   = $first->copy()->addMonths($this->total_installments - 1)->endOfMonth();
 
         return $month->between($start, $end);
     }
 
-    public function getRemainingAmount(): float
+    /**
+     * Quantas parcelas já foram pagas.
+     * - Override manual (manual_paid_count) tem prioridade.
+     * - Senão, conta automaticamente os meses de vencimento já passados
+     *   (a parcela do mês corrente ainda é a "atual", não conta como paga).
+     */
+    public function paidInstallmentsCount(CreditCard $card): int
     {
-        $paid = max(0, $this->current_installment - 1);
-        return (float) round(($this->total_installments - $paid) * $this->installment_amount, 2);
+        if ($this->manual_paid_count !== null) {
+            return max(0, min((int) $this->manual_paid_count, $this->total_installments));
+        }
+
+        if ($this->is_recurring) {
+            return 0;
+        }
+
+        $first = $this->firstDueMonth($card);
+        $now   = now()->startOfMonth();
+
+        $months = ($now->year - $first->year) * 12 + ($now->month - $first->month);
+
+        return max(0, min($months, $this->total_installments));
     }
 
-    public function getLastInstallmentMonth(): string
+    /**
+     * Número da parcela atual (a que está sendo paga este mês).
+     */
+    public function currentInstallment(CreditCard $card): int
     {
-        return Carbon::parse($this->purchase_date)
+        if ($this->is_recurring) {
+            return 0;
+        }
+
+        return min($this->paidInstallmentsCount($card) + 1, $this->total_installments);
+    }
+
+    /**
+     * Parcelamento totalmente pago (manualmente quitado ou pelo tempo).
+     */
+    public function isFullyPaid(CreditCard $card): bool
+    {
+        if ($this->is_paid_off) {
+            return true;
+        }
+
+        return !$this->is_recurring
+            && $this->paidInstallmentsCount($card) >= $this->total_installments;
+    }
+
+    /**
+     * Saldo devedor que ainda ocupa o limite do cartão.
+     * Parcelado: parcelas não pagas × valor da parcela (volta ao limite conforme paga).
+     * Recorrente: o valor de um ciclo mensal.
+     */
+    public function getRemainingAmount(CreditCard $card): float
+    {
+        if ($this->is_paid_off) {
+            return 0.0;
+        }
+
+        if ($this->is_recurring) {
+            return (float) $this->installment_amount;
+        }
+
+        $paid = $this->paidInstallmentsCount($card);
+
+        if ($paid >= $this->total_installments) {
+            return 0.0;
+        }
+
+        // base no valor total da compra (volta ao limite a cada parcela paga)
+        $remaining = (float) $this->total_amount - ($paid * (float) $this->installment_amount);
+
+        return round(max(0, $remaining), 2);
+    }
+
+    /**
+     * Mês/ano da última parcela (rótulo pt-BR).
+     */
+    public function getLastInstallmentMonth(CreditCard $card): string
+    {
+        return $this->firstDueMonth($card)
             ->addMonths($this->total_installments - 1)
             ->locale('pt_BR')
             ->isoFormat('MMM/YYYY');

@@ -64,11 +64,14 @@ Route::middleware('auth')->group(function () {
     Route::prefix('cartoes')->name('creditcards.')->group(function () {
         Route::get('/', [CreditCardController::class, 'index'])->name('index');
         Route::post('/', [CreditCardController::class, 'store'])->name('store');
+        Route::patch('/{card}', [CreditCardController::class, 'update'])->name('update');
         Route::delete('/{card}', [CreditCardController::class, 'destroy'])->name('destroy');
 
         Route::post('/{card}/parcelamentos', [CreditCardController::class, 'storeInstallment'])->name('installments.store');
+        Route::patch('/parcelamentos/{installment}', [CreditCardController::class, 'updateInstallment'])->name('installments.update');
         Route::post('/parcelamentos/{installment}/quitar', [CreditCardController::class, 'payOffInstallment'])->name('installments.payoff');
         Route::post('/parcelamentos/{installment}/avancar', [CreditCardController::class, 'advanceInstallment'])->name('installments.advance');
+        Route::post('/parcelamentos/{installment}/voltar', [CreditCardController::class, 'regressInstallment'])->name('installments.regress');
         Route::delete('/parcelamentos/{installment}', [CreditCardController::class, 'destroyInstallment'])->name('installments.destroy');
 
         Route::post('/pagamentos/{payment}/toggle', [CreditCardController::class, 'togglePayment'])->name('payments.toggle');

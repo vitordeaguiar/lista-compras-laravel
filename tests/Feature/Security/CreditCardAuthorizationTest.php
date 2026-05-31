@@ -41,6 +41,20 @@ class CreditCardAuthorizationTest extends TestCase
             ->assertStatus(403);
     }
 
+    public function test_update_card_retorna_403_para_cartao_alheio(): void
+    {
+        $this->actingAs($this->userB)
+            ->patch(route('creditcards.update', $this->card), [
+                'name'         => 'Hackeado',
+                'brand'        => 'visa',
+                'credit_limit' => '1.000,00',
+                'due_day'      => 5,
+                'closing_day'  => 1,
+                'color'        => '#000000',
+            ])
+            ->assertStatus(403);
+    }
+
     public function test_store_installment_retorna_403_para_cartao_alheio(): void
     {
         $this->actingAs($this->userB)
@@ -144,6 +158,54 @@ class CreditCardAuthorizationTest extends TestCase
 
         $this->actingAs($this->userB)
             ->post(route('creditcards.installments.advance', $installment))
+            ->assertStatus(403);
+    }
+
+    public function test_update_installment_retorna_403_para_parcelamento_alheio(): void
+    {
+        $installment = CreditCardInstallment::forceCreate([
+            'user_id'             => $this->userA->id,
+            'credit_card_id'      => $this->card->id,
+            'description'         => 'Notebook',
+            'category'            => 'eletronico',
+            'total_amount'        => 3000,
+            'installment_amount'  => 250,
+            'total_installments'  => 12,
+            'current_installment' => 1,
+            'is_recurring'        => false,
+            'purchase_date'       => now()->toDateString(),
+            'is_paid_off'         => false,
+        ]);
+
+        $this->actingAs($this->userB)
+            ->patch(route('creditcards.installments.update', $installment), [
+                'description'        => 'Roubado',
+                'category'           => 'outros',
+                'total_amount'       => '1,00',
+                'total_installments' => 1,
+                'purchase_date'      => now()->toDateString(),
+            ])
+            ->assertStatus(403);
+    }
+
+    public function test_regress_installment_retorna_403_para_parcelamento_alheio(): void
+    {
+        $installment = CreditCardInstallment::forceCreate([
+            'user_id'             => $this->userA->id,
+            'credit_card_id'      => $this->card->id,
+            'description'         => 'Notebook',
+            'category'            => 'eletronico',
+            'total_amount'        => 3000,
+            'installment_amount'  => 250,
+            'total_installments'  => 12,
+            'current_installment' => 1,
+            'is_recurring'        => false,
+            'purchase_date'       => now()->toDateString(),
+            'is_paid_off'         => false,
+        ]);
+
+        $this->actingAs($this->userB)
+            ->post(route('creditcards.installments.regress', $installment))
             ->assertStatus(403);
     }
 }
