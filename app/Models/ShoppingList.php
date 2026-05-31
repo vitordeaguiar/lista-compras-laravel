@@ -8,7 +8,7 @@ class ShoppingList extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'name', 'shopping_date', 'status', 'total', 'discount', 'notes', 'completed_at'];
+    protected $fillable = ['name', 'shopping_date', 'status', 'total', 'discount', 'notes', 'completed_at'];
 
     protected $casts = [
         'shopping_date' => 'date',

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserSetting extends Model
 {
     protected $fillable = [
-        'user_id', 'theme', 'accent_color', 'salary_day',
+        'theme', 'accent_color', 'salary_day',
         'monthly_budget', 'monthly_savings_goal', 'notify_due_days',
         'notify_budget_alert', 'notify_monthly_summary', 'notify_list_reminder',
         'notify_new_month', 'notify_email', 'notify_push',

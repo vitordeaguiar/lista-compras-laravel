@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinancialFixedCost extends Model
 {
-    protected $fillable = ['user_id', 'name', 'amount', 'due_day', 'is_recurring', 'icon'];
+    protected $fillable = ['name', 'amount', 'due_day', 'is_recurring', 'icon'];
     protected $casts    = ['is_recurring' => 'boolean', 'amount' => 'decimal:2'];
 
     public function user()

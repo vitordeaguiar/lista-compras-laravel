@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinancialFixedPayment extends Model
 {
-    protected $fillable = ['fixed_cost_id', 'user_id', 'month', 'amount', 'paid', 'paid_at'];
+    protected $fillable = ['fixed_cost_id', 'month', 'amount', 'paid', 'paid_at'];
     protected $casts    = ['paid' => 'boolean', 'paid_at' => 'datetime', 'amount' => 'decimal:2'];
 
     public function fixedCost()

@@ -9,6 +9,7 @@ use App\Models\FinancialInvestment;
 use App\Models\FinancialInvestmentEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class FinanceController extends Controller
 {
@@ -95,7 +96,10 @@ class FinanceController extends Controller
 
     public function toggleFixed(FinancialFixedPayment $payment)
     {
-        abort_if($payment->user_id !== Auth::id(), 403);
+        if ($payment->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $payment->update([
             'paid'    => !$payment->paid,
             'paid_at' => !$payment->paid ? now() : null,
@@ -105,14 +109,20 @@ class FinanceController extends Controller
 
     public function updateFixed(Request $request, FinancialFixedPayment $payment)
     {
-        abort_if($payment->user_id !== Auth::id(), 403);
+        if ($payment->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $payment->update(['amount' => $request->validate(['amount' => 'required|numeric|min:0'])['amount']]);
         return back();
     }
 
     public function toggleVariable(FinancialVariableCost $variable)
     {
-        abort_if($variable->user_id !== Auth::id(), 403);
+        if ($variable->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $variable->update(['paid' => !$variable->paid]);
         return back();
     }
@@ -132,7 +142,10 @@ class FinanceController extends Controller
 
     public function updateVariable(Request $request, FinancialVariableCost $variable)
     {
-        abort_if($variable->user_id !== Auth::id(), 403);
+        if ($variable->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $variable->update($request->validate(['amount' => 'required|numeric|min:0', 'name' => 'sometimes|string']));
         return back();
     }
@@ -191,42 +204,60 @@ class FinanceController extends Controller
 
     public function updateInvestment(Request $request, FinancialInvestmentEntry $entry)
     {
-        abort_if($entry->user_id !== Auth::id(), 403);
+        if ($entry->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $entry->update(['amount' => $request->validate(['amount' => 'required|numeric|min:0'])['amount']]);
         return back();
     }
 
     public function updateInvestmentInitial(Request $request, FinancialInvestment $investment)
     {
-        abort_if($investment->user_id !== Auth::id(), 403);
+        if ($investment->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $investment->update(['initial_amount' => $request->validate(['initial_amount' => 'required|numeric|min:0'])['initial_amount']]);
         return back();
     }
 
     public function destroyFixed(FinancialFixedCost $cost)
     {
-        abort_if($cost->user_id !== Auth::id(), 403);
+        if ($cost->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $cost->delete();
         return back();
     }
 
     public function destroyVariable(FinancialVariableCost $variable)
     {
-        abort_if($variable->user_id !== Auth::id(), 403);
+        if ($variable->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $variable->delete();
         return back();
     }
 
     public function destroyIncome(FinancialIncome $income)
     {
-        abort_if($income->user_id !== Auth::id(), 403);
+        if ($income->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $income->delete();
         return back();
     }
 
     public function destroyInvestment(FinancialInvestment $investment)
     {
-        abort_if($investment->user_id !== Auth::id(), 403);
+        if ($investment->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $investment->delete();
         return back();
     }
@@ -237,25 +268,26 @@ class FinanceController extends Controller
         $user      = Auth::user();
         $prevMonth = \Carbon\Carbon::parse($month.'-01')->subMonth()->format('Y-m');
 
-        // Copia fixos selecionados
+        // Copia fixos selecionados (apenas os que pertencem ao usuário)
         foreach ($request->input('fixed_ids', []) as $fixedId) {
-            $prev = FinancialFixedPayment::where('fixed_cost_id', $fixedId)
+            $prev = FinancialFixedPayment::where('user_id', $user->id)
+                ->where('fixed_cost_id', $fixedId)
                 ->where('month', $prevMonth)->first();
+            if (!$prev) continue;
             FinancialFixedPayment::firstOrCreate(
                 ['fixed_cost_id' => $fixedId, 'month' => $month, 'user_id' => $user->id],
-                ['amount' => $prev->amount ?? 0, 'paid' => false]
+                ['amount' => $prev->amount, 'paid' => false]
             );
         }
 
-        // Copia entradas selecionadas
+        // Copia entradas selecionadas (apenas as que pertencem ao usuário)
         foreach ($request->input('income_ids', []) as $incId) {
-            $prev = FinancialIncome::find($incId);
-            if ($prev) {
-                FinancialIncome::firstOrCreate(
-                    ['user_id' => $user->id, 'month' => $month, 'name' => $prev->name],
-                    ['amount' => $prev->amount]
-                );
-            }
+            $prev = FinancialIncome::where('user_id', $user->id)->find($incId);
+            if (!$prev) continue;
+            FinancialIncome::firstOrCreate(
+                ['user_id' => $user->id, 'month' => $month, 'name' => $prev->name],
+                ['amount' => $prev->amount]
+            );
         }
 
         return redirect()->route('finance.index', ['month' => $month])

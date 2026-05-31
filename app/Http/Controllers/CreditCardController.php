@@ -6,6 +6,7 @@ use App\Models\CreditCardInstallment;
 use App\Models\CreditCardPayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class CreditCardController extends Controller
@@ -92,14 +93,20 @@ class CreditCardController extends Controller
 
     public function destroy(CreditCard $card)
     {
-        abort_if($card->user_id !== Auth::id(), 403);
+        if ($card->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $card->update(['is_active' => false]);
         return back()->with('success', 'Cartão removido.');
     }
 
     public function storeInstallment(Request $request, CreditCard $card)
     {
-        abort_if($card->user_id !== Auth::id(), 403);
+        if ($card->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
 
         $data = $request->validate([
             'description'        => 'required|string|max:255',
@@ -132,21 +139,30 @@ class CreditCardController extends Controller
 
     public function payOffInstallment(CreditCardInstallment $installment)
     {
-        abort_if($installment->user_id !== Auth::id(), 403);
+        if ($installment->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $installment->update(['is_paid_off' => true]);
         return back()->with('success', 'Parcelamento marcado como quitado!');
     }
 
     public function destroyInstallment(CreditCardInstallment $installment)
     {
-        abort_if($installment->user_id !== Auth::id(), 403);
+        if ($installment->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $installment->delete();
         return back()->with('success', 'Parcelamento removido.');
     }
 
     public function togglePayment(CreditCardPayment $payment)
     {
-        abort_if($payment->user_id !== Auth::id(), 403);
+        if ($payment->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $nowPaid = !$payment->paid;
         $payment->update([
             'paid'    => $nowPaid,
@@ -157,7 +173,10 @@ class CreditCardController extends Controller
 
     public function updatePaymentAmount(Request $request, CreditCardPayment $payment)
     {
-        abort_if($payment->user_id !== Auth::id(), 403);
+        if ($payment->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
         $amount = (float) str_replace(['.', ','], ['', '.'], $request->amount);
         $payment->update(['amount' => $amount]);
         return back();
@@ -165,7 +184,10 @@ class CreditCardController extends Controller
 
     public function advanceInstallment(CreditCardInstallment $installment)
     {
-        abort_if($installment->user_id !== Auth::id(), 403);
+        if ($installment->user_id !== Auth::id()) {
+            Log::warning('Acesso negado', ['user_id' => Auth::id(), 'url' => request()->fullUrl(), 'ip' => request()->ip(), 'at' => now()->toIso8601String()]);
+            abort(403);
+        }
 
         if ($installment->current_installment < $installment->total_installments) {
             $next = $installment->current_installment + 1;
