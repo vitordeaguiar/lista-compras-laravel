@@ -10,6 +10,7 @@ use App\Models\FinancialFixedPayment;
 use App\Models\FinancialIncome;
 use App\Models\FinancialInvestment;
 use App\Models\FinancialInvestmentEntry;
+use App\Models\FinancialMonth;
 use App\Models\FinancialVariableCost;
 use App\Models\ShoppingList;
 use App\Models\User;
@@ -65,6 +66,11 @@ class ModelFillableSecurityTest extends TestCase
     public function test_financial_investment_entry_nao_expoe_user_id(): void
     {
         $this->assertNoForbiddenFields(new FinancialInvestmentEntry());
+    }
+
+    public function test_financial_month_nao_expoe_user_id(): void
+    {
+        $this->assertNoForbiddenFields(new FinancialMonth());
     }
 
     public function test_credit_card_nao_expoe_user_id(): void

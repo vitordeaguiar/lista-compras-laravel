@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinancialMonth extends Model
 {
-    protected $fillable = ['user_id', 'month'];
+    protected $fillable = ['month'];
 
     public function user()
     {
