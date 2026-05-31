@@ -7,7 +7,7 @@ use Carbon\Carbon;
 class CreditCard extends Model
 {
     protected $fillable = [
-        'user_id', 'name', 'brand', 'credit_limit',
+        'name', 'brand', 'credit_limit',
         'due_day', 'closing_day', 'color', 'is_active',
     ];
 

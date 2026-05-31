@@ -28,10 +28,24 @@ class CreditCardController extends Controller
                 ->filter(fn($inst) => $inst->isActiveInMonth($monthDate))
                 ->sum('installment_amount');
 
-            $card->current_payment = CreditCardPayment::firstOrCreate(
-                ['credit_card_id' => $card->id, 'month' => $month, 'user_id' => $user->id],
-                ['amount' => $card->month_amount, 'paid' => false]
-            );
+            $payment = CreditCardPayment::where([
+                'credit_card_id' => $card->id,
+                'month'          => $month,
+                'user_id'        => $user->id,
+            ])->first();
+
+            if (!$payment) {
+                $payment = new CreditCardPayment([
+                    'credit_card_id' => $card->id,
+                    'month'          => $month,
+                    'amount'         => $card->month_amount,
+                    'paid'           => false,
+                ]);
+                $payment->user_id = $user->id;
+                $payment->save();
+            }
+
+            $card->current_payment = $payment;
 
             $card->projection = [];
             for ($i = 0; $i < 6; $i++) {
@@ -87,8 +101,11 @@ class CreditCardController extends Controller
             'color'        => 'required|string|max:50',
         ]);
         $data['credit_limit'] = (float) str_replace(['.', ','], ['', '.'], $data['credit_limit']);
-        $data['user_id'] = Auth::id();
-        CreditCard::create($data);
+
+        $card = new CreditCard($data);
+        $card->user_id = Auth::id();
+        $card->save();
+
         return back()->with('success', 'Cartão adicionado!');
     }
 
@@ -121,8 +138,7 @@ class CreditCardController extends Controller
         $totalAmount = (float) str_replace(['.', ','], ['', '.'], $data['total_amount']);
         $installments = (int) $data['total_installments'];
 
-        CreditCardInstallment::create([
-            'user_id'             => Auth::id(),
+        $installment = new CreditCardInstallment([
             'credit_card_id'      => $card->id,
             'description'         => $data['description'],
             'category'            => $data['category'],
@@ -134,6 +150,8 @@ class CreditCardController extends Controller
             'purchase_date'       => $data['purchase_date'],
             'is_paid_off'         => false,
         ]);
+        $installment->user_id = Auth::id();
+        $installment->save();
 
         return back()->with('success', 'Parcelamento adicionado!');
     }
