@@ -121,6 +121,6 @@ class ShoppingListController extends Controller
         }
 
         $list->delete();
-        return back()->with('success', 'Lista removida.');
+        return redirect()->route('lists.index')->with('success', 'Lista removida.');
     }
 }
