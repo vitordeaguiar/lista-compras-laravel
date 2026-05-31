@@ -40,6 +40,17 @@ class CreditCardInstallmentTest extends TestCase
         $this->assertEquals('2026-06', $inst->firstDueMonth($card)->format('Y-m'));
     }
 
+    public function test_compra_a_vista_1x_apos_fechamento_cai_no_mes_seguinte(): void
+    {
+        // compra 28/05 em 1x num cartão que fecha dia 3 → entra só na fatura de junho
+        $card = $this->card(closingDay: 3, dueDay: 10);
+        $inst = $this->installment(['purchase_date' => '2026-05-28', 'total_installments' => 1]);
+
+        $this->assertEquals('2026-06', $inst->firstDueMonth($card)->format('Y-m'));
+        $this->assertFalse($inst->isActiveInMonth(Carbon::parse('2026-05-01'), $card));
+        $this->assertTrue($inst->isActiveInMonth(Carbon::parse('2026-06-01'), $card));
+    }
+
     public function test_compra_antes_do_fechamento_cai_na_fatura_do_mes_corrente(): void
     {
         // fecha dia 10; compra 05/05 (antes do fechamento) → 1ª parcela em maio
