@@ -330,6 +330,28 @@ class CreditCardTest extends TestCase
             ->assertSee('Geladeira');
     }
 
+    public function test_store_installment_aceita_categorias_carro_e_comida(): void
+    {
+        $card = $this->makeCard();
+
+        foreach (['carro', 'comida'] as $cat) {
+            $this->actingAs($this->user)
+                ->post(route('creditcards.installments.store', $card), [
+                    'description'        => 'Item ' . $cat,
+                    'category'           => $cat,
+                    'total_amount'       => '300,00',
+                    'total_installments' => 3,
+                    'purchase_date'      => now()->toDateString(),
+                ])
+                ->assertRedirect();
+
+            $this->assertDatabaseHas('credit_card_installments', [
+                'credit_card_id' => $card->id,
+                'category'       => $cat,
+            ]);
+        }
+    }
+
     private function makeCard(array $attrs = []): CreditCard
     {
         return CreditCard::forceCreate(array_merge([

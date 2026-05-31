@@ -266,7 +266,7 @@ class CreditCardController extends Controller
     {
         return $request->validate([
             'description'        => 'required|string|max:255',
-            'category'           => 'required|in:compras,assinatura,eletronico,casa,saude,outros',
+            'category'           => 'required|in:compras,assinatura,eletronico,casa,saude,carro,comida,outros',
             'total_amount'       => 'required|string',
             'total_installments' => 'required|integer|min:1|max:72',
             'is_recurring'       => 'nullable|boolean',

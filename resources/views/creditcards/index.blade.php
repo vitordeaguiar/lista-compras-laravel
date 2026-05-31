@@ -5,7 +5,7 @@
     $nextMonth  = \Carbon\Carbon::parse($month.'-01')->addMonth()->format('Y-m');
     $monthLabel = ucfirst(\Carbon\Carbon::parse($month.'-01')->locale('pt_BR')->isoFormat('MMMM [de] YYYY'));
     $totalCards = $cards->count();
-    $catIcons   = ['compras'=>'🛍️','assinatura'=>'🔄','eletronico'=>'💻','casa'=>'🏠','saude'=>'💊','outros'=>'📦'];
+    $catIcons   = ['compras'=>'🛍️','assinatura'=>'🔄','eletronico'=>'💻','casa'=>'🏠','saude'=>'💊','carro'=>'🚗','comida'=>'🍔','outros'=>'📦'];
     $brandIcons = ['visa'=>'VISA','mastercard'=>'MC','elo'=>'ELO','amex'=>'AMEX','outro'=>'···'];
 @endphp
 
@@ -511,6 +511,8 @@
                                 <option value="eletronico">💻 Eletrônico</option>
                                 <option value="casa">🏠 Casa</option>
                                 <option value="saude">💊 Saúde</option>
+                                <option value="carro">🚗 Carro</option>
+                                <option value="comida">🍔 Comida</option>
                                 <option value="outros">📦 Outros</option>
                             </select>
                         </div>
@@ -812,6 +814,8 @@
                         <option value="eletronico">💻 Eletrônico</option>
                         <option value="casa">🏠 Casa</option>
                         <option value="saude">💊 Saúde</option>
+                        <option value="carro">🚗 Carro</option>
+                        <option value="comida">🍔 Comida</option>
                         <option value="outros">📦 Outros</option>
                     </select>
                 </div>
