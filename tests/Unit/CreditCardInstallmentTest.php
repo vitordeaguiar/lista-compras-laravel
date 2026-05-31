@@ -101,9 +101,33 @@ class CreditCardInstallmentTest extends TestCase
         $card = $this->card(closingDay: 3, dueDay: 10);
         $inst = $this->installment(['purchase_date' => '2026-01-01', 'total_installments' => 10]);
 
-        // jan, fev, mar, abr já venceram = 4 pagas; maio é a atual
-        $this->assertEquals(4, $inst->paidInstallmentsCount($card));
-        $this->assertEquals(5, $inst->currentInstallment($card));
+        // jan, fev, mar, abr e maio (venc 10/05 já passou) = 5 pagas; junho é a atual
+        $this->assertEquals(5, $inst->paidInstallmentsCount($card));
+        $this->assertEquals(6, $inst->currentInstallment($card));
+    }
+
+    public function test_fatura_do_mes_corrente_ja_vencida_conta_como_paga(): void
+    {
+        // compra 02/05, fecha 15, vence 22, 3x; hoje 31/05 (fatura de maio venceu dia 22)
+        $this->travelTo(Carbon::parse('2026-05-31'));
+
+        $card = $this->card(closingDay: 15, dueDay: 22);
+        $inst = $this->installment(['purchase_date' => '2026-05-02', 'total_installments' => 3]);
+
+        $this->assertEquals(1, $inst->paidInstallmentsCount($card)); // P1 (venc 22/05) já paga
+        $this->assertEquals(2, $inst->currentInstallment($card));    // está na 2ª parcela
+    }
+
+    public function test_fatura_do_mes_corrente_ainda_nao_vencida_nao_conta(): void
+    {
+        // mesma compra, mas hoje 20/05 (antes do vencimento dia 22)
+        $this->travelTo(Carbon::parse('2026-05-20'));
+
+        $card = $this->card(closingDay: 15, dueDay: 22);
+        $inst = $this->installment(['purchase_date' => '2026-05-02', 'total_installments' => 3]);
+
+        $this->assertEquals(0, $inst->paidInstallmentsCount($card)); // 22/05 ainda não chegou
+        $this->assertEquals(1, $inst->currentInstallment($card));    // está na 1ª parcela
     }
 
     public function test_override_manual_tem_prioridade_sobre_o_tempo(): void
@@ -135,10 +159,10 @@ class CreditCardInstallmentTest extends TestCase
         $this->travelTo(Carbon::parse('2026-05-31'));
 
         $card = $this->card(closingDay: 3, dueDay: 10);
-        // 1000 em 10x de 100; 4 pagas → restam 6 parcelas = 600
+        // 1000 em 10x de 100; 5 pagas (jan–mai) → restam 5 parcelas = 500
         $inst = $this->installment(['purchase_date' => '2026-01-01', 'total_installments' => 10]);
 
-        $this->assertEquals(600.0, $inst->getRemainingAmount($card));
+        $this->assertEquals(500.0, $inst->getRemainingAmount($card));
     }
 
     public function test_saldo_devedor_inicial_e_o_valor_total_da_compra(): void

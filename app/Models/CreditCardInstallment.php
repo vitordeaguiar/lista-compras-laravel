@@ -73,8 +73,9 @@ class CreditCardInstallment extends Model
     /**
      * Quantas parcelas já foram pagas.
      * - Override manual (manual_paid_count) tem prioridade.
-     * - Senão, conta automaticamente os meses de vencimento já passados
-     *   (a parcela do mês corrente ainda é a "atual", não conta como paga).
+     * - Senão, conta automaticamente as faturas cujo vencimento já passou,
+     *   considerando o DIA de vencimento (a fatura do mês corrente já conta
+     *   como paga se hoje já passou do dia de vencimento).
      */
     public function paidInstallmentsCount(CreditCard $card): int
     {
@@ -87,11 +88,22 @@ class CreditCardInstallment extends Model
         }
 
         $first = $this->firstDueMonth($card);
-        $now   = now()->startOfMonth();
+        $now   = now();
 
-        $months = ($now->year - $first->year) * 12 + ($now->month - $first->month);
+        // meses inteiros entre a 1ª fatura e o mês atual (faturas de meses já passados)
+        $monthsDiff = ($now->year - $first->year) * 12 + ($now->month - $first->month);
 
-        return max(0, min($months, $this->total_installments));
+        if ($monthsDiff < 0) {
+            return 0; // a 1ª fatura ainda nem chegou
+        }
+
+        // a fatura do mês corrente já venceu? (dia de vencimento já passou)
+        $dueDayThisMonth  = min($card->due_day, $now->daysInMonth);
+        $currentDuePassed = $now->day >= $dueDayThisMonth ? 1 : 0;
+
+        $paid = $monthsDiff + $currentDuePassed;
+
+        return max(0, min($paid, $this->total_installments));
     }
 
     /**
