@@ -81,11 +81,12 @@ class CreditCardController extends Controller
         $data = $request->validate([
             'name'         => 'required|string|max:255',
             'brand'        => 'required|in:visa,mastercard,elo,amex,outro',
-            'credit_limit' => 'required|numeric|min:0',
+            'credit_limit' => 'required|string',
             'due_day'      => 'required|integer|min:1|max:31',
             'closing_day'  => 'required|integer|min:1|max:31',
             'color'        => 'required|string|max:50',
         ]);
+        $data['credit_limit'] = (float) str_replace(['.', ','], ['', '.'], $data['credit_limit']);
         $data['user_id'] = Auth::id();
         CreditCard::create($data);
         return back()->with('success', 'Cartão adicionado!');
