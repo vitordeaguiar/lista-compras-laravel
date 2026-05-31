@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class CreditCardPayment extends Model
 {
     protected $fillable = [
-        'credit_card_id', 'month', 'amount', 'paid', 'paid_at',
+        'user_id', 'credit_card_id', 'month', 'amount', 'paid', 'paid_at',
     ];
 
     protected $casts = [
