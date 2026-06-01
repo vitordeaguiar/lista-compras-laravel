@@ -248,7 +248,7 @@
 {{-- Add form --}}
 @if($list->isOpen())
 <div class="add-form">
-    <form method="POST" action="{{ route('items.store', $list) }}">
+    <form method="POST" action="{{ route('items.store', $list) }}" autocomplete="off">
         @csrf
         <div class="form-row">
             <div class="fg ac-wrap">
