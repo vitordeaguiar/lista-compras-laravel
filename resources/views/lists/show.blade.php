@@ -253,14 +253,14 @@
         <div class="form-row">
             <div class="fg ac-wrap">
                 <label for="item-name">Produto</label>
-                <input type="text" id="item-name" name="name" placeholder="Ex: Arroz Tio João 5kg" required autocomplete="off">
+                <input type="text" id="item-name" name="name" placeholder="Ex: Arroz Tio João 5kg" required autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
                 <ul id="item-suggestions" class="ac-dropdown" role="listbox" aria-label="Sugestões"></ul>
             </div>
-            <div class="fg sm"><label>Qtd</label><input type="number" name="qty" placeholder="1" value="1" min="0.001" step="0.001"></div>
-            <div class="fg sm"><label>Unid.</label><input type="text" name="unit" placeholder="un,kg…"></div>
+            <div class="fg sm"><label>Qtd</label><input type="number" name="qty" placeholder="1" value="1" min="0.001" step="0.001" autocomplete="off" inputmode="decimal"></div>
+            <div class="fg sm"><label>Unid.</label><input type="text" name="unit" placeholder="un,kg…" autocomplete="off" autocorrect="off"></div>
             <div class="fg md">
                 <label>Preço (R$)</label>
-                <div class="pr-wrap"><em>R$</em><input type="text" name="price" class="price-mask" placeholder="0,00" inputmode="numeric"></div>
+                <div class="pr-wrap"><em>R$</em><input type="text" name="price" class="price-mask" placeholder="0,00" autocomplete="off" inputmode="decimal"></div>
             </div>
             <button type="submit" class="btn-add">＋ Adicionar</button>
         </div>
