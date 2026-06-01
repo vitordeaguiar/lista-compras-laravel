@@ -21,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(3)->by($request->ip());
         });
 
+        RateLimiter::for('verify-code', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
         RateLimiter::for('global', function (Request $request) {
             return Limit::perMinute(60)->by($request->ip());
         });

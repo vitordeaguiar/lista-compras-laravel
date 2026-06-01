@@ -16,7 +16,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Smart Listiq">
-    <script>
+    <script nonce="{{ $cspNonce ?? '' }}">
     (function(){
         try{
             var aMap={'#2dd4bf':'#14b8a6','#6366f1':'#4f46e5','#10b981':'#059669','#38bdf8':'#0ea5e9','#93c5fd':'#60a5fa','#818cf8':'#6366f1','#c084fc':'#a855f7','#fb7185':'#f43f5e','#fbbf24':'#f59e0b','#f97316':'#ea580c'};
@@ -400,7 +400,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 // ── Service Worker ──────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {

@@ -114,6 +114,6 @@
 @endif
 
 @if($errors->any())
-<script>document.getElementById('newListModal').classList.add('open')</script>
+<script nonce="{{ $cspNonce }}">document.getElementById('newListModal').classList.add('open')</script>
 @endif
 @endsection

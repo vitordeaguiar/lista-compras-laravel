@@ -907,7 +907,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
 // ── Tabs ──────────────────────────────────────────────────────────
 function setTab(id) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));

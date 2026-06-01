@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 use App\Models\EmailVerification;
 
@@ -123,14 +124,27 @@ class AuthController extends Controller
             'code'  => 'required|digits:6',
         ]);
 
+        // Bloqueia brute-force: máx 5 tentativas erradas por IP+e-mail
+        $attemptsKey = 'verify_attempts_' . md5($request->ip() . $request->email);
+        $attempts    = (int) Cache::get($attemptsKey, 0);
+
+        if ($attempts >= 5) {
+            return back()
+                ->withErrors(['code' => 'Muitas tentativas. Solicite um novo código de verificação.'])
+                ->withInput();
+        }
+
         $verification = EmailVerification::where('email', $request->email)
             ->where('code', $request->code)
             ->latest()
             ->first();
 
         if (!$verification || $verification->isExpired()) {
+            Cache::put($attemptsKey, $attempts + 1, now()->addMinutes(30));
             return back()->withErrors(['code' => 'Código inválido ou expirado.'])->withInput();
         }
+
+        Cache::forget($attemptsKey);
 
         return view('auth.complete', [
             'email' => $request->email,
@@ -145,7 +159,7 @@ class AuthController extends Controller
             'email'    => 'required|email|max:255|unique:users,email',
             'code'     => 'required|digits:6',
             'name'     => 'required|string|max:255',
-            'password' => 'required|string|min:6|max:255|confirmed',
+            'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         $verification = EmailVerification::where('email', $request->email)

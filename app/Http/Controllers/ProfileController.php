@@ -61,6 +61,14 @@ class ProfileController extends Controller
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
         ]);
+
+        // Exige senha atual ao alterar o e-mail
+        if ($data['email'] !== $user->email) {
+            $request->validate([
+                'current_password' => ['required', 'current_password'],
+            ]);
+        }
+
         $user->update($data);
         return back()->with('success', 'Perfil atualizado com sucesso!');
     }
@@ -85,7 +93,7 @@ class ProfileController extends Controller
         $user = Auth::user();
         $data = $request->validate([
             'theme'                  => 'required|in:dark,light',
-            'accent_color'           => 'required|string|max:20',
+            'accent_color'           => ['required', 'string', 'regex:/^#[0-9a-fA-F]{3,8}$/'],
             'layout_density'         => 'required|in:comfortable,compact',
             'salary_day'             => 'required|integer|min:1|max:31',
             'monthly_budget'         => 'nullable|numeric|min:0',

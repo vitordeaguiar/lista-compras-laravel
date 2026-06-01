@@ -276,7 +276,7 @@
 @forelse($pending as $item)
     <div class="item-card" id="icard-{{ $item->id }}">
         @if($list->isOpen())
-            <button type="button" class="chk" onclick="openToggleModal({{ $item->id }}, '{{ addslashes($item->name) }}', '{{ route('items.toggle', [$list, $item]) }}')" title="Marcar comprado">✓</button>
+            <button type="button" class="chk" data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}" data-toggle-url="{{ route('items.toggle', [$list, $item]) }}" onclick="openToggleModal(this.dataset.itemId, this.dataset.itemName, this.dataset.toggleUrl)" title="Marcar comprado">✓</button>
         @else
             <div class="chk" style="cursor:default;opacity:.35">✓</div>
         @endif
@@ -332,7 +332,7 @@
     @foreach($purchased as $item)
     <div class="item-card done">
         @if($list->isOpen())
-            <button type="button" class="chk" onclick="openToggleModal({{ $item->id }}, '{{ addslashes($item->name) }}', '{{ route('items.toggle', [$list, $item]) }}')" title="Desmarcar">✓</button>
+            <button type="button" class="chk" data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}" data-toggle-url="{{ route('items.toggle', [$list, $item]) }}" onclick="openToggleModal(this.dataset.itemId, this.dataset.itemName, this.dataset.toggleUrl)" title="Desmarcar">✓</button>
         @else
             <div class="chk" style="background:var(--accent);border-color:var(--accent);color:#09090b;cursor:default">✓</div>
         @endif
@@ -426,7 +426,7 @@
 </div>
 @endif
 
-<script>
+<script nonce="{{ $cspNonce }}">
 function applyMask(input) {
     let v = input.value.replace(/\D/g, '');
     if (!v) { input.value = ''; return; }

@@ -324,7 +324,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ $cspNonce }}">
 const finWeeklyData  = @json($allFinWeekly);
 const mktWeeklyData  = @json($allMktWeekly);
 const finMonthlyData = @json($finMonthly);

@@ -155,6 +155,12 @@
                         <input type="email" name="email" value="{{ old('email', $user->email) }}" required>
                         @error('email')<div class="field-error">{{ $message }}</div>@enderror
                     </div>
+                    <div class="form-group" id="current-password-group" style="display:none">
+                        <label>Senha atual <span style="color:var(--danger)">*</span></label>
+                        <input type="password" name="current_password" autocomplete="current-password" placeholder="Obrigatória para alterar o e-mail">
+                        @error('current_password')<div class="field-error">{{ $message }}</div>@enderror
+                        <div style="font-size:.68rem;color:var(--text3);margin-top:.25rem">Necessária apenas ao alterar o e-mail.</div>
+                    </div>
                     <button type="submit" class="btn btn-primary">💾 Salvar Perfil</button>
                 </form>
             </div>
@@ -553,7 +559,24 @@
     </div>{{-- /.prof-body --}}
 </div>{{-- /.prof-layout --}}
 
-<script>
+<script nonce="{{ $cspNonce }}">
+// ── SENHA OBRIGATÓRIA AO ALTERAR E-MAIL ─────────────────────────────────────
+(function () {
+    const emailInput   = document.querySelector('input[name="email"]');
+    const pwdGroup     = document.getElementById('current-password-group');
+    const pwdInput     = pwdGroup ? pwdGroup.querySelector('input') : null;
+    if (!emailInput || !pwdGroup) return;
+    const originalEmail = emailInput.defaultValue;
+    @if($errors->has('current_password'))
+    pwdGroup.style.display = 'block';
+    @endif
+    emailInput.addEventListener('input', function () {
+        const changed = this.value.trim() !== originalEmail;
+        pwdGroup.style.display = changed ? 'block' : 'none';
+        if (pwdInput) pwdInput.required = changed;
+    });
+})();
+
 // ── TAB NAVIGATION ──────────────────────────────────────────────────────────
 const tabBtns   = document.querySelectorAll('.prof-tab-btn');
 const tabPanels = document.querySelectorAll('.prof-panel');

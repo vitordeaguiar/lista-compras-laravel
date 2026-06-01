@@ -8,7 +8,8 @@
     <a href="{{ route('admin.index') }}" class="btn btn-ghost btn-sm">← Voltar</a>
     @if($user->id !== Auth::id())
         <button type="button" class="btn btn-danger btn-sm"
-            onclick="confirmDelete('{{ addslashes($user->name) }}', '{{ route('admin.users.destroy', $user) }}')">🗑 Excluir</button>
+            data-name="{{ $user->name }}" data-url="{{ route('admin.users.destroy', $user) }}"
+            onclick="confirmDelete(this.dataset.name, this.dataset.url)">🗑 Excluir</button>
     @endif
 @endsection
 
@@ -85,7 +86,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 function confirmDelete(name, action) {
     document.getElementById('del-user-name').textContent = name;
     document.getElementById('del-form').action = action;

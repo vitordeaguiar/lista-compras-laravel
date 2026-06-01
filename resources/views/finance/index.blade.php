@@ -308,7 +308,7 @@
                     <span class="fin-icon">💵</span>
                     <span class="fin-name">{{ $inc->name }}</span>
                     <span style="font-size:.82rem;font-weight:600;color:#22c55e;font-variant-numeric:tabular-nums">R$ {{ number_format($inc->amount,2,',','.') }}</span>
-                    <form method="POST" action="{{ route('finance.income.destroy', $inc->id) }}" onsubmit="return confirm('Excluir entrada \'{{ addslashes($inc->name) }}\'?')">
+                    <form method="POST" action="{{ route('finance.income.destroy', $inc->id) }}" data-confirm="Excluir entrada '{{ $inc->name }}'?" onsubmit="return confirm(this.dataset.confirm)">
                         @csrf @method('DELETE')
                         <button type="submit" class="del-btn" title="Excluir">×</button>
                     </form>
@@ -381,7 +381,7 @@
                         <button type="submit" class="edit-ok">✓</button>
                     </form>
                 </div>
-                <form method="POST" action="{{ route('finance.fixed.destroy', $p->fixed_cost_id) }}" onsubmit="return confirm('Excluir \'{{ addslashes($p->fixedCost?->name ?? '') }}\' de todos os meses?')">
+                <form method="POST" action="{{ route('finance.fixed.destroy', $p->fixed_cost_id) }}" data-confirm="Excluir '{{ $p->fixedCost?->name ?? '' }}' de todos os meses?" onsubmit="return confirm(this.dataset.confirm)">
                     @csrf @method('DELETE')
                     <button type="submit" class="del-btn" title="Excluir">×</button>
                 </form>
@@ -466,7 +466,7 @@
                         <button type="submit" class="edit-ok">✓</button>
                     </form>
                 </div>
-                <form method="POST" action="{{ route('finance.variable.destroy', $v->id) }}" onsubmit="return confirm('Excluir \'{{ addslashes($v->name) }}\'?')">
+                <form method="POST" action="{{ route('finance.variable.destroy', $v->id) }}" data-confirm="Excluir '{{ $v->name }}'?" onsubmit="return confirm(this.dataset.confirm)">
                     @csrf @method('DELETE')
                     <button type="submit" class="del-btn" title="Excluir">×</button>
                 </form>
@@ -554,7 +554,7 @@
                 <div style="flex:1;min-width:0">
                     <div style="display:flex;align-items:center;gap:.5rem">
                         <span style="font-size:.8rem;color:var(--text);font-weight:600;flex:1">{{ $inv->name }}</span>
-                        <form method="POST" action="{{ route('finance.investment.destroy', $inv->id) }}" onsubmit="return confirm('Excluir investimento \'{{ addslashes($inv->name) }}\' e todos os aportes?')">
+                        <form method="POST" action="{{ route('finance.investment.destroy', $inv->id) }}" data-confirm="Excluir investimento '{{ $inv->name }}' e todos os aportes?" onsubmit="return confirm(this.dataset.confirm)">
                             @csrf @method('DELETE')
                             <button type="submit" class="del-btn" title="Excluir">×</button>
                         </form>
@@ -714,7 +714,7 @@
 
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 // ── Tabs ──────────────────────────────────────────────────────
 function setTab(name) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));

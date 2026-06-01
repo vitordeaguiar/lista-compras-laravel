@@ -256,7 +256,7 @@
 </div>
 @endif
 
-<script>
+<script nonce="{{ $cspNonce }}">
 function toggleEdit(id) {
     const el = document.getElementById('edit-' + id);
     el.classList.toggle('show');

@@ -89,7 +89,8 @@
                             </form>
 
                             <button type="button" class="btn btn-danger btn-sm" title="Excluir"
-                                onclick="confirmDelete('{{ addslashes($user->name) }}', '{{ route('admin.users.destroy', $user) }}')">🗑</button>
+                                data-name="{{ $user->name }}" data-url="{{ route('admin.users.destroy', $user) }}"
+                                onclick="confirmDelete(this.dataset.name, this.dataset.url)">🗑</button>
                         @endif
                     </div>
                 </td>
@@ -152,7 +153,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $cspNonce }}">
 function confirmDelete(name, action) {
     document.getElementById('del-user-name').textContent = name;
     document.getElementById('del-form').action = action;
