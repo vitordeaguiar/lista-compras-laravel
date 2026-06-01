@@ -24,7 +24,7 @@ putenv('COMPOSER_HOME=/home1/vit75277/.composer');
 
 $name     = $_GET['name']     ?? 'Usuário Teste';
 $email    = $_GET['email']    ?? 'teste@smartlistiq.com.br';
-$password = $_GET['password'] ?? 'Teste@2026';
+$password = $_GET['password'] ?? 'Sm@rtL1st1q#T3st3!';
 
 echo "<pre>";
 echo "=== Criando usuário de teste ===\n\n";
