@@ -90,16 +90,16 @@ class CreditCardController extends Controller
 
         $futureCommitment = collect($globalProjection)->skip(1)->sum('value');
 
-        // Saldo devedor agrupado por categoria (para o painel "por categoria")
+        // Fatura do mês agrupada por categoria (para o painel "por categoria").
+        // Soma das parcelas ativas no mês selecionado → total bate com $totalFatura.
         $categoryTotals = [];
         foreach ($cards as $card) {
             foreach ($card->installments as $inst) {
-                $remaining = $inst->getRemainingAmount($card);
-                if ($remaining <= 0) {
+                if (!$inst->isActiveInMonth($monthDate, $card)) {
                     continue;
                 }
                 $cat = $inst->category;
-                $categoryTotals[$cat] = ($categoryTotals[$cat] ?? 0) + $remaining;
+                $categoryTotals[$cat] = ($categoryTotals[$cat] ?? 0) + (float) $inst->installment_amount;
             }
         }
         arsort($categoryTotals);

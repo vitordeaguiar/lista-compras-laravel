@@ -75,6 +75,7 @@
 .cat-val{font-size:.8rem;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
 .cat-bar{height:6px;border-radius:99px;background:var(--bg3);overflow:hidden}
 .cat-bar-fill{height:100%;border-radius:99px;transition:width .3s}
+.cat-total{display:flex;justify-content:space-between;align-items:center;padding-top:.6rem;margin-top:.15rem;border-top:1px solid var(--border);font-size:.8rem;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
 
 /* ── Card detail layout ── */
 .card-detail-grid{display:grid;grid-template-columns:260px 1fr;gap:1rem}
@@ -278,12 +279,14 @@
             @endforeach
         </div>
 
-        {{-- Saldo devedor por categoria --}}
+        {{-- Fatura do mês por categoria --}}
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin:.4rem 0 .55rem">
+            <span style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3)">
+                Fatura por categoria · {{ $monthLabel }}
+            </span>
+        </div>
         @if(!empty($categoryTotals))
         @php $catMax = max($categoryTotals); $catSum = array_sum($categoryTotals); @endphp
-        <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin:.4rem 0 .55rem">
-            Saldo devedor por categoria
-        </div>
         <div class="cat-grid">
             @foreach($categoryTotals as $cat => $val)
             <div class="cat-row">
@@ -301,6 +304,16 @@
                 </div>
             </div>
             @endforeach
+            <div class="cat-total">
+                <span>Total da fatura</span>
+                <span>R$ {{ number_format($catSum, 2, ',', '.') }}</span>
+            </div>
+        </div>
+        @else
+        <div class="cat-grid">
+            <div style="text-align:center;color:var(--text3);font-size:.75rem;padding:.5rem">
+                Nenhuma compra nesta fatura
+            </div>
         </div>
         @endif
     @endif
