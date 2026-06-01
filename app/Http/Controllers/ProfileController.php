@@ -14,9 +14,9 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        $settings = UserSetting::firstOrCreate(
-            ['user_id' => $user->id],
-            [
+        $settings = UserSetting::where('user_id', $user->id)->first();
+        if (!$settings) {
+            $settings = new UserSetting([
                 'theme'                  => 'dark',
                 'accent_color'           => '#2dd4bf',
                 'salary_day'             => 5,
@@ -33,8 +33,10 @@ class ProfileController extends Controller
                 'auto_copy_incomes'      => true,
                 'auto_keep_investments'  => true,
                 'layout_density'         => 'comfortable',
-            ]
-        );
+            ]);
+            $settings->user_id = $user->id;
+            $settings->save();
+        }
 
         $sessions = collect();
         try {
@@ -103,7 +105,14 @@ class ProfileController extends Controller
         $data['monthly_budget']       = $data['monthly_budget'] ?? 0;
         $data['monthly_savings_goal'] = $data['monthly_savings_goal'] ?? 0;
 
-        UserSetting::updateOrCreate(['user_id' => $user->id], $data);
+        $settings = UserSetting::where('user_id', $user->id)->first();
+        if ($settings) {
+            $settings->update($data);
+        } else {
+            $settings = new UserSetting($data);
+            $settings->user_id = $user->id;
+            $settings->save();
+        }
         return back()->with('success', 'Configurações salvas com sucesso!');
     }
 

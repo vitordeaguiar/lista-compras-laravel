@@ -27,11 +27,13 @@ class ShoppingListController extends Controller
             'notes'         => 'nullable|string|max:500',
         ]);
 
-        $data['name']    = strip_tags(trim($data['name']));
-        $data['notes']   = isset($data['notes']) ? strip_tags(trim($data['notes'])) : null;
-        $data['user_id'] = Auth::id();
+        $data['name']  = strip_tags(trim($data['name']));
+        $data['notes'] = isset($data['notes']) ? strip_tags(trim($data['notes'])) : null;
 
-        $list = ShoppingList::create($data);
+        $list = new ShoppingList($data);
+        $list->user_id = Auth::id();
+        $list->save();
+
         return redirect()->route('lists.show', $list)->with('success', 'Lista criada!');
     }
 

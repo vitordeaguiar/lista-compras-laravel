@@ -25,8 +25,8 @@ class FinanceController extends Controller
         // Custos fixos — cria payments do mês se não existirem
         $fixedCosts = FinancialFixedCost::where('user_id', $user->id)->get();
         foreach ($fixedCosts as $cost) {
-            FinancialFixedPayment::firstOrCreate(
-                ['fixed_cost_id' => $cost->id, 'month' => $month, 'user_id' => $user->id],
+            $this->firstOrCreateForUser(FinancialFixedPayment::class,
+                ['fixed_cost_id' => $cost->id, 'month' => $month],
                 ['amount' => $cost->amount, 'paid' => false]
             );
         }
@@ -145,8 +145,7 @@ class FinanceController extends Controller
             'amount'   => 'required|numeric|min:0',
             'month'    => 'required|string',
         ]);
-        $data['user_id'] = Auth::id();
-        FinancialVariableCost::create($data);
+        $this->createForUser(FinancialVariableCost::class, $data);
         return back();
     }
 
@@ -167,11 +166,9 @@ class FinanceController extends Controller
             'amount'  => 'required|numeric|min:0',
             'due_day' => 'required|integer|min:1|max:31',
         ]);
-        $data['user_id'] = Auth::id();
-        $cost = FinancialFixedCost::create($data);
-        FinancialFixedPayment::create([
+        $cost = $this->createForUser(FinancialFixedCost::class, $data);
+        $this->createForUser(FinancialFixedPayment::class, [
             'fixed_cost_id' => $cost->id,
-            'user_id'       => Auth::id(),
             'month'         => $request->month,
             'amount'        => $cost->amount,
             'paid'          => false,
@@ -186,8 +183,7 @@ class FinanceController extends Controller
             'amount' => 'required|numeric|min:0',
             'month'  => 'required|string',
         ]);
-        $data['user_id'] = Auth::id();
-        FinancialIncome::create($data);
+        $this->createForUser(FinancialIncome::class, $data);
         return back();
     }
 
@@ -199,13 +195,12 @@ class FinanceController extends Controller
             'amount'   => 'required|numeric|min:0',
             'month'    => 'required|string',
         ]);
-        $investment = FinancialInvestment::firstOrCreate(
-            ['user_id' => Auth::id(), 'name' => $data['name']],
+        $investment = $this->firstOrCreateForUser(FinancialInvestment::class,
+            ['name' => $data['name']],
             ['category' => $data['category'], 'started_at' => now()]
         );
-        FinancialInvestmentEntry::create([
+        $this->createForUser(FinancialInvestmentEntry::class, [
             'investment_id' => $investment->id,
-            'user_id'       => Auth::id(),
             'month'         => $data['month'],
             'amount'        => $data['amount'],
         ]);
@@ -284,8 +279,8 @@ class FinanceController extends Controller
                 ->where('fixed_cost_id', $fixedId)
                 ->where('month', $prevMonth)->first();
             if (!$prev) continue;
-            FinancialFixedPayment::firstOrCreate(
-                ['fixed_cost_id' => $fixedId, 'month' => $month, 'user_id' => $user->id],
+            $this->firstOrCreateForUser(FinancialFixedPayment::class,
+                ['fixed_cost_id' => $fixedId, 'month' => $month],
                 ['amount' => $prev->amount, 'paid' => false]
             );
         }
@@ -294,13 +289,45 @@ class FinanceController extends Controller
         foreach ($request->input('income_ids', []) as $incId) {
             $prev = FinancialIncome::where('user_id', $user->id)->find($incId);
             if (!$prev) continue;
-            FinancialIncome::firstOrCreate(
-                ['user_id' => $user->id, 'month' => $month, 'name' => $prev->name],
+            $this->firstOrCreateForUser(FinancialIncome::class,
+                ['month' => $month, 'name' => $prev->name],
                 ['amount' => $prev->amount]
             );
         }
 
         return redirect()->route('finance.index', ['month' => $month])
             ->with('success', 'Mês aberto com sucesso!');
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────
+
+    /**
+     * Cria um registro do usuário autenticado sem expor user_id ao mass
+     * assignment (user_id é atribuído fora do fillable, por segurança).
+     */
+    private function createForUser(string $modelClass, array $attributes)
+    {
+        $model = new $modelClass($attributes);
+        $model->user_id = Auth::id();
+        $model->save();
+        return $model;
+    }
+
+    /**
+     * Busca um registro do usuário pelos atributos informados; se não existir,
+     * cria com os valores adicionais. Equivalente a firstOrCreate, mas com
+     * user_id atribuído fora do mass assignment.
+     */
+    private function firstOrCreateForUser(string $modelClass, array $search, array $values = [])
+    {
+        $query = $modelClass::where('user_id', Auth::id());
+        foreach ($search as $key => $val) {
+            $query->where($key, $val);
+        }
+        $model = $query->first();
+        if (!$model) {
+            $model = $this->createForUser($modelClass, array_merge($search, $values));
+        }
+        return $model;
     }
 }
