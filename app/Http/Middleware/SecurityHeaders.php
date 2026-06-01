@@ -25,7 +25,7 @@ class SecurityHeaders
         $response->headers->set(
             'Content-Security-Policy',
             "default-src 'self'; " .
-            "script-src 'self' 'nonce-{$nonce}'; " .
+            "script-src 'self' 'unsafe-inline'; " .
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; " .
             "font-src 'self' https://fonts.gstatic.com; " .
             "img-src 'self' data:; " .
