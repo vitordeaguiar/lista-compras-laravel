@@ -144,7 +144,8 @@
 
     /* ── BOTTOM NAV (mobile) ── */
     .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border);height:60px;z-index:100;align-items:center;justify-content:space-around;padding:0 .25rem;padding-bottom:env(safe-area-inset-bottom)}
-    .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;padding:.5rem .7rem;border-radius:10px;text-decoration:none;color:var(--text3);font-size:.57rem;font-weight:600;flex:1;transition:color .15s;min-width:0;min-height:44px;touch-action:manipulation}
+    .bn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;padding:.5rem .2rem;border-radius:10px;text-decoration:none;color:var(--text3);font-size:.57rem;font-weight:600;flex:1;transition:color .15s;min-width:0;min-height:44px;touch-action:manipulation}
+    .bn-item span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .bn-item.active{color:var(--accent)}
     .bn-item:hover{color:var(--text2)}
     .bn-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center}
@@ -357,6 +358,14 @@
                 </svg>
             </span>
             <span>Financeiro</span>
+        </a>
+        <a href="{{ route('creditcards.index') }}" class="bn-item {{ request()->routeIs('creditcards.*') ? 'active' : '' }}">
+            <span class="bn-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+            </span>
+            <span>Cartões</span>
         </a>
         <a href="{{ route('profile.index') }}" class="bn-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
             <span class="bn-icon">
