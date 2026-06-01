@@ -104,7 +104,7 @@
         </div>
         <div class="dash-fcard-lbl">Saídas {{ now()->locale('pt_BR')->isoFormat('MMM') }}</div>
         <div class="dash-fcard-val" style="color:var(--danger)">R$ {{ number_format($totalOut, 0, ',', '.') }}</div>
-        <div class="dash-fcard-diff" style="color:var(--text3)">fixos + variáveis</div>
+        <div class="dash-fcard-diff" style="color:var(--text3)">fixos + variáveis + cartões</div>
     </div>
 
     <div class="dash-fcard featured">
@@ -146,6 +146,9 @@
         <span class="dash-bitem"><span class="dash-bdot" style="background:var(--blue)"></span>Fixos R$ {{ number_format($totalFixed, 0, ',', '.') }}</span>
         <span class="dash-bitem"><span class="dash-bdot" style="background:var(--warning)"></span>Variáveis R$ {{ number_format($totalVariable, 0, ',', '.') }}</span>
         <span class="dash-bitem"><span class="dash-bdot" style="background:var(--accent)"></span>Mercado R$ {{ number_format($totalSupermarket, 0, ',', '.') }}</span>
+        @if($totalCreditCard > 0)
+        <span class="dash-bitem"><span class="dash-bdot" style="background:#f43f5e"></span>Cartões R$ {{ number_format($totalCreditCard, 0, ',', '.') }}</span>
+        @endif
         <span class="dash-bitem"><span class="dash-bdot" style="background:var(--bg3)"></span>Livre R$ {{ number_format($balance, 0, ',', '.') }}</span>
     </div>
 </div>

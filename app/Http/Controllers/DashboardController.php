@@ -36,7 +36,19 @@ class DashboardController extends Controller
         $totalInvestment = \App\Models\FinancialInvestmentEntry::where('user_id', $user->id)
             ->where('month', $month)->sum('amount');
 
-        $totalOut  = $totalFixed + $totalVariable + $totalSupermarket + $totalInvestment;
+        // CARTÕES — calcula fatura do mês a partir das parcelas ativas
+        $monthDate   = Carbon::parse($month . '-01');
+        $creditCards = \App\Models\CreditCard::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->with(['installments' => fn($q) => $q->where('is_paid_off', false)])
+            ->get();
+        $totalCreditCard = (float) $creditCards->sum(function ($card) use ($monthDate) {
+            return $card->installments
+                ->filter(fn($inst) => $inst->isActiveInMonth($monthDate, $card))
+                ->sum('installment_amount');
+        });
+
+        $totalOut  = $totalFixed + $totalVariable + $totalSupermarket + $totalInvestment + $totalCreditCard;
         $balance   = $totalIncome - $totalOut;
         $budgetPct = $totalIncome > 0 ? min(100, round(($totalOut / $totalIncome) * 100)) : 0;
 
@@ -113,9 +125,13 @@ class DashboardController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $m     = now()->subMonths($i)->format('Y-m');
             $label = now()->subMonths($i)->locale('pt_BR')->isoFormat('MMM');
+            $mDate = Carbon::parse($m . '-01');
             $inc   = (float) \App\Models\FinancialIncome::where('user_id', $user->id)->where('month', $m)->sum('amount');
             $out   = (float) \App\Models\FinancialFixedPayment::where('user_id', $user->id)->where('month', $m)->sum('amount')
-                   + (float) \App\Models\FinancialVariableCost::where('user_id', $user->id)->where('month', $m)->sum('amount');
+                   + (float) \App\Models\FinancialVariableCost::where('user_id', $user->id)->where('month', $m)->sum('amount')
+                   + (float) $creditCards->sum(fn($card) => $card->installments
+                       ->filter(fn($inst) => $inst->isActiveInMonth($mDate, $card))
+                       ->sum('installment_amount'));
             $finMonthly[] = ['label' => $label, 'month' => $m, 'income' => $inc, 'expense' => $out];
         }
 
@@ -143,7 +159,7 @@ class DashboardController extends Controller
         return view('dashboard.index', compact(
             'openLists', 'recentActivity',
             'totalIncome', 'totalFixed', 'totalVariable',
-            'totalSupermarket', 'totalInvestment', 'totalOut',
+            'totalSupermarket', 'totalInvestment', 'totalCreditCard', 'totalOut',
             'balance', 'budgetPct',
             'upcomingBills', 'topExpenses',
             'finMonthly', 'mktMonthly',
