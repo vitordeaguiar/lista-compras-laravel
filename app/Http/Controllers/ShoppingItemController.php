@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -9,6 +10,35 @@ use App\Models\ShoppingItem;
 
 class ShoppingItemController extends Controller
 {
+    public function suggestions(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        if (mb_strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = ShoppingItem::query()
+            ->join('shopping_lists', 'shopping_lists.id', '=', 'shopping_items.shopping_list_id')
+            ->where('shopping_lists.user_id', Auth::id())
+            ->where('shopping_lists.status', 'completed')
+            ->where('shopping_items.name', 'LIKE', '%' . $q . '%')
+            ->groupBy('shopping_items.name', 'shopping_items.unit')
+            ->selectRaw('shopping_items.name, shopping_items.unit, AVG(shopping_items.price) as avg_price, COUNT(*) as freq')
+            ->orderByDesc('freq')
+            ->limit(5)
+            ->get();
+
+        return response()->json(
+            $results->map(fn($row) => [
+                'name'      => $row->name,
+                'unit'      => $row->unit,
+                'avg_price' => $row->avg_price !== null ? (float) $row->avg_price : null,
+                'freq'      => (int) $row->freq,
+            ])
+        );
+    }
+
     public function store(Request $request, ShoppingList $list)
     {
         if ($list->user_id !== Auth::id()) {

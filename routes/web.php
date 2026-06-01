@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     // Lists
     Route::get('/listas',                   [ShoppingListController::class, 'index'])->name('lists.index');
     Route::post('/listas',                  [ShoppingListController::class, 'store'])->name('lists.store');
+    Route::get('/listas/sugestoes',         [ShoppingItemController::class, 'suggestions'])->name('items.suggestions');
     Route::get('/listas/{list}',            [ShoppingListController::class, 'show'])->name('lists.show');
     Route::patch('/listas/{list}/concluir', [ShoppingListController::class, 'complete'])->name('lists.complete');
     Route::patch('/listas/{list}/reabrir',  [ShoppingListController::class, 'reopen'])->name('lists.reopen');

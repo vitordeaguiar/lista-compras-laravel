@@ -9,6 +9,13 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="shortcut icon" href="/favicon.svg">
     <meta name="theme-color" content="#2dd4bf">
+
+    {{-- PWA --}}
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Smart Listiq">
     <script>
     (function(){
         try{
@@ -342,5 +349,83 @@
 @yield('content')
 @endauth
 @stack('scripts')
+
+{{-- ── PWA: Service Worker + Install Banner ── --}}
+<div id="pwa-banner" style="
+    display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;
+    background:#111113;border-top:1px solid #3f3f46;
+    padding:.85rem 1.25rem calc(.85rem + env(safe-area-inset-bottom));
+    display:none;align-items:center;gap:.75rem;flex-wrap:wrap;
+    box-shadow:0 -4px 20px rgba(0,0,0,.4);
+" aria-live="polite">
+    <div style="flex:1;min-width:180px">
+        <div style="font-size:.85rem;font-weight:700;color:#fafafa;margin-bottom:.18rem">Instalar Smart Listiq</div>
+        <div style="font-size:.74rem;color:#a1a1aa">Adicione à tela inicial para acesso rápido</div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-shrink:0">
+        <button id="pwa-dismiss-btn" style="
+            background:none;border:1px solid #3f3f46;color:#a1a1aa;
+            padding:.45rem .85rem;border-radius:8px;font-size:.78rem;
+            cursor:pointer;font-family:inherit;transition:all .15s;
+        ">Agora não</button>
+        <button id="pwa-install-btn" style="
+            background:linear-gradient(135deg,#2dd4bf,#14b8a6);color:#09090b;
+            border:none;padding:.45rem .95rem;border-radius:8px;font-size:.78rem;
+            font-weight:700;cursor:pointer;font-family:inherit;transition:filter .18s;
+        ">Instalar</button>
+    </div>
+</div>
+
+<script>
+// ── Service Worker ──────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+}
+
+// ── Install Banner ──────────────────────────────────────────────────────
+(function () {
+    var DISMISSED_KEY = 'sl_pwa_banner_dismissed';
+    if (localStorage.getItem(DISMISSED_KEY)) return;
+
+    var deferredPrompt = null;
+    var banner         = document.getElementById('pwa-banner');
+    var installBtn     = document.getElementById('pwa-install-btn');
+    var dismissBtn     = document.getElementById('pwa-dismiss-btn');
+
+    window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        setTimeout(function () {
+            if (!deferredPrompt) return;
+            if (localStorage.getItem(DISMISSED_KEY)) return;
+            banner.style.display = 'flex';
+        }, 30000);
+    });
+
+    installBtn.addEventListener('click', function () {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function () {
+            deferredPrompt = null;
+            localStorage.setItem(DISMISSED_KEY, '1');
+            banner.style.display = 'none';
+        });
+    });
+
+    dismissBtn.addEventListener('click', function () {
+        localStorage.setItem(DISMISSED_KEY, '1');
+        banner.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', function () {
+        deferredPrompt = null;
+        localStorage.setItem(DISMISSED_KEY, '1');
+        banner.style.display = 'none';
+    });
+})();
+</script>
 </body>
 </html>

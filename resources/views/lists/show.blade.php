@@ -148,6 +148,21 @@
     .tp-modal{max-width:95vw}
     .del{opacity:1}
 }
+
+/* ── AUTOCOMPLETE ── */
+.ac-wrap{position:relative}
+.ac-dropdown{
+    position:absolute;top:calc(100% + 4px);left:0;right:0;
+    background:var(--bg2);border:1px solid var(--border);border-radius:9px;
+    list-style:none;margin:0;padding:.3rem;z-index:200;display:none;
+    box-shadow:var(--shadow-md);max-height:280px;overflow-y:auto;min-width:200px
+}
+.ac-dropdown.open{display:block}
+.ac-item{padding:.52rem .75rem;border-radius:7px;cursor:pointer;transition:background .14s}
+.ac-item:hover,.ac-item.focused{background:var(--bg3)}
+.ac-name{font-size:.83rem;font-weight:600;color:var(--text)}
+.ac-meta{font-size:.7rem;color:var(--text3);margin-top:.1rem;display:flex;flex-wrap:wrap;gap:.45rem}
+.ac-price{color:var(--accent);font-weight:500}
 </style>
 @endpush
 
@@ -236,7 +251,11 @@
     <form method="POST" action="{{ route('items.store', $list) }}">
         @csrf
         <div class="form-row">
-            <div class="fg"><label>Produto</label><input type="text" name="name" placeholder="Ex: Arroz Tio João 5kg" required></div>
+            <div class="fg ac-wrap">
+                <label for="item-name">Produto</label>
+                <input type="text" id="item-name" name="name" placeholder="Ex: Arroz Tio João 5kg" required autocomplete="off">
+                <ul id="item-suggestions" class="ac-dropdown" role="listbox" aria-label="Sugestões"></ul>
+            </div>
             <div class="fg sm"><label>Qtd</label><input type="number" name="qty" placeholder="1" value="1" min="0.001" step="0.001"></div>
             <div class="fg sm"><label>Unid.</label><input type="text" name="unit" placeholder="un,kg…"></div>
             <div class="fg md">
@@ -504,5 +523,113 @@ if (concludeModal) {
     });
     updateConcludePreview();
 }
+
+// ── AUTOCOMPLETE DE ITENS ─────────────────────────────────────────────────
+(function () {
+    const nameInput  = document.getElementById('item-name');
+    const dropdown   = document.getElementById('item-suggestions');
+    if (!nameInput || !dropdown) return;
+
+    const form       = nameInput.closest('form');
+    const unitInput  = form ? form.querySelector('input[name="unit"]')  : null;
+    const priceInput = form ? form.querySelector('input[name="price"]') : null;
+
+    let debounceTimer = null;
+    let suggestions   = [];
+    let focused       = -1;
+
+    nameInput.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        const q = this.value.trim();
+        if (q.length < 2) { closeDropdown(); return; }
+        debounceTimer = setTimeout(() => fetchSuggestions(q), 250);
+    });
+
+    async function fetchSuggestions(q) {
+        try {
+            const res = await fetch('/listas/sugestoes?' + new URLSearchParams({ q }));
+            if (!res.ok) { closeDropdown(); return; }
+            suggestions = await res.json();
+            renderDropdown();
+        } catch { closeDropdown(); }
+    }
+
+    function renderDropdown() {
+        dropdown.innerHTML = '';
+        if (!suggestions.length) { closeDropdown(); return; }
+        focused = -1;
+        suggestions.forEach((s, i) => {
+            const li = document.createElement('li');
+            li.className = 'ac-item';
+            li.setAttribute('role', 'option');
+            const price = s.avg_price != null
+                ? 'R$ ' + parseFloat(s.avg_price).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : 'sem preço';
+            li.innerHTML =
+                '<div class="ac-name">' + esc(s.name) + '</div>' +
+                '<div class="ac-meta">' +
+                    (s.unit ? '<span>' + esc(s.unit) + '</span>' : '') +
+                    '<span>' + s.freq + '× comprado</span>' +
+                    '<span class="ac-price">' + price + '</span>' +
+                '</div>';
+            li.addEventListener('mousedown', function (e) { e.preventDefault(); selectItem(i); });
+            dropdown.appendChild(li);
+        });
+        dropdown.classList.add('open');
+    }
+
+    function selectItem(i) {
+        const s = suggestions[i];
+        if (!s) return;
+        nameInput.value = s.name;
+        if (unitInput)  unitInput.value = s.unit || '';
+        if (priceInput && s.avg_price != null) {
+            priceInput.value = String(Math.round(s.avg_price * 100));
+            priceInput.dispatchEvent(new Event('input'));
+        }
+        closeDropdown();
+        const qtyInput = form ? form.querySelector('input[name="qty"]') : null;
+        if (qtyInput) qtyInput.focus();
+    }
+
+    function closeDropdown() {
+        dropdown.classList.remove('open');
+        dropdown.innerHTML = '';
+        suggestions = [];
+        focused = -1;
+    }
+
+    nameInput.addEventListener('keydown', function (e) {
+        if (!dropdown.classList.contains('open')) return;
+        const items = dropdown.querySelectorAll('.ac-item');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            focused = Math.min(focused + 1, items.length - 1);
+            updateFocus(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            focused = Math.max(focused - 1, -1);
+            updateFocus(items);
+        } else if (e.key === 'Enter' && focused >= 0) {
+            e.preventDefault();
+            selectItem(focused);
+        } else if (e.key === 'Escape') {
+            closeDropdown();
+        }
+    });
+
+    function updateFocus(items) {
+        items.forEach((li, i) => li.classList.toggle('focused', i === focused));
+        if (focused >= 0) items[focused].scrollIntoView({ block: 'nearest' });
+    }
+
+    document.addEventListener('click', function (e) {
+        if (!nameInput.contains(e.target) && !dropdown.contains(e.target)) closeDropdown();
+    });
+
+    function esc(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+})();
 </script>
 @endsection
