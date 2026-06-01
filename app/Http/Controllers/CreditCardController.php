@@ -90,9 +90,24 @@ class CreditCardController extends Controller
 
         $futureCommitment = collect($globalProjection)->skip(1)->sum('value');
 
+        // Saldo devedor agrupado por categoria (para o painel "por categoria")
+        $categoryTotals = [];
+        foreach ($cards as $card) {
+            foreach ($card->installments as $inst) {
+                $remaining = $inst->getRemainingAmount($card);
+                if ($remaining <= 0) {
+                    continue;
+                }
+                $cat = $inst->category;
+                $categoryTotals[$cat] = ($categoryTotals[$cat] ?? 0) + $remaining;
+            }
+        }
+        arsort($categoryTotals);
+
         return view('creditcards.index', compact(
             'cards', 'month', 'totalFatura',
-            'totalParcelamentos', 'globalProjection', 'futureCommitment', 'faturasPagas'
+            'totalParcelamentos', 'globalProjection', 'futureCommitment',
+            'faturasPagas', 'categoryTotals'
         ));
     }
 

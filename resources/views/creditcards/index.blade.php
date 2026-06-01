@@ -6,6 +6,8 @@
     $monthLabel = ucfirst(\Carbon\Carbon::parse($month.'-01')->locale('pt_BR')->isoFormat('MMMM [de] YYYY'));
     $totalCards = $cards->count();
     $catIcons   = ['compras'=>'🛍️','assinatura'=>'🔄','eletronico'=>'💻','casa'=>'🏠','saude'=>'💊','carro'=>'🚗','comida'=>'🍔','outros'=>'📦'];
+    $catNames   = ['compras'=>'Compras','assinatura'=>'Assinatura','eletronico'=>'Eletrônico','casa'=>'Casa','saude'=>'Saúde','carro'=>'Carro','comida'=>'Comida','outros'=>'Outros'];
+    $catColors  = ['compras'=>'#6366f1','assinatura'=>'#818cf8','eletronico'=>'#0891b2','casa'=>'#2dd4bf','saude'=>'#22c55e','carro'=>'#f59e0b','comida'=>'#ef4444','outros'=>'#94a3b8'];
     $brandIcons = ['visa'=>'VISA','mastercard'=>'MC','elo'=>'ELO','amex'=>'AMEX','outro'=>'···'];
 @endphp
 
@@ -62,6 +64,17 @@
 .proj-card.current-month{border-color:rgba(var(--accent-rgb,45,212,191),.35);background:var(--adim)}
 .proj-lbl{font-size:.58rem;color:var(--text3);margin-bottom:.2rem;text-transform:uppercase}
 .proj-val{font-size:.88rem;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+
+/* ── Category breakdown ── */
+.cat-grid{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.25rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem 1rem}
+.cat-row{display:flex;align-items:center;gap:.65rem}
+.cat-ico{font-size:1.1rem;width:26px;text-align:center;flex-shrink:0}
+.cat-body{flex:1;min-width:0}
+.cat-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.28rem;gap:.5rem}
+.cat-name{font-size:.76rem;color:var(--text2)}
+.cat-val{font-size:.8rem;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cat-bar{height:6px;border-radius:99px;background:var(--bg3);overflow:hidden}
+.cat-bar-fill{height:100%;border-radius:99px;transition:width .3s}
 
 /* ── Card detail layout ── */
 .card-detail-grid{display:grid;grid-template-columns:260px 1fr;gap:1rem}
@@ -264,6 +277,32 @@
             </div>
             @endforeach
         </div>
+
+        {{-- Saldo devedor por categoria --}}
+        @if(!empty($categoryTotals))
+        @php $catMax = max($categoryTotals); $catSum = array_sum($categoryTotals); @endphp
+        <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin:.4rem 0 .55rem">
+            Saldo devedor por categoria
+        </div>
+        <div class="cat-grid">
+            @foreach($categoryTotals as $cat => $val)
+            <div class="cat-row">
+                <span class="cat-ico">{{ $catIcons[$cat] ?? '📦' }}</span>
+                <div class="cat-body">
+                    <div class="cat-top">
+                        <span class="cat-name">{{ $catNames[$cat] ?? ucfirst($cat) }}</span>
+                        <span class="cat-val">R$ {{ number_format($val, 2, ',', '.') }}
+                            <span style="font-size:.62rem;color:var(--text3);font-weight:400">· {{ $catSum > 0 ? round($val / $catSum * 100) : 0 }}%</span>
+                        </span>
+                    </div>
+                    <div class="cat-bar">
+                        <div class="cat-bar-fill" style="width:{{ $catMax > 0 ? round($val / $catMax * 100) : 0 }}%;background:{{ $catColors[$cat] ?? '#94a3b8' }}"></div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
     @endif
 </div>
 

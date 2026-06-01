@@ -53,9 +53,19 @@ class FinanceController extends Controller
         $totalInvestment = FinancialInvestmentEntry::where('user_id', $user->id)
             ->where('month', $month)->sum('amount');
 
-        // Cartões de crédito
-        $creditCardsTotal = \App\Models\CreditCardPayment::where('user_id', $user->id)
-            ->where('month', $month)->sum('amount');
+        // Cartões de crédito — fatura do mês (soma das parcelas ativas de cada cartão),
+        // calculada diretamente para refletir o total mesmo sem abrir a aba de cartões.
+        $monthDate   = \Carbon\Carbon::parse($month . '-01');
+        $creditCards = \App\Models\CreditCard::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->with(['installments' => fn($q) => $q->where('is_paid_off', false)])
+            ->get();
+        $creditCardsTotal = 0.0;
+        foreach ($creditCards as $card) {
+            $creditCardsTotal += (float) $card->installments
+                ->filter(fn($inst) => $inst->isActiveInMonth($monthDate, $card))
+                ->sum('installment_amount');
+        }
 
         // Saldo
         $balance = $totalIncome - $totalFixed - $totalVariable - $supermarket - $totalInvestment - $creditCardsTotal;
@@ -63,7 +73,7 @@ class FinanceController extends Controller
         // Gráfico rosca — por categoria
         $chartDonut = [
             ['label' => 'Moradia',       'value' => $fixedPayments->whereIn('fixedCost.icon', ['🏠','💧','⚡'])->sum('amount'), 'color' => '#6366f1'],
-            ['label' => 'Cartão',        'value' => $fixedPayments->filter(fn($p) => str_contains($p->fixedCost->name ?? '', 'atura') || str_contains($p->fixedCost->name ?? '', 'artão'))->sum('amount'), 'color' => '#ef4444'],
+            ['label' => 'Cartões',       'value' => (float) $creditCardsTotal, 'color' => '#ef4444'],
             ['label' => 'Supermercado',  'value' => $supermarket,      'color' => '#2dd4bf'],
             ['label' => 'Variáveis',     'value' => $totalVariable,    'color' => '#f59e0b'],
             ['label' => 'Investimentos', 'value' => $totalInvestment,  'color' => '#818cf8'],

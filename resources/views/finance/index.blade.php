@@ -4,7 +4,7 @@
     $prevMonth  = \Carbon\Carbon::parse($month.'-01')->subMonth()->format('Y-m');
     $nextMonth  = \Carbon\Carbon::parse($month.'-01')->addMonth()->format('Y-m');
     $monthLabel = ucfirst(\Carbon\Carbon::parse($month.'-01')->locale('pt_BR')->isoFormat('MMMM [de] YYYY'));
-    $totalOut   = $totalFixed + $totalVariable + $supermarket + $totalInvestment;
+    $totalOut   = $totalFixed + $totalVariable + $supermarket + $totalInvestment + $creditCardsTotal;
     $pctUsed    = $totalIncome > 0 ? min(100, round($totalOut / $totalIncome * 100)) : 0;
     $fixedTotal = $fixedPayments->count();
 @endphp
@@ -214,6 +214,10 @@
         <div class="sum-row">
             <span class="sum-lbl">🛒 Supermercado</span>
             <span class="sum-val c-red">− R$ {{ number_format($supermarket, 2, ',', '.') }}</span>
+        </div>
+        <div class="sum-row">
+            <span class="sum-lbl">💳 Cartões</span>
+            <span class="sum-val c-red">− R$ {{ number_format($creditCardsTotal, 2, ',', '.') }}</span>
         </div>
         <div class="sum-row">
             <span class="sum-lbl">📈 Investimentos</span>

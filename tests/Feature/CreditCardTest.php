@@ -407,6 +407,68 @@ class CreditCardTest extends TestCase
         $this->assertEquals(21.90, (float) $inst->installment_amount);
     }
 
+    public function test_financeiro_inclui_fatura_dos_cartoes_no_saldo(): void
+    {
+        $card = $this->makeCard(['closing_day' => 3, 'due_day' => 10]);
+        CreditCardInstallment::forceCreate([
+            'user_id'             => $this->user->id,
+            'credit_card_id'      => $card->id,
+            'description'         => 'TV',
+            'category'            => 'casa',
+            'total_amount'        => 1200,
+            'installment_amount'  => 100,
+            'total_installments'  => 12,
+            'current_installment' => 1,
+            'is_recurring'        => false,
+            'purchase_date'       => now()->startOfMonth()->toDateString(), // 1ª parcela neste mês
+            'is_paid_off'         => false,
+        ]);
+
+        $response = $this->actingAs($this->user)->get(route('finance.index'));
+        $response->assertOk();
+
+        // a fatura do cartão (100/mês) entra como saída no financeiro
+        $this->assertEquals(100.0, (float) $response->viewData('creditCardsTotal'));
+    }
+
+    public function test_index_cartoes_agrupa_saldo_devedor_por_categoria(): void
+    {
+        $card = $this->makeCard(['closing_day' => 3, 'due_day' => 10]);
+        CreditCardInstallment::forceCreate([
+            'user_id'             => $this->user->id,
+            'credit_card_id'      => $card->id,
+            'description'         => 'Mercado',
+            'category'            => 'comida',
+            'total_amount'        => 300,
+            'installment_amount'  => 100,
+            'total_installments'  => 3,
+            'manual_paid_count'   => 0,
+            'is_recurring'        => false,
+            'purchase_date'       => now()->toDateString(),
+            'is_paid_off'         => false,
+        ]);
+        CreditCardInstallment::forceCreate([
+            'user_id'             => $this->user->id,
+            'credit_card_id'      => $card->id,
+            'description'         => 'Pneu',
+            'category'            => 'carro',
+            'total_amount'        => 500,
+            'installment_amount'  => 100,
+            'total_installments'  => 5,
+            'manual_paid_count'   => 0,
+            'is_recurring'        => false,
+            'purchase_date'       => now()->toDateString(),
+            'is_paid_off'         => false,
+        ]);
+
+        $response = $this->actingAs($this->user)->get(route('creditcards.index'));
+        $response->assertOk();
+
+        $cats = $response->viewData('categoryTotals');
+        $this->assertEquals(300.0, $cats['comida']);
+        $this->assertEquals(500.0, $cats['carro']);
+    }
+
     private function makeCard(array $attrs = []): CreditCard
     {
         return CreditCard::forceCreate(array_merge([
