@@ -259,6 +259,18 @@
                 Admin
             </a>
             @endif
+
+            <button id="pwa-sb-item" class="sb-item" onclick="pwaTriggerInstall()"
+                style="display:none;border:none;width:100%;text-align:left;cursor:pointer;background:none;color:var(--accent)">
+                <span class="sb-icon" style="color:var(--accent)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </span>
+                Instalar app
+            </button>
         </nav>
 
         <div class="sb-user">
@@ -286,7 +298,19 @@
                 <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
                 <div class="topbar-sub">@yield('page-sub')</div>
             </div>
-            <div class="topbar-actions">@yield('page-actions')</div>
+            <div class="topbar-actions" style="display:flex;align-items:center;gap:.5rem">
+                <button id="pwa-topbar-btn" onclick="pwaTriggerInstall()"
+                    style="display:none;align-items:center;gap:.35rem;background:var(--adim);border:1px solid rgba(45,212,191,.3);color:var(--accent);padding:.35rem .75rem;border-radius:8px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .18s"
+                    title="Instalar Smart Listiq">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Instalar
+                </button>
+                @yield('page-actions')
+            </div>
         </div>
         <main class="page-content">
             @if(session('success'))<div class="alert">{{ session('success') }}</div>@endif
@@ -384,46 +408,65 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// ── Install Banner ──────────────────────────────────────────────────────
+// ── PWA Install ─────────────────────────────────────────────────────────────
 (function () {
     var DISMISSED_KEY = 'sl_pwa_banner_dismissed';
-    if (localStorage.getItem(DISMISSED_KEY)) return;
-
     var deferredPrompt = null;
-    var banner         = document.getElementById('pwa-banner');
-    var installBtn     = document.getElementById('pwa-install-btn');
-    var dismissBtn     = document.getElementById('pwa-dismiss-btn');
+
+    var sbItem     = document.getElementById('pwa-sb-item');
+    var topbarBtn  = document.getElementById('pwa-topbar-btn');
+    var banner     = document.getElementById('pwa-banner');
+    var installBtn = document.getElementById('pwa-install-btn');
+    var dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+    // Expõe função global para os botões de install
+    window.pwaTriggerInstall = function () {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function (choice) {
+            deferredPrompt = null;
+            hideAll();
+            localStorage.setItem(DISMISSED_KEY, '1');
+        });
+    };
+
+    function showInstallButtons() {
+        if (sbItem)    sbItem.style.display    = 'flex';
+        if (topbarBtn) topbarBtn.style.display = 'inline-flex';
+        // Banner aparece após 5s para quem ainda não dispensou
+        if (!localStorage.getItem(DISMISSED_KEY)) {
+            setTimeout(function () {
+                if (deferredPrompt && banner) banner.style.display = 'flex';
+            }, 5000);
+        }
+    }
+
+    function hideAll() {
+        if (sbItem)    sbItem.style.display    = 'none';
+        if (topbarBtn) topbarBtn.style.display = 'none';
+        if (banner)    banner.style.display    = 'none';
+    }
 
     window.addEventListener('beforeinstallprompt', function (e) {
         e.preventDefault();
         deferredPrompt = e;
-
-        setTimeout(function () {
-            if (!deferredPrompt) return;
-            if (localStorage.getItem(DISMISSED_KEY)) return;
-            banner.style.display = 'flex';
-        }, 30000);
+        showInstallButtons();
     });
 
-    installBtn.addEventListener('click', function () {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function () {
-            deferredPrompt = null;
+    if (installBtn) installBtn.addEventListener('click', function () { window.pwaTriggerInstall(); });
+
+    if (dismissBtn) {
+        dismissBtn.addEventListener('click', function () {
             localStorage.setItem(DISMISSED_KEY, '1');
-            banner.style.display = 'none';
+            if (banner) banner.style.display = 'none';
+            // Mantém botão sidebar/topbar visível para instalar depois
         });
-    });
-
-    dismissBtn.addEventListener('click', function () {
-        localStorage.setItem(DISMISSED_KEY, '1');
-        banner.style.display = 'none';
-    });
+    }
 
     window.addEventListener('appinstalled', function () {
         deferredPrompt = null;
+        hideAll();
         localStorage.setItem(DISMISSED_KEY, '1');
-        banner.style.display = 'none';
     });
 })();
 </script>
