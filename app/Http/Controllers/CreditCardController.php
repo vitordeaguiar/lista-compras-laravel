@@ -24,8 +24,8 @@ class CreditCardController extends Controller
         $monthDate = Carbon::parse($month . '-01');
 
         $cards->each(function ($card) use ($month, $monthDate, $user) {
-            // fatura deste mês = soma das parcelas ativas no mês
-            $card->month_amount = (float) $card->installments
+            // estimativa do mês = soma das parcelas ativas no mês
+            $estimate = (float) $card->installments
                 ->filter(fn($inst) => $inst->isActiveInMonth($monthDate, $card))
                 ->sum('installment_amount');
 
@@ -43,7 +43,7 @@ class CreditCardController extends Controller
                 $payment = new CreditCardPayment([
                     'credit_card_id' => $card->id,
                     'month'          => $month,
-                    'amount'         => $card->month_amount,
+                    'amount'         => $estimate,
                     'paid'           => false,
                 ]);
                 $payment->user_id = $user->id;
@@ -52,16 +52,19 @@ class CreditCardController extends Controller
 
             $card->current_payment = $payment;
 
+            // fatura exibida no cartão = valor REAL se a fatura está paga (e > 0),
+            // senão a estimativa pelas parcelas ativas.
+            $card->month_amount = $card->billedAmountForMonth($monthDate, $payment);
+
+            // projeção: o mês atual segue a regra (real se pago); meses futuros
+            // ainda não têm fatura paga → sempre estimativa.
             $projection = [];
             for ($i = 0; $i < 6; $i++) {
-                $m     = $monthDate->copy()->addMonths($i);
-                $total = (float) $card->installments
-                    ->filter(fn($inst) => $inst->isActiveInMonth($m, $card))
-                    ->sum('installment_amount');
+                $m = $monthDate->copy()->addMonths($i);
                 $projection[] = [
                     'label' => $m->locale('pt_BR')->isoFormat('MMM/YY'),
                     'month' => $m->format('Y-m'),
-                    'value' => $total,
+                    'value' => $card->billedAmountForMonth($m, $i === 0 ? $payment : null),
                 ];
             }
             $card->projection = $projection;
@@ -77,9 +80,8 @@ class CreditCardController extends Controller
             $m     = $monthDate->copy()->addMonths($i);
             $total = 0;
             foreach ($cards as $card) {
-                $total += (float) $card->installments
-                    ->filter(fn($inst) => $inst->isActiveInMonth($m, $card))
-                    ->sum('installment_amount');
+                // mês atual segue a regra paga/estimado; meses futuros usam estimativa
+                $total += $card->billedAmountForMonth($m, $i === 0 ? $card->current_payment : null);
             }
             $globalProjection[] = [
                 'label' => $m->locale('pt_BR')->isoFormat('MMM/YY'),
@@ -91,7 +93,8 @@ class CreditCardController extends Controller
         $futureCommitment = collect($globalProjection)->skip(1)->sum('value');
 
         // Fatura do mês agrupada por categoria (para o painel "por categoria").
-        // Soma das parcelas ativas no mês selecionado → total bate com $totalFatura.
+        // Sempre pela ESTIMATIVA (parcelas ativas), pois o valor real pago não tem
+        // quebra por categoria; pode divergir de $totalFatura quando a fatura é paga.
         $categoryTotals = [];
         foreach ($cards as $card) {
             foreach ($card->installments as $inst) {
@@ -213,6 +216,10 @@ class CreditCardController extends Controller
             'paid'    => $nowPaid,
             'paid_at' => $nowPaid ? now() : null,
         ]);
+
+        // Pagar a fatura dá baixa nas parcelas daquele mês; desmarcar reverte.
+        $this->applyInvoiceBaixa($payment, $nowPaid);
+
         return back();
     }
 
@@ -248,6 +255,44 @@ class CreditCardController extends Controller
     }
 
     // ── Helpers ────────────────────────────────────────────────────────
+
+    /**
+     * Dá baixa (ou reverte) nas parcelas da fatura de um mês conforme o pagamento.
+     *
+     * Para cada parcelamento NÃO-recorrente e não quitado que está ativo no mês
+     * da fatura, ajusta a contagem (manual_paid_count) para a POSIÇÃO daquele mês
+     * quando pago, ou posição − 1 quando desmarcado. A partir daí o parcelamento
+     * passa a ser guiado pelos pagamentos, não mais pela contagem automática.
+     * Recorrentes (assinaturas) e já quitados são ignorados.
+     */
+    private function applyInvoiceBaixa(CreditCardPayment $payment, bool $paid): void
+    {
+        $card = $payment->creditCard;
+        if (!$card) {
+            return;
+        }
+
+        $monthDate = Carbon::parse($payment->month . '-01');
+
+        foreach ($card->installments as $inst) {
+            if ($inst->is_recurring || $inst->is_paid_off) {
+                continue;
+            }
+            if (!$inst->isActiveInMonth($monthDate, $card)) {
+                continue;
+            }
+
+            // posição (1-based) da parcela deste mês dentro do parcelamento
+            $first    = $inst->firstDueMonth($card);
+            $position = ($monthDate->year - $first->year) * 12
+                      + ($monthDate->month - $first->month) + 1;
+
+            $count = $paid ? $position : $position - 1;
+            $count = max(0, min($count, $inst->total_installments));
+
+            $inst->update(['manual_paid_count' => $count]);
+        }
+    }
 
     private function authorizeOwner(?int $ownerId): void
     {
