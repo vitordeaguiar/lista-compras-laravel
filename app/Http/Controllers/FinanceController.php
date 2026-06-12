@@ -53,19 +53,30 @@ class FinanceController extends Controller
         $totalInvestment = FinancialInvestmentEntry::where('user_id', $user->id)
             ->where('month', $month)->sum('amount');
 
-        // Cartões de crédito — fatura do mês (soma das parcelas ativas de cada cartão),
-        // calculada diretamente para refletir o total mesmo sem abrir a aba de cartões.
+        // Cartões de crédito — valor do mês por cartão: usa o valor REAL da fatura
+        // quando ela já está paga (e > 0), senão a estimativa pelas parcelas ativas.
         $monthDate   = \Carbon\Carbon::parse($month . '-01');
         $creditCards = \App\Models\CreditCard::where('user_id', $user->id)
             ->where('is_active', true)
             ->with(['installments' => fn($q) => $q->where('is_paid_off', false)])
             ->get();
+        $cardPayments = \App\Models\CreditCardPayment::where('user_id', $user->id)
+            ->where('month', $month)
+            ->get()->keyBy('credit_card_id');
         $creditCardsTotal = 0.0;
         foreach ($creditCards as $card) {
-            $creditCardsTotal += (float) $card->installments
-                ->filter(fn($inst) => $inst->isActiveInMonth($monthDate, $card))
-                ->sum('installment_amount');
+            $creditCardsTotal += $card->billedAmountForMonth($monthDate, $cardPayments->get($card->id));
         }
+
+        // Status para o rótulo: 'paid' se todas as faturas estão pagas (valor real),
+        // 'estimated' se ao menos uma ainda usa estimativa, 'none' sem cartões.
+        $creditCardsAllPaid = $creditCards->isNotEmpty() && $creditCards->every(function ($card) use ($cardPayments) {
+            $p = $cardPayments->get($card->id);
+            return $p && $p->paid && (float) $p->amount > 0;
+        });
+        $creditCardsStatus = $creditCards->isEmpty()
+            ? 'none'
+            : ($creditCardsAllPaid ? 'paid' : 'estimated');
 
         // Saldo
         $balance = $totalIncome - $totalFixed - $totalVariable - $supermarket - $totalInvestment - $creditCardsTotal;
@@ -100,7 +111,7 @@ class FinanceController extends Controller
             'variables', 'totalVariable',
             'supermarket', 'investments', 'totalInvestment',
             'balance', 'chartDonut', 'chartBars',
-            'prevFixedPayments', 'creditCardsTotal'
+            'prevFixedPayments', 'creditCardsTotal', 'creditCardsStatus'
         ));
     }
 

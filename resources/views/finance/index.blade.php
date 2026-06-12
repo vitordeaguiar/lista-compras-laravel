@@ -216,7 +216,14 @@
             <span class="sum-val c-red">− R$ {{ number_format($supermarket, 2, ',', '.') }}</span>
         </div>
         <div class="sum-row">
-            <span class="sum-lbl">💳 Cartões</span>
+            <span class="sum-lbl">
+                💳 Cartões
+                @if($creditCardsStatus === 'paid')
+                    <span class="fin-badge b-ok">✓ pago</span>
+                @elseif($creditCardsStatus === 'estimated')
+                    <span class="fin-badge b-due">~ estimado</span>
+                @endif
+            </span>
             <span class="sum-val c-red">− R$ {{ number_format($creditCardsTotal, 2, ',', '.') }}</span>
         </div>
         <div class="sum-row">

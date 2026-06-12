@@ -36,17 +36,26 @@ class DashboardController extends Controller
         $totalInvestment = \App\Models\FinancialInvestmentEntry::where('user_id', $user->id)
             ->where('month', $month)->sum('amount');
 
-        // CARTÕES — calcula fatura do mês a partir das parcelas ativas
+        // CARTÕES — valor do mês por cartão: usa o valor REAL da fatura quando paga
+        // (e > 0), senão a estimativa pelas parcelas ativas. Mesma regra do Financeiro.
         $monthDate   = Carbon::parse($month . '-01');
         $creditCards = \App\Models\CreditCard::where('user_id', $user->id)
             ->where('is_active', true)
             ->with(['installments' => fn($q) => $q->where('is_paid_off', false)])
             ->get();
-        $totalCreditCard = (float) $creditCards->sum(function ($card) use ($monthDate) {
-            return $card->installments
-                ->filter(fn($inst) => $inst->isActiveInMonth($monthDate, $card))
-                ->sum('installment_amount');
-        });
+
+        // Payments dos últimos 6 meses (para o strip e o gráfico), indexados por "YYYY-MM|card_id".
+        $chartMonths = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $chartMonths[] = now()->subMonths($i)->format('Y-m');
+        }
+        $cardPayments = \App\Models\CreditCardPayment::where('user_id', $user->id)
+            ->whereIn('month', $chartMonths)
+            ->get()
+            ->keyBy(fn($p) => $p->month . '|' . $p->credit_card_id);
+
+        $totalCreditCard = (float) $creditCards->sum(fn($card) =>
+            $card->billedAmountForMonth($monthDate, $cardPayments->get($month . '|' . $card->id)));
 
         $totalOut  = $totalFixed + $totalVariable + $totalSupermarket + $totalInvestment + $totalCreditCard;
         $balance   = $totalIncome - $totalOut;
@@ -129,9 +138,8 @@ class DashboardController extends Controller
             $inc   = (float) \App\Models\FinancialIncome::where('user_id', $user->id)->where('month', $m)->sum('amount');
             $out   = (float) \App\Models\FinancialFixedPayment::where('user_id', $user->id)->where('month', $m)->sum('amount')
                    + (float) \App\Models\FinancialVariableCost::where('user_id', $user->id)->where('month', $m)->sum('amount')
-                   + (float) $creditCards->sum(fn($card) => $card->installments
-                       ->filter(fn($inst) => $inst->isActiveInMonth($mDate, $card))
-                       ->sum('installment_amount'));
+                   + (float) $creditCards->sum(fn($card) =>
+                       $card->billedAmountForMonth($mDate, $cardPayments->get($m . '|' . $card->id)));
             $finMonthly[] = ['label' => $label, 'month' => $m, 'income' => $inc, 'expense' => $out];
         }
 
