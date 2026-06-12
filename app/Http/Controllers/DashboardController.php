@@ -138,6 +138,11 @@ class DashboardController extends Controller
             $inc   = (float) \App\Models\FinancialIncome::where('user_id', $user->id)->where('month', $m)->sum('amount');
             $out   = (float) \App\Models\FinancialFixedPayment::where('user_id', $user->id)->where('month', $m)->sum('amount')
                    + (float) \App\Models\FinancialVariableCost::where('user_id', $user->id)->where('month', $m)->sum('amount')
+                   + (float) \App\Models\ShoppingList::where('user_id', $user->id)
+                       ->where('status', 'completed')
+                       ->whereRaw("DATE_FORMAT(updated_at, '%Y-%m') = ?", [$m])
+                       ->sum('total')
+                   + (float) \App\Models\FinancialInvestmentEntry::where('user_id', $user->id)->where('month', $m)->sum('amount')
                    + (float) $creditCards->sum(fn($card) =>
                        $card->billedAmountForMonth($mDate, $cardPayments->get($m . '|' . $card->id)));
             $finMonthly[] = ['label' => $label, 'month' => $m, 'income' => $inc, 'expense' => $out];

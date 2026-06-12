@@ -90,15 +90,33 @@ class FinanceController extends Controller
             ['label' => 'Investimentos', 'value' => $totalInvestment,  'color' => '#818cf8'],
         ];
 
-        // Gráfico barras — últimos 6 meses
+        // Gráfico barras — últimos 6 meses. "Saídas" usa a MESMA definição do total
+        // do topo: fixos + variáveis + supermercado + investimentos + cartões.
+        $chartMonths = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $chartMonths[] = now()->subMonths($i)->format('Y-m');
+        }
+        $chartCardPayments = \App\Models\CreditCardPayment::where('user_id', $user->id)
+            ->whereIn('month', $chartMonths)
+            ->get()
+            ->keyBy(fn($p) => $p->month . '|' . $p->credit_card_id);
+
         $chartBars = [];
         for ($i = 5; $i >= 0; $i--) {
             $m     = now()->subMonths($i)->format('Y-m');
+            $mDate = \Carbon\Carbon::parse($m . '-01');
             $label = now()->subMonths($i)->locale('pt_BR')->isoFormat('MMM');
-            $inc   = FinancialIncome::where('user_id', $user->id)->where('month', $m)->sum('amount');
-            $out   = FinancialFixedPayment::where('user_id', $user->id)->where('month', $m)->sum('amount')
-                   + FinancialVariableCost::where('user_id', $user->id)->where('month', $m)->sum('amount');
-            $chartBars[] = ['label' => $label, 'income' => (float) $inc, 'expense' => (float) $out];
+            $inc   = (float) FinancialIncome::where('user_id', $user->id)->where('month', $m)->sum('amount');
+            $out   = (float) FinancialFixedPayment::where('user_id', $user->id)->where('month', $m)->sum('amount')
+                   + (float) FinancialVariableCost::where('user_id', $user->id)->where('month', $m)->sum('amount')
+                   + (float) \App\Models\ShoppingList::where('user_id', $user->id)
+                       ->where('status', 'completed')
+                       ->whereRaw("DATE_FORMAT(completed_at, '%Y-%m') = ?", [$m])
+                       ->sum('total')
+                   + (float) FinancialInvestmentEntry::where('user_id', $user->id)->where('month', $m)->sum('amount')
+                   + (float) $creditCards->sum(fn($card) =>
+                       $card->billedAmountForMonth($mDate, $chartCardPayments->get($m . '|' . $card->id)));
+            $chartBars[] = ['label' => $label, 'income' => $inc, 'expense' => $out];
         }
 
         // Mês atual para "novo mês inteligente" (será copiado para o próximo)
