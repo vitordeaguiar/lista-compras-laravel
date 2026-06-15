@@ -71,6 +71,31 @@ class CreditCardInstallment extends Model
     }
 
     /**
+     * Deve aparecer na LISTA de parcelamentos do mês visualizado?
+     *
+     * - Recorrente / ainda em aberto: aparece em todo mês ativo (regra normal).
+     * - Quitado: aparece somente no mês da ÚLTIMA parcela (o mês em que "baixou"),
+     *   para ficar no histórico daquele mês sem poluir os meses seguintes.
+     *
+     * Obs.: isto é apenas exibição da aba Cartões; não afeta os totais do
+     * financeiro/dashboard, que continuam contando a parcela no mês dela.
+     */
+    public function visibleInMonth(Carbon $month, CreditCard $card): bool
+    {
+        if (!$this->isActiveInMonth($month, $card)) {
+            return false;
+        }
+
+        if (!$this->isFullyPaid($card)) {
+            return true;
+        }
+
+        $lastMonth = $this->firstDueMonth($card)->addMonths($this->total_installments - 1);
+
+        return $month->format('Y-m') === $lastMonth->format('Y-m');
+    }
+
+    /**
      * Quantas parcelas já foram pagas.
      * - Override manual (manual_paid_count) tem prioridade.
      * - Senão, conta automaticamente as faturas cujo vencimento já passou,

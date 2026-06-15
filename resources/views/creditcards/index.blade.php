@@ -449,13 +449,13 @@
                 <div style="font-size:.76rem;font-weight:600;color:var(--text)">
                     Parcelamentos
                     <span style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:.62rem;padding:.06rem .38rem;border-radius:99px;margin-left:.35rem">
-                        {{ $card->installments->filter(fn($inst) => $inst->isActiveInMonth($monthDate, $card))->count() }}
+                        {{ $card->installments->filter(fn($inst) => $inst->visibleInMonth($monthDate, $card))->count() }}
                     </span>
                 </div>
             </div>
 
             <div class="inst-list" id="inst-list-{{ $card->id }}">
-                @forelse($card->installments->filter(fn($inst) => $inst->isActiveInMonth($monthDate, $card))->sortBy(fn($i) => $i->isFullyPaid($card) ? 1 : 0) as $inst)
+                @forelse($card->installments->filter(fn($inst) => $inst->visibleInMonth($monthDate, $card))->sortBy(fn($i) => $i->isFullyPaid($card) ? 1 : 0) as $inst)
                 @php
                     $isRec     = $inst->is_recurring;
                     $total     = $inst->total_installments;
@@ -619,7 +619,7 @@
     </div>
 
     <div class="inst-list" id="all-inst-list">
-        @php $allInsts = $cards->flatMap(fn($c) => $c->installments->filter(fn($i) => $i->isActiveInMonth($monthDate, $c))->map(fn($i) => ['inst' => $i, 'card' => $c]))->sortBy(fn($x) => $x['inst']->isFullyPaid($x['card']) ? 1 : 0); @endphp
+        @php $allInsts = $cards->flatMap(fn($c) => $c->installments->filter(fn($i) => $i->visibleInMonth($monthDate, $c))->map(fn($i) => ['inst' => $i, 'card' => $c]))->sortBy(fn($x) => $x['inst']->isFullyPaid($x['card']) ? 1 : 0); @endphp
         @forelse($allInsts as $entry)
         @php
             $inst = $entry['inst']; $card = $entry['card'];
