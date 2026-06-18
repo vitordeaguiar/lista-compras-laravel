@@ -389,16 +389,20 @@
 
         <div class="conclude-summary">
             <div class="csum-row">
-                <span>Total comprado</span>
-                <span style="font-weight:700" id="concludeTotalBruto">R$ 0,00</span>
+                <span>Soma dos itens marcados</span>
+                <span style="font-weight:700" id="concludeSumItems">R$ 0,00</span>
             </div>
-            <div class="csum-row">
-                <span>Desconto</span>
+            <div class="csum-row" id="rowDesconto" style="display:none">
+                <span>🏷 Desconto</span>
                 <span style="font-weight:700;color:#22c55e" id="concludeDesconto">- R$ 0,00</span>
+            </div>
+            <div class="csum-row" id="rowAcima" style="display:none">
+                <span>⚠️ Acima da soma</span>
+                <span style="font-weight:700;color:var(--warning)" id="concludeAcima">+ R$ 0,00</span>
             </div>
             <div style="height:1px;background:var(--border);margin:.45rem 0"></div>
             <div class="csum-row" style="font-size:.82rem">
-                <span style="font-weight:700;color:var(--text)">Total final</span>
+                <span style="font-weight:700;color:var(--text)">Total da lista</span>
                 <span style="font-size:.95rem;font-weight:900;color:var(--accent)" id="concludeTotalFinal">R$ 0,00</span>
             </div>
         </div>
@@ -406,12 +410,12 @@
         <form method="POST" action="{{ route('lists.complete', $list) }}" id="concludeForm">
             @csrf @method('PATCH')
             <div class="mfield">
-                <label>Desconto recebido (opcional)</label>
-                <input type="text" name="discount" id="discountInput"
-                    placeholder="R$ 0,00" autocomplete="off"
+                <label>Valor total da lista (opcional)</label>
+                <input type="text" name="total" id="totalInput"
+                    placeholder="R$ 0,00" autocomplete="off" inputmode="numeric"
                     oninput="updateConcludePreview()">
                 <div style="font-size:.62rem;color:var(--text3);margin-top:.3rem">
-                    💡 Se recebeu desconto no caixa ou cupom, informe aqui. Será subtraído do total.
+                    💡 Informe o total pago. Abaixo da soma dos itens vira desconto; acima é só erro/preço faltando. Em branco, usamos a soma dos itens.
                 </div>
             </div>
             <div class="modal-footer">
@@ -486,25 +490,38 @@ document.getElementById('tpOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeToggleModal();
 });
 
-// ── Desconto / Concluir ────────────────────────────────────────
-const totalBruto = {{ $list->items->where('purchased', true)->sum(fn($i) => ($i->price ?? 0) * ($i->qty ?? 1)) }};
+// ── Total / Concluir ───────────────────────────────────────────
+const sumItems = {{ $list->items->where('purchased', true)->sum(fn($i) => ($i->price ?? 0) * ($i->qty ?? 1)) }};
 
 function fmt(v) {
     return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function updateConcludePreview() {
-    const raw      = (document.getElementById('discountInput')?.value || '').replace(/\./g, '').replace(',', '.');
-    const discount = parseFloat(raw) || 0;
-    const final    = Math.max(0, totalBruto - discount);
-    document.getElementById('concludeTotalBruto').textContent  = fmt(totalBruto);
-    document.getElementById('concludeDesconto').textContent    = '- ' + fmt(discount);
-    document.getElementById('concludeTotalFinal').textContent  = fmt(final);
+    const raw    = (document.getElementById('totalInput')?.value || '').replace(/\./g, '').replace(',', '.');
+    const hasVal = raw !== '';
+    const total  = hasVal ? (parseFloat(raw) || 0) : sumItems;
+
+    document.getElementById('concludeSumItems').textContent   = fmt(sumItems);
+    document.getElementById('concludeTotalFinal').textContent = fmt(total);
+
+    const rowDesc  = document.getElementById('rowDesconto');
+    const rowAcima = document.getElementById('rowAcima');
+    rowDesc.style.display  = 'none';
+    rowAcima.style.display = 'none';
+
+    if (hasVal && total < sumItems) {
+        rowDesc.style.display = '';
+        document.getElementById('concludeDesconto').textContent = '- ' + fmt(sumItems - total);
+    } else if (hasVal && total > sumItems) {
+        rowAcima.style.display = '';
+        document.getElementById('concludeAcima').textContent = '+ ' + fmt(total - sumItems);
+    }
 }
 
-const discountInput = document.getElementById('discountInput');
-if (discountInput) {
-    discountInput.addEventListener('input', function() {
+const totalInput = document.getElementById('totalInput');
+if (totalInput) {
+    totalInput.addEventListener('input', function() {
         let v = this.value.replace(/\D/g, '');
         if (!v) { this.value = ''; updateConcludePreview(); return; }
         v = (parseInt(v, 10) / 100).toFixed(2);
@@ -512,7 +529,7 @@ if (discountInput) {
         updateConcludePreview();
     });
     document.getElementById('concludeForm').addEventListener('submit', function() {
-        discountInput.value = discountInput.value.replace(/\./g, '').replace(',', '.');
+        totalInput.value = totalInput.value.replace(/\./g, '').replace(',', '.');
     });
 }
 

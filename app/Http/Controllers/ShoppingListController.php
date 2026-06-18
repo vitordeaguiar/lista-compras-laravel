@@ -66,25 +66,31 @@ class ShoppingListController extends Controller
         }
         abort_if($list->isCompleted(), 422);
 
-        // JS já converte "1.234,56" → "1234.56" antes do submit; basta cast direto
-        $discount = (float) $request->input('discount', 0);
+        // JS já converte "1.234,56" → "1234.56" antes do submit; em branco → null
+        $data = $request->validate(['total' => 'nullable|numeric|min:0']);
 
-        $total = $list->items()
+        // Soma dos itens marcados como comprados (preço × qtd)
+        $sumItems = $list->items()
             ->where('purchased', true)
             ->get()
             ->sum(fn($item) => ($item->price ?? 0) * $item->qty);
 
-        $finalTotal = max(0, $total - $discount);
+        // Valor total informado pelo usuário; em branco, usa a soma dos itens.
+        $total = isset($data['total']) ? max(0, (float) $data['total']) : (float) $sumItems;
+
+        // Se o total ficou abaixo da soma dos itens, a diferença foi desconto.
+        // Se ficou acima (preços incompletos ou erro), não há desconto.
+        $discount = $total < $sumItems ? round($sumItems - $total, 2) : 0;
 
         $list->update([
             'status'       => 'completed',
-            'total'        => $finalTotal,
+            'total'        => $total,
             'discount'     => $discount,
             'completed_at' => now(),
         ]);
 
         return redirect()->route('lists.index')
-            ->with('success', 'Lista concluída! Total: R$ ' . number_format($finalTotal, 2, ',', '.'));
+            ->with('success', 'Lista concluída! Total: R$ ' . number_format($total, 2, ',', '.'));
     }
 
     public function reopen(ShoppingList $list)
@@ -103,6 +109,7 @@ class ShoppingListController extends Controller
         $list->update([
             'status'       => 'open',
             'total'        => null,
+            'discount'     => 0,
             'completed_at' => null,
         ]);
 
