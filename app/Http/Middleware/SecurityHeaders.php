@@ -25,10 +25,13 @@ class SecurityHeaders
         $response->headers->set(
             'Content-Security-Policy',
             "default-src 'self'; " .
-            "script-src 'self' 'unsafe-inline'; " .
+            // 'wasm-unsafe-eval' libera o WebAssembly do Tesseract.js (OCR do cupom)
+            "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; " .
+            // worker do Tesseract (carregado de 'self'; blob: como fallback)
+            "worker-src 'self' blob:; " .
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; " .
             "font-src 'self' https://fonts.gstatic.com; " .
-            "img-src 'self' data:; " .
+            "img-src 'self' data: blob:; " .
             "connect-src 'self';"
         );
 

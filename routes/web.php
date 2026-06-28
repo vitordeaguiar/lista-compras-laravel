@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CreditCardController;
+use App\Http\Controllers\ReceiptImportController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login',               [AuthController::class, 'showLogin'])->name('login');
@@ -29,6 +30,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/listas',                   [ShoppingListController::class, 'index'])->name('lists.index');
     Route::post('/listas',                  [ShoppingListController::class, 'store'])->name('lists.store');
     Route::get('/listas/sugestoes',         [ShoppingItemController::class, 'suggestions'])->name('items.suggestions');
+
+    // Importar a partir do cupom fiscal (registrar antes de /listas/{list})
+    Route::get('/listas/cupom',             [ReceiptImportController::class, 'create'])->name('lists.receipt.create');
+    Route::post('/listas/cupom/extrair',    [ReceiptImportController::class, 'extract'])->name('lists.receipt.extract');
+    Route::post('/listas/cupom',            [ReceiptImportController::class, 'store'])->name('lists.receipt.store');
+
     Route::get('/listas/{list}',            [ShoppingListController::class, 'show'])->name('lists.show');
     Route::patch('/listas/{list}/concluir', [ShoppingListController::class, 'complete'])->name('lists.complete');
     Route::patch('/listas/{list}/reabrir',  [ShoppingListController::class, 'reopen'])->name('lists.reopen');
