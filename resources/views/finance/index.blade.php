@@ -438,8 +438,8 @@
 <div id="tab-variaveis" class="tab-panel">
 
     @php
-        $catIcons = ['lazer'=>'🎮','delivery'=>'🛵','compras'=>'🛍️','transporte'=>'🚌','saude'=>'💊','educacao'=>'📚','outros'=>'📦'];
-        $catNames = ['lazer'=>'Lazer','delivery'=>'Delivery','compras'=>'Compras','transporte'=>'Transporte','saude'=>'Saúde','educacao'=>'Educação','outros'=>'Outros'];
+        $catIcons = ['lazer'=>'🎮','delivery'=>'🛵','comida'=>'🍔','mercado'=>'🛒','compras'=>'🛍️','transporte'=>'🚌','saude'=>'💊','educacao'=>'📚','outros'=>'📦'];
+        $catNames = ['lazer'=>'Lazer','delivery'=>'Delivery','comida'=>'Comida','mercado'=>'Mercado','compras'=>'Compras','transporte'=>'Transporte','saude'=>'Saúde','educacao'=>'Educação','outros'=>'Outros'];
     @endphp
 
     <div class="cat-tabs">

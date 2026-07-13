@@ -6,9 +6,9 @@
     $monthLabel = ucfirst(\Carbon\Carbon::parse($month.'-01')->locale('pt_BR')->isoFormat('MMMM [de] YYYY'));
     $monthDate  = \Carbon\Carbon::parse($month.'-01');
     $totalCards = $cards->count();
-    $catIcons   = ['compras'=>'🛍️','assinatura'=>'🔄','eletronico'=>'💻','casa'=>'🏠','saude'=>'💊','carro'=>'🚗','comida'=>'🍔','outros'=>'📦'];
-    $catNames   = ['compras'=>'Compras','assinatura'=>'Assinatura','eletronico'=>'Eletrônico','casa'=>'Casa','saude'=>'Saúde','carro'=>'Carro','comida'=>'Comida','outros'=>'Outros'];
-    $catColors  = ['compras'=>'#6366f1','assinatura'=>'#818cf8','eletronico'=>'#0891b2','casa'=>'#2dd4bf','saude'=>'#22c55e','carro'=>'#f59e0b','comida'=>'#ef4444','outros'=>'#94a3b8'];
+    $catIcons   = ['compras'=>'🛍️','assinatura'=>'🔄','eletronico'=>'💻','casa'=>'🏠','saude'=>'💊','carro'=>'🚗','comida'=>'🍔','mercado'=>'🛒','outros'=>'📦'];
+    $catNames   = ['compras'=>'Compras','assinatura'=>'Assinatura','eletronico'=>'Eletrônico','casa'=>'Casa','saude'=>'Saúde','carro'=>'Carro','comida'=>'Comida','mercado'=>'Mercado','outros'=>'Outros'];
+    $catColors  = ['compras'=>'#6366f1','assinatura'=>'#818cf8','eletronico'=>'#0891b2','casa'=>'#2dd4bf','saude'=>'#22c55e','carro'=>'#f59e0b','comida'=>'#ef4444','mercado'=>'#0ea5e9','outros'=>'#94a3b8'];
     $brandIcons = ['visa'=>'VISA','mastercard'=>'MC','elo'=>'ELO','amex'=>'AMEX','outro'=>'···'];
 @endphp
 
@@ -566,6 +566,7 @@
                                 <option value="saude">💊 Saúde</option>
                                 <option value="carro">🚗 Carro</option>
                                 <option value="comida">🍔 Comida</option>
+                                <option value="mercado">🛒 Mercado</option>
                                 <option value="outros">📦 Outros</option>
                             </select>
                         </div>
@@ -869,6 +870,7 @@
                         <option value="saude">💊 Saúde</option>
                         <option value="carro">🚗 Carro</option>
                         <option value="comida">🍔 Comida</option>
+                        <option value="mercado">🛒 Mercado</option>
                         <option value="outros">📦 Outros</option>
                     </select>
                 </div>
