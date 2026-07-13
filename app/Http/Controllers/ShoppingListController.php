@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\ShoppingList;
+use App\Models\UserSetting;
 
 class ShoppingListController extends Controller
 {
@@ -49,8 +50,24 @@ class ShoppingListController extends Controller
             abort(403);
         }
 
-        $list->load('items');
+        // Ordem base = inserção (por id); a divisão comprados/pendentes é feita na view.
+        $list->load(['items' => fn ($q) => $q->orderBy('id')]);
+
+        // Preferência do usuário: alfabética reordena a coleção já carregada.
+        if ($this->itemsOrderPreference() === 'alphabetical') {
+            $list->setRelation(
+                'items',
+                $list->items->sortBy(fn ($i) => mb_strtolower($i->name))->values()
+            );
+        }
+
         return view('lists.show', compact('list'));
+    }
+
+    private function itemsOrderPreference(): string
+    {
+        $order = UserSetting::where('user_id', Auth::id())->value('list_item_order');
+        return $order === 'alphabetical' ? 'alphabetical' : 'insertion';
     }
 
     public function complete(Request $request, ShoppingList $list)

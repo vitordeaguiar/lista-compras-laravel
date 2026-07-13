@@ -292,6 +292,29 @@
                     </div>
                 </div>
 
+                <div class="prof-card">
+                    <div class="prof-card-title">Ordem dos itens da lista</div>
+                    <div class="prof-card-sub">Define como os itens aparecem dentro de cada lista de compras.</div>
+                    <div class="density-options">
+                        <label class="density-opt {{ ($settings->list_item_order ?? 'insertion') === 'insertion' ? 'active' : '' }}">
+                            <input type="radio" name="list_item_order" value="insertion"
+                                {{ ($settings->list_item_order ?? 'insertion') === 'insertion' ? 'checked' : '' }}>
+                            <div>
+                                <div style="font-size:.8rem;font-weight:600;color:var(--text)">Ordem de adição</div>
+                                <div style="font-size:.67rem;color:var(--text3);margin-top:.1rem">Como você adicionou</div>
+                            </div>
+                        </label>
+                        <label class="density-opt {{ ($settings->list_item_order ?? 'insertion') === 'alphabetical' ? 'active' : '' }}">
+                            <input type="radio" name="list_item_order" value="alphabetical"
+                                {{ ($settings->list_item_order ?? 'insertion') === 'alphabetical' ? 'checked' : '' }}>
+                            <div>
+                                <div style="font-size:.8rem;font-weight:600;color:var(--text)">Alfabética</div>
+                                <div style="font-size:.67rem;color:var(--text3);margin-top:.1rem">De A a Z</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="save-bar">
                     <button type="submit" class="btn btn-primary">💾 Salvar Aparência</button>
                 </div>
@@ -645,10 +668,11 @@ function pickDay(day, el) {
     document.getElementById('salary-day-input').value = day;
 }
 
-// ── DENSITY TOGGLE ───────────────────────────────────────────────────────────
-document.querySelectorAll('input[name="layout_density"]').forEach(radio => {
+// ── OPÇÕES EM CARDS (densidade + ordem dos itens) ────────────────────────────
+document.querySelectorAll('input[name="layout_density"], input[name="list_item_order"]').forEach(radio => {
     radio.addEventListener('change', function() {
-        document.querySelectorAll('.density-opt').forEach(o => o.classList.remove('active'));
+        // limpa o 'active' só dentro do próprio grupo de opções
+        this.closest('.density-options').querySelectorAll('.density-opt').forEach(o => o.classList.remove('active'));
         this.closest('.density-opt').classList.add('active');
     });
 });

@@ -33,6 +33,7 @@ class ProfileController extends Controller
                 'auto_copy_incomes'      => true,
                 'auto_keep_investments'  => true,
                 'layout_density'         => 'comfortable',
+                'list_item_order'        => 'insertion',
             ]);
             $settings->user_id = $user->id;
             $settings->save();
@@ -95,6 +96,7 @@ class ProfileController extends Controller
             'theme'                  => 'required|in:dark,light',
             'accent_color'           => ['required', 'string', 'regex:/^#[0-9a-fA-F]{3,8}$/'],
             'layout_density'         => 'required|in:comfortable,compact',
+            'list_item_order'        => 'required|in:insertion,alphabetical',
             'salary_day'             => 'required|integer|min:1|max:31',
             'monthly_budget'         => 'nullable|numeric|min:0',
             'monthly_savings_goal'   => 'nullable|numeric|min:0',

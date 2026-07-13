@@ -11,7 +11,7 @@ class UserSetting extends Model
         'notify_budget_alert', 'notify_monthly_summary', 'notify_list_reminder',
         'notify_new_month', 'notify_email', 'notify_push',
         'auto_copy_fixed', 'auto_copy_incomes', 'auto_keep_investments',
-        'layout_density',
+        'layout_density', 'list_item_order',
     ];
 
     protected $casts = [
